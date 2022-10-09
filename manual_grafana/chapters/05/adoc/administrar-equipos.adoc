@@ -1,0 +1,90 @@
+= Administrar equipos
+
+Un _equipo_ es un grupo de usuarios asignados a una organización en un servidor Grafana. Cada usuario puede pertenecer a más de una organización y a más de un equipo. Los equipos generalmente son administrados por Administradores de la organización, pero también pueden ser administrados por los Editores si la configuración del servidor xref:administracion/configuracion#_editors_can_admin[editors_can_admin] está establecida en `true`. Para obtener más información, consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización].
+
+A los miembros de los equipos se les asigna uno de dos permisos:
+
+[arabic]
+. Miembro: se requiere para ser miembro del equipo.
+. Administrador: un miembro del equipo que también puede administrar la membresía del equipo, cambiar los permisos del equipo, cambiar la configuración del equipo y agregar o eliminar el equipo.
+
+[NOTE]
+====
+Debe tener permisos de Administrador de la organización o Administrador del equipo, o permisos de Editor con xref:administracion/configuracion#_editors_can_admin[editors_can_admin] seleccionado, para realizar las tareas descritas en esta página. Los Administradores de equipo solo pueden realizar tareas que se apliquen a su equipo específico.
+====
+
+== Ver lista de equipos
+
+Vea la lista completa de equipos en su organización Grafana.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+
+=== Vista del administrador de la organización
+
+image::image17.png[Team list,width=624,height=243]
+
+=== Vista de administrador del equipo
+
+image::image18.png[Team list,width=624,height=248]
+
+== Cree un equipo
+
+Agregue un equipo a su organización Grafana.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en *Nuevo equipo*.
+. Ingrese la información del equipo:
+[arabic]
+.. *Nombre:* ingrese el nombre del nuevo equipo.
+.. *Correo electrónico:* (opcional) ingrese el correo electrónico del equipo.
+. Haga clic en *Crear*.
+
+== Agregar un miembro del equipo
+
+Agregue una cuenta de usuario existente a un equipo.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en el nombre del equipo al que desea agregar usuarios.
+. Haga clic en *Agregar miembro*.
+. En la lista *Agregar miembro del equipo*, haga clic en la cuenta de usuario que desea agregar al equipo. También puede escribir en el campo para filtrar la lista.
+. Haga clic en *Agregar al equipo*.
+. Repita el proceso para agregar más miembros al equipo.
+
+image::image19.png[Add team member,width=624,height=265]
+
+== Eliminar a un miembro del equipo
+
+Elimina una cuenta de usuario del equipo.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en el nombre del equipo del que desea eliminar usuarios.
+. Haga clic en la *X* roja junto al nombre del usuario que desea eliminar del equipo y luego haga clic en *Eliminar*.
+
+== Establecer permisos de miembros del equipo
+
+Cambiar los niveles de permiso de los miembros del equipo.
+
+* Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+* Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+* Haga clic en el nombre del equipo en el que desea cambiar los permisos de usuario.
+* En la lista de miembros del equipo, busque y haga clic en la cuenta de usuario que desea cambiar. Puede utilizar el campo de búsqueda para filtrar la lista si es necesario.
+* Haga clic en la lista *Permisos* y luego haga clic en el nuevo nivel de permiso de usuario.
+
+image::image20.png[Change team member permissions,width=624,height=247]
+
+== Eliminar un equipo
+
+Elimina de forma permanente el equipo y todos los permisos especiales que se le hayan asignado.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en la *X* roja junto al equipo que desea eliminar y luego haga clic en *Eliminar*.

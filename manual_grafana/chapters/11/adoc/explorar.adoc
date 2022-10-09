@@ -1,0 +1,63 @@
+= Explorar
+
+La interfaz de usuario del tablero de Grafana tiene que ver con la creación de tableros para la visualización. Explorar elimina el tablero y las opciones del panel para que pueda concentrarse en la consulta. Le ayuda a iterar hasta que tenga una consulta que funcione y luego piense en la creación de un tablero.
+
+Si solo desea explorar sus datos y no desea crear un tablero, Explorar lo hace mucho más fácil. Si su fuente de datos admite datos de tablas y gráficos, Explorar muestra los resultados tanto en forma de gráfico como de tabla. Esto le permite ver tendencias en los datos y más detalles al mismo tiempo. Ver también:
+
+* xref:explorar/gestion-de-consultas.adoc[Gestión de consultas en Explorar]
+* xref:explorar/registros-en-explorar.adoc[Integración de registros en Explorar]
+* xref:explorar/rastreo-en-explorar.adoc[Integración de rastreo en Explorar]
+
+== Empiece a explorar
+
+Para acceder a Explorar, debe tener un rol de editor o administrador. Consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización] para obtener más información sobre a qué tiene acceso cada rol.
+
+Para acceder a Explorar:
+
+[arabic]
+. Haga clic en el icono Explorar en la barra de menú.
++
+image::image171.png[Screenshot of the new Explore Icon,width=146,height=271]
++
+Se abre una pestaña Explorar vacía.
++
+Alternativamente, para comenzar con una consulta existente en un panel, elija la opción Explorar en el menú Panel. Esto abre una pestaña Explorar con la consulta del panel y le permite modificar o iterar en la consulta fuera de su tablero.
+
+image::image172.png[Screenshot of the new Explore option in the panel menu,width=624,height=213]
+
+. Elija su fuente de datos del menú desplegable en la parte superior izquierda. https://grafana.com/oss/prometheus/[Prometheus] tiene una implementación Explorar personalizada, las otras fuentes de datos usan su editor de consultas estándar.
+. En el campo de consulta, escriba su consulta para explorar sus datos. Hay tres botones al lado del campo de consulta, un botón para borrar (X), un botón para agregar consulta (+) y el botón para eliminar consulta (-). Al igual que el editor de consultas normal, puede agregar y eliminar varias consultas.
+
+== Dividir y comparar
+
+La vista dividida proporciona una manera fácil de comparar gráficos y tablas uno al lado del otro o de mirar datos relacionados juntos en una página.
+
+Para abrir la vista dividida:
+
+[arabic]
+. Haga clic en el botón dividir para duplicar la consulta actual y dividir la página en dos consultas en paralelo.
+
+Es posible seleccionar otra fuente de datos para la nueva consulta que, por ejemplo, le permite comparar la misma consulta para dos servidores diferentes o comparar el entorno de ensayo con el entorno de producción.
+
+image::image173.png[Screenshot of Explore option in the panel menu,width=624,height=292]
+
+En la vista dividida, los selectores de tiempo de ambos paneles se pueden vincular (si cambia uno, el otro también se cambia) haciendo clic en uno de los botones de sincronización de tiempo adjuntos a los selectores de tiempo. La vinculación de selectores de tiempo ayuda a mantener sincronizadas las horas de inicio y finalización de las consultas de vista dividida. Garantiza que esté mirando el mismo intervalo de tiempo en ambos paneles divididos.
+
+Para cerrar la consulta recién creada, haga clic en el botón Cerrar división.
+
+== Navegar entre Explorar y un tablero
+
+Para ayudar a acelerar los flujos de trabajo que implican cambiar regularmente de Explorar a un tablero y viceversa, Grafana le brinda la capacidad de volver al tablero de origen después de navegar a Explorar desde el menú desplegable del panel.
+
+Una vez que haya navegado a Explorar, debería ver un botón "Atrás" en la barra de herramientas Explorar. Simplemente haga clic en él para volver al tablero de origen. Para traer al tablero los cambios que realice en Explorar, haga clic en la flecha junto al botón para mostrar un elemento de menú "Volver al panel con cambios".
+
+image::image174.png[Screenshot of the expanded explore return dropdown,width=328,height=67]
+
+== Compartir enlace acortado
+
+[NOTE]
+====
+Disponible en Grafana 7.3 y versiones posteriores.
+====
+
+La función Compartir enlace abreviado le permite crear URL más pequeñas y sencillas con el formato /goto/:uid en lugar de utilizar URL más largas con parámetros de consulta. Para crear un enlace abreviado, haga clic en la opción *Compartir* en la barra de herramientas Explorar. Cualquier enlace abreviado que nunca se utilice se eliminará automáticamente después de 7 días.

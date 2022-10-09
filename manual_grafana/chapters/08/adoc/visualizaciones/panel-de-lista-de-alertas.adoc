@@ -1,0 +1,42 @@
+= Panel de lista de alertas
+
+El Panel de la lista de alertas le permite mostrar las alertas de su tablero. Puede configurar la lista para mostrar el estado actual o los cambios de estado recientes. Puede leer más acerca de las alertas en xref:alertas/alertas.adoc[Descripción general de las alertas].
+
+image::image66.png[https://grafana.com/static/img/docs/v45/alert-list-panel.png,width=624,height=147]
+
+Utilice esta configuración para refinar su visualización.
+
+== Opciones
+
+* *Mostrar:* elija si el panel debe mostrar el estado de alerta actual o los cambios de estado de alerta recientes.
+* *Elementos máximos:* establece el número máximo de alertas para listar.
+* *Orden de clasificación:* seleccione cómo ordenar las alertas mostradas:
+** *Alfabético (asc):* orden alfabético.
+** *Alfabético (desc):* orden alfabético inverso.
+** *Importancia:* por importancia de acuerdo con los siguientes valores, siendo 1 el más alto:
+*** alerting: 1
+*** no_data: 2
+*** pending: 3
+*** ok: 4
+*** paused: 5
+* *Alertas de este tablero:* muestra alertas solo del tablero en el que se encuentra la lista de alertas.
+
+== Filtrar
+
+Estas opciones le permiten limitar las alertas que se muestran solo a aquellas que coinciden con la consulta, carpeta o etiquetas que elija.
+
+* *Nombre de alerta:* ingrese una consulta de nombre de alerta.
+* *Título del tablero:* ingrese una consulta de título del tablero.
+* *Carpeta:* seleccione una carpeta. Solo se mostrarán las alertas de los tableros de la carpeta seleccionada.
+* *Etiquetas del panel:* seleccione una o más etiquetas. Solo se mostrarán las alertas de los tableros con una o más de las etiquetas.
+
+=== Filtro de estado
+
+Elija qué estados de alerta mostrar en este panel.
+
+* OK
+* Pausado
+* Sin datos
+* Error de ejecución
+* Alertando
+* Pendiente

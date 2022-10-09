@@ -1,0 +1,348 @@
+= API Nativa de Java
+
+== Dependencias
+
+* JDK >= 1.8
+* Maven >= 3.6
+
+== Instalación
+
+En el directorio raíz:
+
+[source]
+----
+mvn clean install -pl session -am -DskipTests
+----
+
+== Uso de la API Nativa de Java de IoTDB con Maven
+
+[source]
+----
+<dependencies>
+    <dependency>
+      <groupId>org.apache.iotdb</groupId>
+      <artifactId>iotdb-session</artifactId>
+      <version>0.12.0</version>
+    </dependency>
+</dependencies>
+----
+
+== API Nativas
+
+Aquí mostramos las interfaces de uso común y sus parámetros en la API Nativa:
+
+* Inicializar una sesión
+
+[source]
+----
+Session(String host, int rpcPort)
+
+Session(String host, String rpcPort, String username, String password)
+
+Session(String host, int rpcPort, String username, String password)
+----
+
+* Abrir una sesión
+
+[source]
+----
+Session.open()
+----
+
+* Cerrar una Sesión
+
+[source]
+----
+​Session.close()
+----
+
+* Establecer grupo de almacenamiento
+
+[source]
+----
+void setStorageGroup(String storageGroupId)    
+----
+
+* Eliminar uno o varios grupos de almacenamiento
+
+[source]
+----
+void deleteStorageGroup(String storageGroup)
+void deleteStorageGroups(List<String> storageGroups)
+----
+
+* Crear una o varias series temporales
+
+[source]
+----
+void createTimeseries(String path, TSDataType dataType,
+      TSEncoding encoding, CompressionType compressor, Map<String, String> props,
+      Map<String, String> tags, Map<String, String> attributes, String measurementAlias)
+      
+void createMultiTimeseries(List<String> paths, List<TSDataType> dataTypes,
+      List<TSEncoding> encodings, List<CompressionType> compressors,
+      List<Map<String, String>> propsList, List<Map<String, String>> tagsList,
+      List<Map<String, String>> attributesList, List<String> measurementAliasList)
+----
+
+* Eliminar una o varias series temporales
+
+[source]
+----
+void deleteTimeseries(String path)
+void deleteTimeseries(List<String> paths)
+----
+
+* Eliminar datos antes o iguales a una marca de tiempo de una o varias series de tiempo
+
+[source]
+----
+void deleteData(String path, long time)
+void deleteData(List<String> paths, long time)
+----
+
+* Insertar un registro, que contiene varios valores de medición de un dispositivo en una marca de tiempo. Sin la información de tipos, el servidor tiene que realizar una inferencia de tipos, lo que puede costar algo de tiempo.
+
+[source]
+----
+void insertRecord(String deviceId, long time, List<String> measurements, List<String> values)
+----
+
+* Insertar una tableta, que son varias filas de un dispositivo, cada fila tiene las mismas medidas
+
+[source]
+----
+void insertTablet(Tablet tablet)
+----
+
+* Insertar múltiples tabletas
+
+[source]
+----
+void insertTablets(Map<String, Tablet> tablet)
+----
+
+* Insertar varios registros. Sin la información de tipos, el servidor tiene que realizar una inferencia de tipos, lo que puede costar algo de tiempo.
+
+[source]
+----
+void insertRecords(List<String> deviceIds, List<Long> times, 
+                   List<List<String>> measurementsList, List<List<String>> valuesList)
+----
+
+* Insertar un registro, que contiene varios valores de medición de un dispositivo en una marca de tiempo. Con la información de tipos, el servidor no necesita hacer inferencias de tipos, lo que conduce a un mejor rendimiento.
+
+[source]
+----
+void insertRecord(String deviceId, long time, List<String> measurements,
+   List<TSDataType> types, List<Object> values)
+----
+
+* Insertar varios registros. Con la información de tipos, el servidor no necesita hacer inferencias de tipos, lo que conduce a un mejor rendimiento.
+
+[source]
+----
+void insertRecords(List<String> deviceIds, List<Long> times,
+    List<List<String>> measurementsList, List<List<TSDataType>> typesList,
+    List<List<Object>> valuesList)
+----
+
+* Inserte varios registros que pertenezcan al mismo dispositivo. Con la información de tipos, el servidor no necesita hacer inferencias de tipos, lo que conduce a un mejor rendimiento.
+
+[source]
+----
+Session.open()
+----
+
+* Consulta de datos brutos. El intervalo de tiempo incluye startTime y excluye endTime
+
+[source]
+----
+SessionDataSet executeRawDataQuery(List<String> paths, long startTime, long endTime)
+----
+
+* Ejecutar declaración de consulta
+
+[source]
+----
+SessionDataSet executeQueryStatement(String sql)
+----
+
+* Ejecutar declaración sin consulta
+
+[source]
+----
+void executeNonQueryStatement(String sql)
+----
+
+== API Nativas para Perfilar el Costo de la Red
+
+* Probar el costo de la red y del cliente de insertRecords. Este método NO inserta datos en la base de datos y el servidor simplemente regresa después de aceptar la solicitud, este método debe usarse para probar otros costos de tiempo en el cliente
+
+[source]
+----
+void testInsertRecords(List<String> deviceIds, List<Long> times,
+              List<List<String>> measurementsList, List<List<String>> valuesList)
+----
+
+Ó
+
+[source]
+----
+void testInsertRecords(List<String> deviceIds, List<Long> times,
+    List<List<String>> measurementsList, List<List<TSDataType>> typesList,
+    List<List<Object>> valuesList)
+----
+
+* Probar la red y el costo del cliente de insertRecordsOfOneDevice. Este método NO inserta datos en la base de datos y el servidor simplemente regresa después de aceptar la solicitud, este método debe usarse para probar otros costos de tiempo en el cliente
+
+[source]
+----
+void testInsertRecordsOfOneDevice(String deviceId, List<Long> times,
+    List<List<String>> measurementsList, List<List<TSDataType>> typesList,
+    List<List<Object>> valuesList)
+----
+
+* Probar la red y el costo del cliente de insertRecord. Este método NO inserta datos en la base de datos y el servidor simplemente regresa después de aceptar la solicitud, este método debe usarse para probar otros costos de tiempo en el cliente
+
+[source]
+----
+void testInsertRecord(String deviceId, long time, List<String> measurements, List<String> values)
+----
+
+Ó
+
+[source]
+----
+void testInsertRecord(String deviceId, long time, List<String> measurements,
+    List<TSDataType> types, List<Object> values)
+----
+
+* Probar la red y el costo del cliente de insertTablet. Este método NO inserta datos en la base de datos y el servidor simplemente regresa después de aceptar la solicitud, este método debe usarse para probar otros costos de tiempo en el cliente
+
+[source]
+----
+void testInsertTablet(Tablet tablet)
+----
+
+== Ejemplo de Codificación
+
+Para obtener más información de las siguientes interfaces, consulte session/src/main/java/org/apache/iotdb/session/Session.java
+
+El código de muestra del uso de estas interfaces se encuentra en example/session/src/main/java/org/apache/iotdb/SessionExample.java, que proporciona un ejemplo de cómo abrir una sesión de IoTDB, ejecutar una inserción por lotes.
+
+== Grupo de Sesiones para API Nativa
+
+Proporcionamos un grupo de conexiones (`SessionPool) para la API nativa. Usando la interfaz, necesita definir el tamaño del grupo.
+
+Si no puede obtener una conexión de sesión en 60 segundos, hay un registro de advertencia, pero el programa se bloqueará.
+
+Si una sesión ha finalizado una operación, se volverá a poner en el grupo automáticamente. Si se interrumpe la conexión de una sesión, la sesión se eliminará automáticamente y el grupo intentará crear una nueva sesión y rehacer la operación.
+
+Para operaciones de consulta:
+
+. Cuando se usa SessionPool para consultar datos, el conjunto de resultados es `SessionDataSetWrapper`;
+
+. Dado un `SessionDataSetWrapper`, si no ha escaneado todos los datos que contiene y deja de usarlo, debe llamar a `SessionPool.closeResultSet (wrapper)`manualmente;
+
+. Cuando llama a `hasNext()` y `next()` de un `SessionDataSetWrapper` y hay una excepción, entonces debe llamar a `SessionPool.closeResultSet (wrapper)` manualmente;
+
+. Puede llamar a `getColumnNames()` de `SessionDataSetWrapper` para obtener los nombres de columna del resultado de la consulta;
+
+Ejemplos: `session/src/test/java/org/apache/iotdb/session/pool/SessionPoolTest.java`
+
+O ejemplo `example/session/src/main/java/org/apache/iotdb/SessionPoolExample.java`
+
+
+== Nuevas Interfaces
+
+[source]
+----
+void open(boolean enableRPCCompression)
+----
+
+Abra una sesión, con un parámetro para especificar si habilita la compresión RPC. Preste atención a que este estado de compresión RPC del cliente debe cumplir con el estado del servidor IoTDB
+
+[source]
+----
+void insertRecord(String deviceId, long time, List<String> measurements,
+      List<TSDataType> types, List<Object> values)
+----
+
+Inserte un registro, de manera que el usuario tenga que proporcionar la información de tipo de cada medición, que es diferente de la interfaz original insertRecord(). Los valores deben proporcionarse en sus tipos primitivos. Esta interfaz es más competente que la que no tiene parámetros de tipo.
+
+[source]
+----
+void insertRecords(List<String> deviceIds, List<Long> times, List<List<String>> measurementsList, 
+                   List<List<TSDataType>> typesList, List<List<Object>> valuesList)
+----
+
+Inserte varios registros con parámetros de tipo. Esta interfaz es más competente que la que no tiene parámetros de tipo.
+
+[source]
+----
+void insertTablet(Tablet tablet, boolean sorted)
+----
+
+Una interfaz insertTablet() adicional que proporciona un parámetro "sorted" que indica si la tableta está en orden. Una tableta clasificada puede acelerar el proceso de inserción.
+
+[source]
+----
+void insertTablets(Map<String, Tablet> tablets)
+----
+
+Un nuevo insertTablets() para insertar varias tabletas.
+
+[source]
+----
+void insertTablets(Map<String, Tablet> tablets, boolean sorted)
+----
+
+insertTablets() con un parámetro adicional "sorted".
+
+[source]
+----
+void testInsertRecord(String deviceId, long time, List<String> measurements, List<TSDataType> types, 
+                      List<Object> values)
+void testInsertRecords(List<String> deviceIds, List<Long> times, List<List<String>> measurementsList, 
+                      List<List<TSDataType>> typesList, List<List<Object>> valuesList)
+void testInsertTablet(Tablet tablet, boolean sorted)
+void testInsertTablets(Map<String, Tablet> tablets)
+void testInsertTablets(Map<String, Tablet> tablets, boolean sorted)
+----
+
+Las interfaces anteriores se agregaron recientemente para probar la capacidad de respuesta de las nuevas interfaces de inserción.
+
+[source]
+----
+void createTimeseries(String path, TSDataType dataType, TSEncoding encoding, CompressionType compressor, 	
+                      Map<String, String> props, Map<String, String> tags, Map<String, String> attributes, 
+                      String measurementAlias)
+----
+
+Cree una serie temporal con ruta, tipo de datos, codificación y compresión. Además, los usuarios pueden proporcionar accesorios, etiquetas, atributos y measurementAlias。
+
+[source]
+----
+void createMultiTimeseries(List<String> paths, List<TSDataType> dataTypes, List<TSEncoding> encodings, 
+                           List<CompressionType> compressors, List<Map<String, String>> propsList, 
+                           List<Map<String, String>> tagsList, List<Map<String, String>> attributesList, 
+                           List<String> measurementAliasList)
+----
+
+Cree múltiples series temporales con un solo método. Los usuarios pueden proporcionar accesorios, etiquetas, atributos y alias de medición, así como información detallada sobre series de tiempo.
+
+[source]
+----
+boolean checkTimeseriesExists(String path)
+----
+
+Agregue un método para verificar si existe una serie temporal específica.
+
+[source]
+----
+public Session(String host, int rpcPort, String username, String password,
+      boolean isEnableCacheLeader)
+----
+
+Abra una sesión y especifica si la caché de Leader está habilitada. Tenga en cuenta que esta interfaz mejora el rendimiento para IoTDB distribuido, pero agrega menos costos para el cliente para IoTDB independiente.

@@ -1,0 +1,66 @@
+= Codificación
+
+Para mejorar la eficiencia del almacenamiento de datos, es necesario codificar los datos durante la escritura de datos, reduciendo así la cantidad de espacio en disco utilizado. En el proceso de escritura y lectura de datos, la cantidad de datos involucrados en las operaciones de E/S se puede reducir para mejorar el rendimiento. IoTDB admite los siguientes métodos de codificación para diferentes tipos de datos:
+
+== PLAIN
+
+La codificación PLAIN, el modo de codificación predeterminado, es decir, sin codificación, admite varios tipos de datos. Tiene una alta eficiencia de compresión y descompresión a la vez que sufre de una baja eficiencia de almacenamiento de espacio.
+
+== TS_2DIFF
+
+La codificación diferencial de segundo orden es más adecuada para codificar datos de secuencia que aumentan o disminuyen monótonamente y no se recomienda para datos de secuencia con grandes fluctuaciones.
+
+== RLE
+
+La codificación de longitud de ejecución es adecuada para almacenar secuencias con valores enteros continuos y no se recomienda para datos de secuencia con valores diferentes la mayoría de las veces.
+
+La codificación de longitud de ejecución también se puede utilizar para codificar números de punto flotante, mientras que es necesario especificar dígitos decimales reservados (MAX_POINT_NUMBER) al crear series de tiempo. Es más adecuado para almacenar datos de secuencia donde los valores de punto flotante aparecen continuamente, aumentando o disminuyendo monótonamente, y no es adecuado para almacenar datos de secuencia con requisitos de alta precisión después del punto decimal o con grandes fluctuaciones.
+
+[NOTE]
+====
+TS_2DIFF y RLE tienen un límite de precisión para el tipo de datos de flotante y doble. De forma predeterminada, se reservan dos lugares decimales. Se recomienda GORILA.
+====
+
+== GORILA
+
+La codificación GORILLA no tiene pérdidas. Es más adecuado para secuencias numéricas con valores similares y no se recomienda para datos de secuencia con grandes fluctuaciones.
+
+Actualmente, hay dos versiones de implementación de codificación GORILLA, se recomienda usar `GORILLA` en lugar de 1 (obsoleto).
+
+Restricciones de uso: cuando utilice GORILLA para codificar datos INT32, debe asegurarse de que no haya ningún punto de datos con el valor `Integer.MIN_VALUE` en la secuencia. Cuando utilice GORILLA para codificar datos INT64, debe asegurarse de que no haya ningún punto de datos con el valor `Long.MIN_VALUE` en la secuencia.
+
+== REGULAR
+
+La codificación de datos regular es más adecuada para la codificación temporal de datos que aumentan de secuencia regular (por ejemplo, las series temporales con el mismo tiempo transcurrido entre cada punto de datos), en cuyo caso es mejor que TS_2DIFF.
+
+El método de codificación de datos regular no es adecuado para los datos con fluctuaciones (datos irregulares), y se recomienda TS_2DIFF para tratarlo.
+
+== Correspondencia entre tipo de datos y codificación
+
+Las cuatro codificaciones descritas en las secciones anteriores son aplicables a diferentes tipos de datos. Si la correspondencia es incorrecta, la serie temporal no se puede crear correctamente. La correspondencia entre el tipo de datos y sus codificaciones admitidas se resume en la Tabla siguiente.
+
+*La correspondencia entre el tipo de datos y sus codificaciones compatibles*
+
+[cols="1,1"]
+|===
+|Tipo de Datos
+|Codificación Compatible
+
+|BOOLEAN 
+|PLAIN, RLE
+
+|INT32 
+|PLAIN, RLE, TS_2DIFF, GORILA
+
+|INT64 
+|PLAIN, RLE, TS_2DIFF, GORILA
+
+|FLOAT 
+|PLAIN, RLE, TS_2DIFF, GORILA
+
+|DOUBLE 
+|PLAIN, RLE, TS_2DIFF, GORILA
+
+|TEXTO 
+|PLAIN
+|===

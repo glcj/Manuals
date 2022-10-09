@@ -1,0 +1,12 @@
+= Reiniciar Grafana
+
+Los usuarios a menudo necesitan reiniciar Grafana después de haber realizado cambios de configuración. Este tema proporciona instrucciones detalladas sobre cómo reiniciar en los sistemas operativos compatibles con Grafana.
+
+== Windows
+
+Para reiniciar Grafana:
+
+[arabic]
+. Abra la aplicación Servicios.
+. Haga clic con el botón derecho en el servicio *Grafana*.
+. En el menú contextual, haga clic en *Reiniciar*.

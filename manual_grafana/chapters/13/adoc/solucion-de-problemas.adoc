@@ -1,0 +1,21 @@
+= Solución de problemas
+
+Esta página enumera algunas herramientas y consejos para ayudar a solucionar problemas comunes de Grafana.
+
+== Solucionar problemas con registros
+
+Si encuentra un error o problema, puede consultar el registro del servidor Grafana. Normalmente se encuentra en `/var/log/grafana/grafana.log` en sistemas Unix o en `<grafana_install_dir>/data/log` en otras plataformas e instalaciones manuales.
+
+Puede habilitar más registros cambiando el nivel de registro en el archivo de configuración de Grafana.
+
+Para obtener más información, consulte xref:administracion/cli-de-grafana.adoc#_habilitar_el_registro_de_depuracion[Habilitar el registro de depuración en la CLI de Grafana] y la xref:administracion/configuracion.adoc#_log[sección de registro en Configuración].
+
+== Solucionar problemas de transformaciones
+
+El orden de las transformaciones importa. Si la salida de datos final de varias transformaciones parece incorrecta, intente cambiar el orden de transformación. Cada transformación transforma los datos devueltos por la transformación anterior, no los datos sin procesar originales.
+
+Para más información, consulte xref:paneles/transformaciones/aplicar-transformaciones.adoc#_depuracion_de_transformaciones[Depuración de transformaciones]
+
+== Preguntas frecuentes
+
+Consulte la https://community.grafana.com/c/howto/faq[sección de preguntas frecuentes] en la página de la Comunidad de Grafana para obtener respuestas a las preguntas más frecuentes.

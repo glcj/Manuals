@@ -1,0 +1,122 @@
+=== Series de tiempo
+
+==== Introducción a las series de tiempo
+
+Imagina que quisiera saber cómo cambia la temperatura exterior a lo largo del día. Una vez cada hora, revisaría el termómetro y anotaría la hora junto con la temperatura actual. Después de un tiempo, tendrías algo como esto:
+
+[cols=",",]
+|===
+|Tiempo |Valor
+
+|09:00 |24°C
+|10:00 |26°C
+|11:00 |27°C
+|===
+
+Los datos de temperatura como este son un ejemplo de lo que llamamos una _serie de tiempo_: una secuencia de medidas, ordenadas en el tiempo. Cada fila de la tabla representa una medición individual en un momento específico.
+
+Las tablas son útiles cuando desea identificar medidas individuales pero dificultan ver el panorama general. Una visualización más común para las series de tiempo es el _gráfico_, que en su lugar coloca cada medición a lo largo de un eje de tiempo. Las representaciones visuales como el gráfico facilitan el descubrimiento de patrones y características de los datos que de otro modo serían difíciles de ver.
+
+image::image2.png[https://grafana.com/static/img/docs/example_graph.png,width=624,height=159]
+
+Los datos de temperatura como el del ejemplo están lejos de ser el único ejemplo de una serie de tiempo. Otros ejemplos de series de tiempo son:
+
+* Uso de CPU y memoria
+* Datos de sensor
+* Índice del mercado de valores
+
+Si bien cada uno de estos ejemplos son secuencias de medidas ordenadas cronológicamente, también comparten otros atributos:
+
+* Los datos nuevos se agregan al final, a intervalos regulares, por ejemplo, cada hora a las 09:00, 10:00, 11:00, etc.
+* Las mediciones rara vez se actualizan después de agregarlas; por ejemplo, la temperatura de ayer no cambia.
+
+Las series de tiempo son poderosas, ayudan a comprender el pasado permitiéndole analizar el estado del sistema en cualquier momento. Las series de tiempo pueden indicarle que el servidor se bloqueó momentos después de que el espacio libre en disco se redujera a cero.
+
+Las series de tiempo también pueden ayudarlo a predecir el futuro al descubrir tendencias en sus datos. Por ejemplo, si el número de usuarios registrados ha aumentado mensualmente en un 4% durante los últimos meses, puede predecir qué tan grande será su base de usuarios al final del año.
+
+Algunas series de tiempo tienen patrones que se repiten durante un período conocido. Por ejemplo, la temperatura suele ser más alta durante el día, antes de bajar por la noche. Al identificar estas series de tiempo periódicas o _estacionales_, puede hacer predicciones confiables sobre el próximo período. Si sabemos que la carga del sistema alcanza su punto máximo todos los días alrededor de las 18:00, podemos agregar más máquinas justo antes.
+
+== Agregando series de tiempo
+
+Dependiendo de lo que esté midiendo, los datos pueden variar mucho. ¿Y si quisiera comparar períodos más largos que el intervalo entre mediciones? Si midiera la temperatura una vez cada hora, terminaría con 24 puntos de datos por día. Para comparar la temperatura en agosto a lo largo de los años, tendría que combinar los 31 por 24 puntos de datos en uno.
+
+La combinación de una colección de medidas se llama _agregación_. Hay varias formas de agregar datos de series de tiempo. Éstos son algunos de los más comunes:
+
+* *Promedio* devuelve la suma de todos los valores dividida por el número total de valores.
+* *Min* y *Max* devuelven el valor más pequeño y más grande de la colección.
+* *Sum* devuelve la suma de todos los valores de la colección.
+* *Contar* devuelve el número de valores de la colección.
+
+Por ejemplo, al agregar los datos en un mes, puede determinar que agosto de 2017 fue, en promedio, más cálido que el año anterior. En cambio, para ver qué mes tuvo la temperatura más alta, compararía la temperatura máxima de cada mes.
+
+La forma en que elige agregar sus datos de series de tiempo es una decisión importante y depende de la historia que quiera contar con sus datos. Es común utilizar diferentes agregaciones para visualizar los mismos datos de series de tiempo de diferentes formas.
+
+== Monitoreo y series de tiempo
+
+En la industria de TI, los datos de series de tiempo a menudo se recopilan para monitorear cosas como la infraestructura, el hardware o los eventos de las aplicaciones. Los datos de series de tiempo generados por máquinas generalmente se recopilan con intervalos cortos, lo que le permite reaccionar ante cualquier cambio inesperado, momentos después de que ocurran. Como consecuencia, los datos se acumulan a un ritmo rápido, por lo que es vital tener una forma de almacenar y consultar datos de manera eficiente. Como resultado, las bases de datos optimizadas para datos de series de tiempo han experimentado un aumento en popularidad en los últimos años.
+
+=== Bases de datos de series de tiempo
+
+Una base de datos de series de tiempo (TSDB) es una base de datos diseñada explícitamente para datos de series de tiempo. Si bien es posible utilizar cualquier base de datos normal para almacenar mediciones, una TSDB viene con algunas optimizaciones útiles.
+
+Las bases de datos de series de tiempo modernas aprovechan el hecho de que las mediciones solo se agregan y rara vez se actualizan o eliminan. Por ejemplo, las marcas de tiempo para cada medición cambian muy poco con el tiempo, lo que resulta en el almacenamiento de datos redundantes.
+
+Mire esta secuencia de marcas de tiempo de Unix:
+
+----
+1572524345, 1572524375, 1572524404, 1572524434, 1572524464
+----
+
+Al observar estas marcas de tiempo, todas comienzan con `1572524`, lo que conduce a un uso deficiente del espacio en disco. En su lugar, podríamos almacenar cada marca de tiempo subsiguiente como la diferencia, o delta, de la primera:
+
+----
+1572524345, +30, +29, +30, +30
+----
+
+Incluso podríamos dar un paso más, calculando los deltas de estos deltas:
+
+----
+1572524345, +30, -1, +1, +0
+----
+
+Si se toman medidas a intervalos regulares, la mayoría de estos deltas-de-deltas serán 0. Debido a optimizaciones como estas, las TSDB usan drásticamente menos espacio que otras bases de datos.
+
+Otra característica de una TSDB es la capacidad de filtrar mediciones mediante _etiquetas_. Cada punto de datos está etiquetado con una etiqueta que agrega información de contexto, como dónde se tomó la medición. A continuación, se muestra un ejemplo del https://docs.influxdata.com/influxdb/v1.7/write_protocols/line_protocol_tutorial/#syntax[formato de datos de InfluxDB] que demuestra cómo se almacena cada medición.
+
+Estas son algunas de las TSDB compatibles con Grafana:
+
+* https://graphiteapp.org/[Graphite]
+* https://www.influxdata.com/products/influxdb-overview/[InfluxDB]
+* https://prometheus.io/[Prometheus]
+
+----
+weather,location=us-midwest temperature=82 1465839830100400200
+  |    -------------------- --------------  |
+  |             |             |             |
+  |             |             |             |
++-----------+--------+-+---------+-+---------+
+|measurement|,tag_set| |field_set| |timestamp|
++-----------+--------+-+---------+-+---------+
+----
+
+=== Recopilación de datos de series de tiempo
+
+Ahora que tenemos un lugar para almacenar nuestra serie de tiempo, ¿cómo recopilamos las medidas? Para recopilar datos de series de tiempo, normalmente instalaría un _recopilador_ en el dispositivo, la máquina o la instancia que desea monitorear. Algunos recopiladores se crean con una base de datos específica en mente y algunos admiten diferentes destinos de salida.
+
+A continuación, se muestran algunos ejemplos de recopiladores:
+
+* https://collectd.org/[collectd]
+* https://github.com/statsd/statsd[statsd]
+* https://prometheus.io/docs/instrumenting/exporters/[Exportadores de Prometheus]
+* https://github.com/influxdata/telegraf[Telegraf]
+
+Un recopilador _envía_ datos a una base de datos o permite que la base de datos _extraiga_ los datos de ella. Ambos métodos tienen sus propios pros y contras:
+
+[cols=",,",options="header",]
+|===
+|     |Pros |Contras
+|Enviar |Más fácil para replicar datos a múltiples destinos. |La TSDB no tiene control sobre la cantidad de datos que se envían.
+|Extraer |Mejor control sobre la cantidad de datos que se ingieren y su autenticidad. |Los cortafuegos, las VPN o los equilibradores de carga pueden dificultar el acceso a los agentes.
+|===
+
+Dado que sería ineficaz escribir todas las mediciones en la base de datos, los recopiladores agregan previamente los datos y escriben en la base de datos de series de tiempo a intervalos regulares.

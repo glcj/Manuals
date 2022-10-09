@@ -1,0 +1,36 @@
+= Filtrar columnas de la tabla
+
+[NOTE]
+====
+Esta función está disponible en Grafana 7.2+.
+====
+
+Si activa el *Filtro de columna* en las xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de la tabla], puede filtrar las opciones de la tabla.
+
+== Activar el filtrado de columnas
+
+[arabic]
+. En Grafana, navegue hasta el tablero con la tabla con las columnas que desea filtrar.
+. En el panel de la tabla que desea filtrar, xref:paneles/editor-de-paneles.adoc#_abrir_el_editor_de_paneles[abra el editor de paneles].
+. Haga clic en la pestaña *Campo*.
+. En las Opciones de la tabla, active la opción de *Filtro de columna*.
+
+Aparece un icono de filtro junto al título de cada columna.
+
+image::image87.png[Column filtering turned on,width=512,height=99]
+
+== Filtrar valores de columna
+
+Para filtrar valores de columna, haga clic en el icono de filtro (embudo) junto al título de una columna. Grafana muestra las opciones de filtro para esa columna.
+
+image::image88.png[Filter column values,width=390,height=500]
+
+Haga clic en la casilla de verificación junto a los valores que desea mostrar. Ingrese texto en el campo de búsqueda en la parte superior para mostrar esos valores en la pantalla para que pueda seleccionarlos en lugar de desplazarse para encontrarlos.
+
+== Borrar filtros de columna
+
+Las columnas con filtros aplicados tienen un embudo azul junto al título.
+
+image::image89.png[Filtered column,width=162,height=193]
+
+Para eliminar el filtro, haga clic en el icono de embudo azul y luego haga clic en *Borrar filtro*.

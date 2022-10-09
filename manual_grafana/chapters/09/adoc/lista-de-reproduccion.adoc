@@ -1,0 +1,157 @@
+= Lista de reproducción
+
+Una lista de reproducción es una lista de tableros que se muestran en una secuencia. Puede utilizar una lista de reproducción para crear conciencia de la situación o para presentar sus métricas a su equipo o visitantes.
+
+Grafana escala automáticamente los tableros a cualquier resolución, lo que los hace perfectos para pantallas grandes.
+
+Puede acceder a la función Lista de reproducción desde el menú lateral de Grafana, en el submenú Tableros.
+
+image::image151.png[https://grafana.com/static/img/docs/v50/playlist.png,width=624,height=451]
+
+== Crear una lista de reproducción
+
+Crea una lista de reproducción para presentar tableros en una secuencia, con un orden establecido y un intervalo de tiempo entre tableros.
+
+[arabic]
+. Para acceder a la función de lista de reproducción, coloque el cursor sobre el menú lateral de Grafana.
+. Haz clic en *Listas de reproducción*.
+. Haz clic en *Nueva lista de reproducción*.
+. En el cuadro de texto *Nombre*, ingrese un nombre para su lista de reproducción.
+. En el cuadro de texto *Intervalo*, ingrese un intervalo de tiempo.
+
+El intervalo de tiempo es la cantidad de tiempo que Grafana permanece en un tablero en particular antes de avanzar al siguiente en la lista de reproducción.
+
+[arabic]
+. Junto a los tableros que desea agregar a su lista de reproducción, haga clic en *Agregar a lista de reproducción*.
+. Haga clic en *Crear*.
+
+== Editar una lista de reproducción
+
+Puede editar listas de reproducción mientras las crea o después de guardarlas.
+
+[arabic]
+. Para acceder a la función de lista de reproducción, coloque el cursor sobre el menú lateral de Grafana.
+. Haz clic en *Listas de reproducción*.
+. Haga clic en la Lista de reproducción que desea editar.
+
+=== Editar el nombre de una lista de reproducción
+
+[arabic]
+. Haga doble clic en el cuadro de texto *Nombre*.
+. Ingresa un nombre.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Editar el intervalo de una lista de reproducción
+
+[arabic]
+. Haga doble clic en el cuadro de texto *Intervalo*.
+. Ingrese un intervalo de tiempo.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Agregar un tablero a una lista de reproducción
+
+[arabic]
+. Junto al tablero que desea agregar, haga clic en *Agregar a lista de reproducción*.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Busque un tablero para agregar
+
+[arabic]
+. Haga clic en el cuadro de texto *Buscar tableros por nombre*.
+. Busque la lista de reproducción por nombre o expresión regular.
+. Si es necesario, filtre sus resultados por estado destacado o etiquetas. De forma predeterminada, sus tableros destacados aparecerán como opciones para agregar a la lista de reproducción.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Reorganizar el orden de los tableros
+
+[arabic]
+. Junto al tablero que desea mover, haga clic en la flecha hacia arriba o hacia abajo.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Quitar un tablero
+
+[arabic]
+. Haga clic en *Eliminar* para eliminar un tablero de la lista de reproducción.
+. Haga clic en *Guardar* para guardar sus cambios.
+
+=== Eliminar una lista de reproducción
+
+[arabic]
+. Haz clic en *Listas de reproducción*.
+. Junto a la lista de reproducción que desea eliminar, haga clic en *Eliminar*.
+
+== Guardar una lista de reproducción
+
+Puede guardar una lista de reproducción para agregarla a su página *Listas de reproducción*, donde puede iniciarla. Asegúrese de que todos los tableros que desea que aparezcan en su lista de reproducción se agreguen al crear o editar la lista de reproducción antes de guardarla.
+
+[arabic]
+. Para acceder a la función de Lista de reproducción, coloque el cursor sobre el menú lateral de Grafana.
+. Haz clic en *Listas de reproducción*.
+. Haga clic en la lista de reproducción.
+. Edita la lista de reproducción.
+** Asegúrese de que su lista de reproducción tenga un *Nombre*, *Intervalo* y al menos un *Tablero* agregado.
+. Clic en *Guardar*.
+
+== Iniciar una lista de reproducción
+
+Puede iniciar una lista de reproducción en cinco modos de vista diferentes, que determinan cómo se muestran los menús y la barra de navegación en los tableros.
+
+De forma predeterminada, cada tablero se muestra durante la cantidad de tiempo ingresada en el campo Intervalo, que se puede configurar al crear o editar una lista de reproducción. Una vez que se inicia una lista de reproducción, se puede controlar usando la barra de navegación en la parte superior de la pantalla.
+
+[arabic]
+. En el submenú Tableros, haga clic en *Listas de reproducción*.
+. Junto a la lista de reproducción que desea iniciar, haga clic en *Iniciar lista de reproducción*.
+. En el menú desplegable, seleccione el modo en el que desea que se muestre la lista de reproducción.
+** *Modo normal:*
+*** El menú lateral permanece visible.
+*** Los controles de la barra de navegación, la fila y el panel aparecen en la parte superior de la pantalla.
+** *Modo TV:*
+*** El menú lateral está oculto / eliminado.
+*** Los controles de la barra de navegación, la fila y el panel aparecen en la parte superior de la pantalla.
+*** Se habilita automáticamente después de un minuto de inactividad del usuario.
+*** Puede habilitarlo manualmente usando el acceso directo de secuencia `d v`, o agregando el parámetro `?inactive` a la URL del tablero.
+*** Puede desactivarlo con cualquier movimiento del mouse o acción del teclado.
+** *Modo TV (con paneles de ajuste automático):*
+*** El menú lateral está oculto/eliminado.
+*** Los controles de la barra de navegación, la fila y el panel aparecen en la parte superior de la pantalla.
+*** Los paneles del tablero se ajustan automáticamente para optimizar el espacio en la pantalla.
+** *Modo quiosco:*
+*** El menú lateral, la barra de navegación, los controles de filas y paneles están completamente ocultos / eliminados de la vista.
+*** Puede habilitarlo manualmente usando el acceso directo de secuencia `d v` después de que la lista de reproducción haya comenzado.
+*** Puede desactivarlo manualmente con el mismo atajo.
+** *Modo quiosco (con paneles de ajuste automático):*
+*** El menú lateral, la barra de navegación, los controles de filas y paneles están completamente ocultos / eliminados de la vista.
+*** Los paneles del tablero se ajustan automáticamente para optimizar el espacio en la pantalla.
+
+== Controla una lista de reproducción
+
+Puedes controlar una lista de reproducción en modo *Normal* o *TV* después de que se inicie, usando la barra de navegación en la parte superior de su pantalla.
+
+[cols=",",options="header",]
+|===
+|Botón |Resultado
+|Siguiente (flecha doble a la derecha) |Avanza al siguiente tablero.
+|Atrás (flecha izquierda) |Vuelve al tablero anterior.
+|Detener (cuadrado) |Finaliza la lista de reproducción y sale al tablero actual.
+|Modo rotar vista (icono de monitor) |Gira la pantalla de los tableros en diferentes modos de vista.
+|Rango de tiempo |Muestra datos dentro de un rango de tiempo. Puede configurarse para mostrar los últimos 5 minutos hasta hace 5 años, o un rango de tiempo personalizado, usando la flecha hacia abajo.
+|Actualizar (flecha circular) |Vuelve a cargar el tablero para mostrar los datos actuales. Puede configurarse para actualizar automáticamente de 5 segundos a 1 día, usando la flecha desplegable.
+|===
+
+====
+Atajo: presione la tecla Esc para detener la lista de reproducción desde su teclado.
+====
+
+== Compartir una lista de reproducción en un modo de visualización
+
+Puede compartir una lista de reproducción copiando la dirección del enlace en el modo de visualización que prefiera y pegando la URL en su destino.
+
+[arabic]
+. En el submenú Tableros, haga clic en *Listas de reproducción*.
+. Junto a la lista de reproducción que desea compartir, haga clic en *Iniciar lista de reproducción*.
+. En el menú desplegable, haga clic con el botón derecho en el modo de visualización que prefiera.
+. Haga clic en *Copiar dirección de enlace* para copiar la URL a su portapapeles.
++
+Ejemplo: la URL de la primera lista de reproducción en el sitio Grafana Play en modo Quiosco se verá así: https://play.grafana.org/playlists/play/1?kiosk.
+
+. Pegue la URL en su destino.

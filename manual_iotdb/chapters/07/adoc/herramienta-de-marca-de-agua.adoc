@@ -1,0 +1,239 @@
+= Herramienta de Marca de Agua
+
+Esta herramienta tiene dos funciones: 1) incrustación de marca de agua del resultado de la consulta de IoTDB y 2) detección de marca de agua de los datos sospechosos.
+
+== Incrustación de Marca de Agua
+
+=== Configuración
+
+La marca de agua está deshabilitada de forma predeterminada en IoTDB. Para habilitar la incrustación de marcas de agua, lo primero es modificar los siguientes campos en el archivo de configuración `iotdb-engine.properties`:
+
+[cols="1,1,1"]
+|===
+|Nombre
+|Ejemplo
+|Explicación
+
+|`watermark_module_opened`
+|`false`
+|`true` para permitir la incrustación de marcas de agua del servidor IoTDB; `false` para deshabilitar
+
+|`watermark_secret_key`
+|IoTDB*2019@Beijing
+|clave secreta autodefinida
+
+|`watermark_bit_string`
+|`100101110100`
+|cadena de 0-1 bit para incrustar
+
+|`watermark_method`
+|`GroupBasedLSBMethod(embed_row_cycle=2,embed_lsb_num=5)`
+|especifica el algoritmo de la marca de agua y sus parámetros
+|===
+
+Notas:
+
+* `watermark_module_opened`: configúrelo como `true` si desea habilitar la incrustación de marcas de agua
+
+* `watermark_secret_key`: el carácter '&' no está permitido. No hay ninguna restricción sobre la longitud de la clave secreta. Generalmente, cuanto más larga es la clave, más alta es la barra para los intrusos.
+
+* `watermark_bit_string`: No hay ninguna restricción en la longitud de la cadena de bits (excepto que no debe estar vacía). Pero tenga en cuenta que es difícil alcanzar el nivel de significación requerido en la fase de detección de marca de agua si la cadena de bits es demasiado corta.
+
+* `watermark_method`: Ahora solo se admite `GroupBasedLSBMethod`, por lo que en realidad solo puede ajustar los dos parámetros de este método, que son `embed_row_cycle` y `embed_lsb_num`.
+
+**Ambos deben ser números enteros positivos.
+
+**`embed_row_cycle` controla la proporción de filas con marca de agua. Cuanto más pequeño sea `embed_row_cycle`, mayor será la proporción de filas con marca de agua. Cuando `embed_row_cycle` es igual a 1, cada fila tiene una marca de agua.
+
+**`GroupBasedLSBMethod` utiliza la incrustación LSB. `embed_lsb_num` controla el número de bits menos significativos disponibles para la incrustación de marcas de agua. Cuanto mayor sea `embed_lsb_num`, mayor será el rango variable de un punto de datos.
+
+* `watermark_secret_key`, `watermark_bit_string` y `watermark_method` deben mantenerse en secreto de posibles atacantes. Es decir, es su responsabilidad hacerse cargo de `iotdb-engine.properties`.
+
+=== Ejemplo de Uso
+
+. Crea un nuevo usuario Alice, concede privilegios de lectura y consulta
+
+Un usuario recién creado no usa marca de agua de forma predeterminada. Entonces, el resultado de la consulta son los datos originales.
+
+[source]
+----
+.\start-cli.bat -u root -pw root
+create user Alice 1234
+grant user Alice privileges 'READ_TIMESERIES' on root.vehicle
+exit
+
+.\start-cli.bat -u Alice -pw 1234
+select * from root
++-----------------------------------+------------------+
+|                               Time|root.vehicle.d0.s0|
++-----------------------------------+------------------+
+|      1970-01-01T08:00:00.001+08:00|              21.5|
+|      1970-01-01T08:00:00.002+08:00|              22.5|
+|      1970-01-01T08:00:00.003+08:00|              23.5|
+|      1970-01-01T08:00:00.004+08:00|              24.5|
+|      1970-01-01T08:00:00.005+08:00|              25.5|
+|      1970-01-01T08:00:00.006+08:00|              26.5|
+|      1970-01-01T08:00:00.007+08:00|              27.5|
+|      1970-01-01T08:00:00.008+08:00|              28.5|
+|      1970-01-01T08:00:00.009+08:00|              29.5|
+|      1970-01-01T08:00:00.010+08:00|              30.5|
+|      1970-01-01T08:00:00.011+08:00|              31.5|
+|      1970-01-01T08:00:00.012+08:00|              32.5|
+|      1970-01-01T08:00:00.013+08:00|              33.5|
+|      1970-01-01T08:00:00.014+08:00|              34.5|
+|      1970-01-01T08:00:00.015+08:00|              35.5|
+|      1970-01-01T08:00:00.016+08:00|              36.5|
+|      1970-01-01T08:00:00.017+08:00|              37.5|
+|      1970-01-01T08:00:00.018+08:00|              38.5|
+|      1970-01-01T08:00:00.019+08:00|              39.5|
+|      1970-01-01T08:00:00.020+08:00|              40.5|
+|      1970-01-01T08:00:00.021+08:00|              41.5|
+|      1970-01-01T08:00:00.022+08:00|              42.5|
+|      1970-01-01T08:00:00.023+08:00|              43.5|
+|      1970-01-01T08:00:00.024+08:00|              44.5|
+|      1970-01-01T08:00:00.025+08:00|              45.5|
+|      1970-01-01T08:00:00.026+08:00|              46.5|
+|      1970-01-01T08:00:00.027+08:00|              47.5|
+|      1970-01-01T08:00:00.028+08:00|              48.5|
+|      1970-01-01T08:00:00.029+08:00|              49.5|
+|      1970-01-01T08:00:00.030+08:00|              50.5|
+|      1970-01-01T08:00:00.031+08:00|              51.5|
+|      1970-01-01T08:00:00.032+08:00|              52.5|
+|      1970-01-01T08:00:00.033+08:00|              53.5|
++-----------------------------------+------------------+
+----
+
+. concede `watermark_embedding` a Alice
+
+Uso: `concede watermark_embedding to Alice`
+
+Tenga en cuenta que puede utilizar grant `watermark_embedding a user1, user2, ...` para otorgar `watermark_embedding` a varios usuarios.
+
+Solo `root` puede ejecutar este comando. Después de que `root` otorga `watermark_embedding` a Alice, todos los resultados de la consulta de Alice tienen una marca de agua.
+
+[source]
+----
+.\start-cli.bat -u root -pw root
+grant watermark_embedding to Alice
+exit
+
+.\start-cli.bat -u Alice -pw '1234'
+select * from root
++-----------------------------------+------------------+
+|                               Time|root.vehicle.d0.s0|
++-----------------------------------+------------------+
+|      1970-01-01T08:00:00.001+08:00|              21.5|
+|      1970-01-01T08:00:00.002+08:00|              22.5|
+|      1970-01-01T08:00:00.003+08:00|         23.500008|
+|      1970-01-01T08:00:00.004+08:00|         24.500015|
+|      1970-01-01T08:00:00.005+08:00|              25.5|
+|      1970-01-01T08:00:00.006+08:00|         26.500015|
+|      1970-01-01T08:00:00.007+08:00|              27.5|
+|      1970-01-01T08:00:00.008+08:00|         28.500004|
+|      1970-01-01T08:00:00.009+08:00|              29.5|
+|      1970-01-01T08:00:00.010+08:00|              30.5|
+|      1970-01-01T08:00:00.011+08:00|              31.5|
+|      1970-01-01T08:00:00.012+08:00|              32.5|
+|      1970-01-01T08:00:00.013+08:00|              33.5|
+|      1970-01-01T08:00:00.014+08:00|              34.5|
+|      1970-01-01T08:00:00.015+08:00|         35.500004|
+|      1970-01-01T08:00:00.016+08:00|              36.5|
+|      1970-01-01T08:00:00.017+08:00|              37.5|
+|      1970-01-01T08:00:00.018+08:00|              38.5|
+|      1970-01-01T08:00:00.019+08:00|              39.5|
+|      1970-01-01T08:00:00.020+08:00|              40.5|
+|      1970-01-01T08:00:00.021+08:00|              41.5|
+|      1970-01-01T08:00:00.022+08:00|         42.500015|
+|      1970-01-01T08:00:00.023+08:00|              43.5|
+|      1970-01-01T08:00:00.024+08:00|         44.500008|
+|      1970-01-01T08:00:00.025+08:00|          45.50003|
+|      1970-01-01T08:00:00.026+08:00|         46.500008|
+|      1970-01-01T08:00:00.027+08:00|         47.500008|
+|      1970-01-01T08:00:00.028+08:00|              48.5|
+|      1970-01-01T08:00:00.029+08:00|              49.5|
+|      1970-01-01T08:00:00.030+08:00|              50.5|
+|      1970-01-01T08:00:00.031+08:00|         51.500008|
+|      1970-01-01T08:00:00.032+08:00|              52.5|
+|      1970-01-01T08:00:00.033+08:00|              53.5|
++-----------------------------------+------------------+
+----
+
+. revocar watermark_embedding de Alice
+
+Uso: `revoke watermark_embedding from Alice`
+
+Tenga en cuenta que puede utilizar revocar `watermark_embedding from user1, user2, ...` para revocar `watermark_embedding` de varios usuarios.
+
+Solo `root` puede ejecutar este comando. Después de que `root` revoca `watermark_embedding` de Alice, todos los resultados de la consulta de Alice son originales nuevamente.
+
+== Detección de Marca de Agua
+
+`detect-watermark.sh` y `detect-watermark.bat` se proporcionan para diferentes plataformas.
+
+Uso: `./detect-watermark.sh [filePath] [secretKey] [watermarkBitString] [embed_row_cycle] [embed_lsb_num] [alpha] [columnIndex] [dataType: int/float/double]`
+
+Ejemplo: `./detect-watermark.sh /home/data/dump1.csv IoTDB*2019@Beijing 100101110100 2 5 0.05 1 float`
+
+[cols="1,1,1"]
+|===
+|Args 
+|Ejemplo 
+|Explicación
+
+|`filePath`
+|`/home/data/dump1.csv`
+|ruta de archivo de datos sospechada
+
+|`secretKey`
+|`IoTDB*2019@Beijing`
+|ver sección de incrustación de marca de agua
+
+|`watermarkBitString`
+|`100101110100`
+|ver sección de incrustación de marca de agua
+
+|`embed_row_cycle`
+|2
+|ver sección de incrustación de marca de agua
+
+|`embed_lsb_num`
+|5
+|ver sección de incrustación de marca de agua
+
+|`alpha`
+|0.05 
+|nivel de significancia
+
+|`columnIndex`
+|1
+|especifica una columna de los datos para detectar
+
+|`dataType`
+|`float`
+|especifica el tipo de datos de la columna detectada; int/float/double
+|===
+
+Notas:
+
+* `filePath`: puede utilizar la herramienta export-csv para generar dicho archivo de datos. La primera fila es el encabezado y la primera columna es la hora. Los datos del archivo tienen este aspecto:
+
+[cols="1,1,1"]
+|===
+|Tiempo 
+|root.vehicle.d0.s1 
+|root.vehicle.d0.s1
+
+|1970-01-01T08:00:00.001+08:00
+|100
+|null
+
+|...
+|...
+|...
+|===
+
+* `watermark_secret_key`, `watermark_bit_string`, `embed_row_cycle` y `embed_lsb_num` deben ser coherentes con los utilizados en la fase de incrustación.
+
+* `alpha`: Debe estar en el rango de [0,1]. La detección de la marca de agua se basa en la prueba de significación. Cuanto menor sea el `alpha`, menor será la probabilidad de que los datos sin la marca de agua se detecten como marca de agua incrustada y, por lo tanto, mayor será la credibilidad del resultado de detectar la existencia de la marca de agua en los datos.
+
+* `columnIndex`: debe ser un número entero positivo.

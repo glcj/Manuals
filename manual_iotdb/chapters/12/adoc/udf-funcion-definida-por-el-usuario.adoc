@@ -1,0 +1,598 @@
+= Función Definida por el Usuario (UDF)
+
+IoTDB proporciona una variedad de funciones integradas para satisfacer sus necesidades informáticas, y también puede crear funciones definidas por el usuario para satisfacer más necesidades informáticas.
+
+Este documento describe cómo escribir, registrar y usar una UDF.
+
+== Tipos de UDF
+
+En IoTDB, puede expandir dos tipos de UDF:
+
+[cols="1,1"]
+|===
+|Clase UDF
+|Descripción
+
+|UDTF （Función de Generación de Series de Tiempo Definida por el Usuario） 
+|Este tipo de función puede tomar *varias* series de tiempo como entrada y generar una serie de tiempo, que puede tener cualquier número de puntos de datos.
+
+|UDAF （Función de Agregación Definida por el Usuario） 
+|En desarrollo.
+|===
+
+== Dependencias de Desarrollo de UDF
+
+Si usa [Maven], puede buscar las dependencias de desarrollo que se enumeran a continuación desde el [repositorio de Maven]. Tenga en cuenta que debe seleccionar la misma versión de dependencia que la versión del servidor IoTDB de destino para el desarrollo.
+
+[source, XML]
+----
+<dependency>
+  <groupId>org.apache.iotdb</groupId>
+  <artifactId>iotdb-server</artifactId>
+  <version>0.12.0-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+----
+
+== UDTF （Función de Generación de Series de Tiempo Definida por el Usuario）
+
+Para escribir una UDTF, debe heredar la clase `org.apache.iotdb.db.query.udf.api.UDTF` y, al menos, implementar el método `beforeStart` y un método `transform`.
+
+La siguiente tabla muestra todas las interfaces disponibles para la implementación del usuario.
+
+[cols="1,1,1"]
+|===
+|Definición de Interfaz 
+|Descripción 
+|Requerido para Implementar
+
+|`void validate(UDFParameterValidator validator) throws Exception`
+|Este método se utiliza principalmente para validar `UDFParameters` y se ejecuta antes de que se llame a `beforeStart(UDFParameters,UDTFConfigurations)`.
+|Opcional 
+
+|`void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception`
+|El método de inicialización para llamar al comportamiento de inicialización definido por el usuario antes de que una UDTF procese los datos de entrada. Cada vez que un usuario ejecuta una consulta UDTF, el framework construirá una nueva instancia de UDF y se llamará a `beforeStart`.
+|Requerido
+
+|`void transform(Row row, PointCollector collector) throws Exception`
+|Este método de procesamiento de datos se llamará cuando elija utilizar la estrategia `RowByRowAccessStrategy` (establecida en `beforeStart`) para consumir datos sin procesar. Los datos de entrada se pasan por `Row` y el resultado de la transformación debe ser generado por `PointCollector`. Debe llamar al método de recopilación de datos proporcionado por `collector` para determinar los datos de salida.
+|Requerido para implementar al menos un método `transform`
+
+|`void transform(RowWindow rowWindow, PointCollector collector) throws Exception`
+|Este método es llamado por el framework. Este método de procesamiento de datos se llamará cuando elija utilizar la estrategia `SlidingSizeWindowAccessStrategy` o `SlidingTimeWindowAccessStrategy` (establecida en `beforeStart`) para consumir datos sin procesar. `RowWindow` pasa los datos de entrada y `PointCollector` debe generar el resultado de la transformación. Debe llamar al método de recopilación de datos proporcionado por `collector` para determinar los datos de salida. 
+|Requerido para implementar al menos un método `transform`
+
+|`void terminate(PointCollector collector) throws Exception`
+|Este método es llamado por el framework. 
+Este método se llamará una vez después de que se hayan ejecutado todas las llamadas de `transform`. En una única consulta UDF, este método solo se llamará una vez. Debe llamar al método de recopilación de datos proporcionado por `collector` para determinar los datos de salida. 
+|Opcional
+
+|`void beforeDestroy()`
+|El framework llama a este método después de que se procesan los últimos datos de entrada, y solo se llamará una vez en el ciclo de vida de cada instancia de UDF.
+|Opcional
+|===
+
+En el ciclo de vida de una instancia de UDTF, la secuencia de llamada de cada método es la siguiente:
+
+
+. void validate(UDFParameterValidator validator) throws Exception
+
+. void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception
+
+. void transform(Row row, PointCollector collector) throws Exception or void transform(RowWindow rowWindow, PointCollector collector) throws Exception
+
+. void terminate(PointCollector collector) throws Exception
+
+. void beforeDestroy()
+
+Tenga en cuenta que cada vez que el framework ejecuta una consulta UDTF, se construirá una nueva instancia de UDF. Cuando finalice la consulta, se destruirá la instancia correspondiente. Por lo tanto, los datos internos de las instancias en diferentes consultas UDTF (incluso en la misma instrucción SQL) están aislados. Puede mantener algunos datos de estado en la UDTF sin tener en cuenta la influencia de la simultaneidad y otros factores.
+
+El uso de cada interfaz se describirá en detalle a continuación.
+
+=== void validate(UDFParameterValidator validator) throws Exception
+
+El método `validate` se utiliza para validar los parámetros ingresados ​​por el usuario.
+
+En este método, puede limitar el número y los tipos de series de tiempo de entrada, verificar los atributos de la entrada del usuario o realizar cualquier verificación personalizada.
+
+Consulte el Javadoc para conocer el uso de `UDFParameterValidator`.
+
+=== void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception
+
+Este método se utiliza principalmente para personalizar UDTF. En este método, el usuario puede hacer las siguientes cosas:
+
+. Utilice UDFParameters para obtener las rutas de la serie temporal y analizar los atributos del par clave-valor ingresados ​​por el usuario.
+
+. Configure la estrategia para acceder a los datos sin procesar y configure el tipo de datos de salida en UDTFConfigurations.
+
+. Cree recursos, como establecer conexiones externas, abrir archivos, etc.
+
+==== UDFParameters
+
+`UDFParameters` se utiliza para analizar parámetros UDF en sentencias SQL (la parte entre paréntesis después del nombre de la función UDF en SQL). Los parámetros de entrada tienen dos partes. La primera parte son las rutas (medidas) y sus tipos de datos de la serie temporal que la UDF necesita procesar, y la segunda parte son los atributos del par clave-valor para la personalización. Solo la segunda parte puede estar vacía.
+
+Ejemplo:
+
+[source, SQL]
+----
+SELECT UDF(s1, s2, 'key1'='iotdb', 'key2'='123.45') FROM root.sg.d;
+----
+
+Uso:
+
+[source, Java]
+----
+void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception {
+  // parameters
+	for (PartialPath path : parameters.getPaths()) {
+    TSDataType dataType = parameters.getDataType(path);
+  	// do something
+  }
+  String stringValue = parameters.getString("key1"); // iotdb
+  Float floatValue = parameters.getFloat("key2"); // 123.45
+  Double doubleValue = parameters.getDouble("key3"); // null
+  int intValue = parameters.getIntOrDefault("key4", 678); // 678
+  // do something
+  
+  // configurations
+  // ...
+}
+----
+
+====  UDTFConfigurations
+
+Debe utilizar `UDTFConfigurations` para especificar la estrategia utilizada por UDF para acceder a los datos sin procesar y el tipo de secuencia de salida.
+
+Uso:
+
+[source, Java]
+----
+void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception {
+  // parameters
+  // ...
+  
+  // configurations
+  configurations
+    .setAccessStrategy(new RowByRowAccessStrategy())
+    .setOutputDataType(TSDataType.INT32);
+}
+----
+
+El método `setAccessStrategy` se usa para establecer la estrategia de UDF para acceder a los datos sin procesar, y el método `setOutputDataType` se usa para establecer el tipo de datos de la secuencia de salida.
+
+===== setAccessStrategy
+
+Tenga en cuenta que la estrategia de acceso a datos sin procesar que establezca aquí determina qué método `transform` llamará el framework. Implemente el método `transform` correspondiente a la estrategia de acceso a datos sin procesar. Por supuesto, también puede decidir dinámicamente qué estrategia establecer en función de los parámetros de atributo analizados por `UDFParameters`. Por lo tanto, también se permite implementar dos métodos `transform` en una UDF.
+
+Las siguientes son las estrategias que puede establecer:
+
+[cols="1,1,1"]
+|===
+|Definición de interfaz 
+|Descripción 
+|El Método `transform` a Llamar
+
+|`RowByRowAccessStrategy` 
+|Procesar datos sin procesar fila por fila. El framework llama al método `transform` una vez para cada fila de entrada de datos sin procesar. Cuando UDF tiene solo una secuencia de entrada, una fila de entrada es un punto de datos en la secuencia de entrada. Cuando UDF tiene varias secuencias de entrada, una fila de entrada es un registro de resultado de la consulta sin procesar (alineada por tiempo) en estas secuencias de entrada. (En una fila, puede haber una columna con un valor `null`, pero no todas son `null`) 
+|`void transform(Row row, PointCollector collector) throws Exception`
+
+|`SlidingTimeWindowAccessStrategy` 
+|Procesa un lote de datos en un intervalo de tiempo fijo cada vez. Llamamos ventana al contenedor de un lote de datos. El framework llama al método `transform` una vez para cada ventana de entrada de datos sin procesar. Puede haber varias filas de datos en una ventana, y cada fila es un registro de resultado de la consulta sin procesar (alineada por tiempo) en estas secuencias de entrada. (En una fila, puede haber una columna con un valor de `null`, pero no todas son `null`) 
+|`void transform(RowWindow rowWindow, PointCollector collector) throws Exception`
+
+|`SlidingSizeWindowAccessStrategy` 
+|Los datos sin procesar se procesan lote a lote, y cada lote contiene un número fijo de filas de datos sin procesar (excepto el último lote). Llamamos ventana al contenedor de un lote de datos. El framework llama al método `transform` una vez para cada ventana de entrada de datos sin procesar. Puede haber varias filas de datos en una ventana, y cada fila es un registro de resultado de la consulta sin procesar (alineada por tiempo) en estas secuencias de entrada. (En una fila, puede haber una columna con un valor de `null`, pero no todas son `null`) 
+|`void transform(RowWindow rowWindow, PointCollector collector) throws Exception`
+|===
+
+`RowByRowAccessStrategy`: La construcción de `RowByRowAccessStrategy` no requiere ningún parámetro.
+
+`SlidingTimeWindowAccessStrategy`: `SlidingTimeWindowAccessStrategy` tiene muchos constructores, puede pasarle 3 tipos de parámetros:
+
+* Parámetro 1: la ventana de visualización en el eje del tiempo
+
+* Parámetro 2: intervalo de tiempo para dividir el eje de tiempo (debe ser positivo)
+
+* Parámetro 3: paso deslizante de tiempo (no se requiere que sea mayor o igual al intervalo de tiempo, pero debe ser un número positivo)
+
+El primer tipo de parámetros son opcionales. Si no se proporcionan los parámetros, la hora de inicio de la ventana de visualización se establecerá igual que la marca de tiempo mínima del conjunto de resultados de la consulta, y la hora de finalización de la ventana de visualización se establecerá igual que la marca de tiempo máxima de la conjunto de resultados de la consulta.
+
+El parámetro de paso deslizante también es opcional. Si el parámetro no se proporciona, el paso deslizante se establecerá en el mismo intervalo de tiempo para dividir el eje de tiempo.
+
+La relación entre los tres tipos de parámetros se puede ver en la siguiente figura. Consulte el Javadoc para obtener más detalles.
+
+image::imagen-12.png[]
+
+Tenga en cuenta que el intervalo de tiempo real de algunas de las últimas ventanas de tiempo puede ser menor que el parámetro de intervalo de tiempo especificado. Además, puede haber casos en los que el número de filas de datos en algunas ventanas de tiempo sea 0. En estos casos, el framework también llamará al método `transform` para las ventanas vacías.
+
+`SlidingSizeWindowAccessStrategy`: `SlidingSizeWindowAccessStrategy` tiene muchos constructores, puede pasarle 2 tipos de parámetros:
+
+* Parámetro 1: Tamaño de la ventana. Este parámetro especifica el número de filas de datos contenidas en una ventana de procesamiento de datos. Tenga en cuenta que el número de filas de datos en algunas de las últimas ventanas de tiempo puede ser menor que el número especificado de filas de datos.
+
+* Parámetro 2: Paso deslizante. Este parámetro significa el número de filas entre el primer punto de la siguiente ventana y el primer punto de la ventana actual. (No es necesario que este parámetro sea mayor o igual al tamaño de la ventana, pero debe ser un número positivo)
+
+El parámetro de paso deslizante es opcional. Si no se proporciona el parámetro, el paso de deslizamiento se establecerá en el mismo tamaño que el tamaño de la ventana.
+
+Consulte el Javadoc para obtener más detalles.
+
+===== setOutputDataType
+
+Tenga en cuenta que el tipo de secuencia de salida que establezca aquí determina el tipo de datos que `PointCollector` realmente puede recibir en el método `transform`. La relación entre el tipo de datos de salida establecido en `setOutputDataType` y el tipo de salida de datos real que `PointCollector` puede recibir es la siguiente:
+
+[cols="1,1"]
+|===
+|Tipo de Datos de Salida Establecido en `setOutputDataType`
+|Tipo de Datos que `PointCollector` Puede Recibir
+
+|`INT32` 
+|`int`
+
+|`INT64` 
+|`long`
+
+|`FLOAT` 
+|`float`
+
+|`DOUBLE` 
+|`double`
+
+|`BOOLEAN` 
+|`boolean`
+
+|`TEXT`
+|`java.lang.String` y `org.apache.iotdb.tsfile.utils.Binary`
+|===
+
+El tipo de serie de tiempo de salida de una UDTF se determina en tiempo de ejecución, lo que significa que una UDTF puede determinar dinámicamente el tipo de serie de tiempo de salida según el tipo de serie de tiempo de entrada. A continuación, se muestra un ejemplo sencillo:
+
+[source, Java]
+----
+void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) throws Exception {
+  // do something
+  // ...
+  
+  configurations
+    .setAccessStrategy(new RowByRowAccessStrategy())
+    .setOutputDataType(parameters.getDataType(0));
+}
+----
+
+=== void transform(Row row, PointCollector collector) throws Exception
+
+Debe implementar este método cuando especifica la estrategia de UDF para leer los datos originales como `RowByRowAccessStrategy`.
+
+Este método procesa los datos sin procesar una fila a la vez. Los datos brutos se ingresan desde `Row` y se envían a `PointCollector`. Puede generar cualquier número de puntos de datos en una llamada al método `transform`. Cabe señalar que el tipo de puntos de datos de salida debe ser el mismo que estableció en el método `beforeStart`, y las marcas de tiempo de los puntos de datos de salida deben aumentar estrictamente de manera monótona.
+
+El siguiente es un ejemplo de UDF completo que implementa el método `void transform(Row row, PointCollector collector) throws Exception`. Es un sumador que recibe dos columnas de series de tiempo como entrada. Cuando dos puntos de datos en una fila no son `null`, esta UDF generará la suma algebraica de estos dos puntos de datos.
+
+[source, Java]
+----
+import org.apache.iotdb.db.query.udf.api.UDTF;
+import org.apache.iotdb.db.query.udf.api.access.Row;
+import org.apache.iotdb.db.query.udf.api.collector.PointCollector;
+import org.apache.iotdb.db.query.udf.api.customizer.config.UDTFConfigurations;
+import org.apache.iotdb.db.query.udf.api.customizer.parameter.UDFParameters;
+import org.apache.iotdb.db.query.udf.api.customizer.strategy.RowByRowAccessStrategy;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+public class Adder implements UDTF {
+
+  @Override
+  public void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) {
+    configurations
+        .setOutputDataType(TSDataType.INT64)
+        .setAccessStrategy(new RowByRowAccessStrategy());
+  }
+
+  @Override
+  public void transform(Row row, PointCollector collector) throws Exception {
+    if (row.isNull(0) || row.isNull(1)) {
+      return;
+    }
+    collector.putLong(row.getTime(), row.getLong(0) + row.getLong(1));
+  }
+}
+----
+
+=== void transform(RowWindow rowWindow, PointCollector collector) throws Exception
+
+Debe implementar este método cuando especifica la estrategia de UDF para leer los datos originales como `SlidingTimeWindowAccessStrategy` o `SlidingSizeWindowAccessStrategy`.
+
+Este método procesa un lote de datos en un número fijo de filas o un intervalo de tiempo fijo cada vez, y llamamos ventana al contenedor que contiene este lote de datos. Los datos brutos se ingresan desde `RowWindow` y se envían a `PointCollector`. `RowWindow` puede ayudarlo a acceder a un lote de `Row`, proporciona un conjunto de interfaces para acceso aleatorio y acceso iterativo a este lote de `Row`. Puede generar cualquier número de puntos de datos en una llamada al método `transform`. Cabe señalar que el tipo de puntos de datos de salida debe ser el mismo que estableció en el método `beforeStart`, y las marcas de tiempo de los puntos de datos de salida deben aumentar estrictamente de forma monotónica.
+
+A continuación se muestra un ejemplo de UDF completo que implementa el método `void transform(RowWindow rowWindow, PointCollector collector) throws Exception`. Es un contador que recibe cualquier número de series de tiempo como entrada, y su función es contar y generar el número de filas de datos en cada ventana de tiempo dentro de un rango de tiempo especificado.
+
+[source, Java]
+----
+import java.io.IOException;
+import org.apache.iotdb.db.query.udf.api.UDTF;
+import org.apache.iotdb.db.query.udf.api.access.RowWindow;
+import org.apache.iotdb.db.query.udf.api.collector.PointCollector;
+import org.apache.iotdb.db.query.udf.api.customizer.config.UDTFConfigurations;
+import org.apache.iotdb.db.query.udf.api.customizer.parameter.UDFParameters;
+import org.apache.iotdb.db.query.udf.api.customizer.strategy.SlidingTimeWindowAccessStrategy;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+public class Counter implements UDTF {
+
+  @Override
+  public void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) {
+    configurations
+        .setOutputDataType(TSDataType.INT32)
+        .setAccessStrategy(new SlidingTimeWindowAccessStrategy(
+            parameters.getLong("time_interval"),
+            parameters.getLong("sliding_step"),
+            parameters.getLong("display_window_begin"),
+            parameters.getLong("display_window_end")));
+  }
+
+  @Override
+  public void transform(RowWindow rowWindow, PointCollector collector) {
+    if (rowWindow.windowSize() != 0) {
+      collector.putInt(rowWindow.getRow(0).getTime(), rowWindow.windowSize());
+    }
+  }
+}
+----
+
+=== void terminate(PointCollector collector) throws Exception
+
+En algunos escenarios, una UDF necesita atravesar todos los datos originales para calcular los puntos de datos de salida finales. La interfaz `terminate` proporciona soporte para esos escenarios.
+
+Este método se llama después de que se ejecutan todas las llamadas `transform` y antes de que se ejecute el método `beforeDestory`. Puede implementar el método `transform` para realizar un procesamiento de datos puro (sin generar ningún punto de datos) e implementar el método de `terminate` para generar los resultados del procesamiento.
+
+Los resultados del procesamiento deben ser generados por `PointCollector`. Puede generar cualquier número de puntos de datos en una llamada al método `terminate`. Cabe señalar que el tipo de puntos de datos de salida debe ser el mismo que estableció en el método `beforeStart`, y las marcas de tiempo de los puntos de datos de salida deben aumentar estrictamente de manera monótona.
+
+A continuación se muestra un ejemplo de UDF completo que implementa el método `void terminate(PointCollector collector) throws Exception`. Toma una serie de tiempo cuyo tipo de datos es `INT32` como entrada y genera el punto de valor máximo de la serie.
+
+[source, Java]
+----
+import java.io.IOException;
+import org.apache.iotdb.db.query.udf.api.UDTF;
+import org.apache.iotdb.db.query.udf.api.access.Row;
+import org.apache.iotdb.db.query.udf.api.collector.PointCollector;
+import org.apache.iotdb.db.query.udf.api.customizer.config.UDTFConfigurations;
+import org.apache.iotdb.db.query.udf.api.customizer.parameter.UDFParameters;
+import org.apache.iotdb.db.query.udf.api.customizer.strategy.RowByRowAccessStrategy;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+public class Max implements UDTF {
+
+  private Long time;
+  private int value;
+
+  @Override
+  public void beforeStart(UDFParameters parameters, UDTFConfigurations configurations) {
+    configurations
+        .setOutputDataType(TSDataType.INT32)
+        .setAccessStrategy(new RowByRowAccessStrategy());
+  }
+
+  @Override
+  public void transform(Row row, PointCollector collector) {
+    int candidateValue = row.getInt(0);
+    if (time == null || value < candidateValue) {
+      time = row.getTime();
+      value = candidateValue;
+    }
+  }
+
+  @Override
+  public void terminate(PointCollector collector) throws IOException {
+    if (time != null) {
+      collector.putInt(time, value);
+    }
+  }
+}
+----
+
+=== void beforeDestroy()
+
+El método para terminar una UDF.
+
+Este método es llamado por el framework. Para una instancia de UDF, `beforeDestroy` se llamará después de que se procese el último registro. En todo el ciclo de vida de la instancia, `beforeDestroy` solo se llamará una vez.
+
+== Ejemplo de Proyecto Maven
+
+Si usa Maven, puede crear su propio proyecto UDF consultando nuestro módulo de *ejemplo udf*. Puedes encontrar el proyecto [aquí].
+
+== Registro UDF
+
+El proceso de registro de una UDF en IoTDB es el siguiente:
+
+. Implemente una clase UDF completa, asumiendo que el nombre de clase completo de esta clase es `org.apache.iotdb.udf.ExampleUDTF`.
+
+. Empaqueta tu proyecto en un JAR. Si usa Maven para administrar su proyecto, puede consultar el ejemplo de proyecto de Maven anterior.
+
+. Coloque el paquete JAR en el directorio `iotdb-server-0.12.0-SNAPSHOT/ext/udf` o en un subdirectorio de `iotdb-server-0.12.0-SNAPSHOT/ext/udf`.
++
+====
+Puede especificar la ruta raíz para que la UDF cargue el Jar modificando 'udf_root_dir' en el archivo de configuración.
+====
+
+. Registre la UDF con la instrucción SQL, asumiendo que el nombre dado a la UDF es `example`.
+
+A continuación se muestra la sintaxis SQL de cómo registrar una UDF.
+
+[source, SQL]
+----
+CREATE FUNCTION <UDF-NAME> AS <UDF-CLASS-FULL-PATHNAME>
+----
+
+Aquí hay un ejemplo:
+
+[source, SQL]
+----
+CREATE FUNCTION example AS "org.apache.iotdb.udf.ExampleUDTF"
+----
+
+Dado que las instancias de UDF se cargan dinámicamente a través de la tecnología de reflexión, no es necesario reiniciar el servidor durante el proceso de registro de UDF.
+
+[NOTE]
+====
+* Los nombres de las funciones UDF no distinguen entre mayúsculas y minúsculas.
+
+* asegúrese de que el nombre de función dado a la UDF sea diferente de todos los nombres de función incorporados. No se puede registrar una UDF con el mismo nombre que una función incorporada.
+
+* Recomendamos que no use clases que tengan el mismo nombre de clase pero una lógica de función diferente en diferentes paquetes JAR. Por ejemplo, en `UDF(UDAF/UDTF): udf1, udf2`, el paquete JAR de udf1 es `udf1.jar` y el paquete JAR de udf2 es `udf2.jar`. Suponga que ambos paquetes JAR contienen la clase `org.apache.iotdb.udf.ExampleUDTF`. Si usa dos UDF en la misma instrucción SQL al mismo tiempo, el sistema cargará cualquiera de ellos de forma aleatoria y puede causar inconsistencias en el comportamiento de ejecución de UDF.
+====
+
+== Desregistro de UDF
+
+A continuación, se muestra la sintaxis SQL de cómo cancelar el registro de una UDF.
+
+[source, SQL]
+----
+DROP FUNCTION <UDF-NAME>
+----
+
+Aquí hay un ejemplo:
+
+[source, SQL]
+----
+DROP FUNCTION example
+----
+
+== Consultas UDF
+
+El uso de UDF es similar al de las funciones de agregación integradas.
+
+=== Soporte de Sintaxis SQL Básica
+
+
+* Soporte `SLIMIT` / `SOFFSET`
+
+* Soporte `LIMIT` / `OFFSET`
+
+* Soporte `NON ALIGNED`
+
+* Soporte de consultas con filtros de tiempo
+
+* Soporte de consultas con filtros de valor
+
+=== Consultas con * en Cláusulas SELECT
+
+Suponga que hay 2 series de tiempo (`root.sg.d1.s1` y `root.sg.d1.s2`) en el sistema.
+
+* `*SELECT example(+++*+++) from root.sg.d1*`
+
+Luego, el conjunto de resultados incluirá los resultados de `example (root.sg.d1.s1)` y `example (root.sg.d1.s2)`.
+
+* `*SELECT example(s1, +++*+++) from root.sg.d1*`
+
+Luego, el conjunto de resultados incluirá los resultados de e`xample (root.sg.d1.s1, root.sg.d1.s1)` y `example (root.sg.d1.s1, root.sg.d1.s2)`.
+
+. `*SELECT example(+++*, *+++) from root.sg.d1*`
+
+Luego, el conjunto de resultados incluirá los resultados de example(root.sg.d1.s1, root.sg.d1.s1), example(root.sg.d1.s2, root.sg.d1.s1), `example(root.sg.d1.s1, root.sg.d1.s2)` y `example(root.sg.d1.s2, root.sg.d1.s2)`.
+
+=== Consultas con Atributos Valor-Clave en Parámetros UDF
+
+Puede pasar cualquier número de parámetros de pares clave-valor a la UDF al construir una consulta de UDF. La clave y el valor del par clave-valor deben incluirse entre comillas simples o dobles. Tenga en cuenta que los parámetros del par clave-valor solo se pueden transferir después de que se hayan transmitido todas las series de tiempo. A continuación, se muestra un conjunto de ejemplos:
+
+[source, SQL]
+----
+SELECT example(s1, "key1"="value1", "key2"="value2"), example(*, "key3"="value3") FROM root.sg.d1;
+SELECT example(s1, s2, "key1"="value1", "key2"="value2") FROM root.sg.d1;
+----
+
+=== Consultas Híbridas
+
+Actualmente, IoTDB admite consultas híbridas de consultas UDF y consultas de datos sin procesar, por ejemplo:
+
+[source, SQL]
+----
+SELECT s1, s2, example(s1, s2) FROM root.sg.d1;
+SELECT *, example(*) FROM root.sg.d1 NON ALIGN;
+----
+
+== Mostrar Todas las UDF Registradas
+
+[source, SQL]
+----
+SHOW FUNCTIONS
+----
+
+== Gestión de Permisos de
+* `suario`
+
+Hay 3 tipos de permisos de usuario relacionados con UDF:
+
+
+* `CREATE_FUNCTION`: solo los usuarios con este permiso pueden registrar UDFs
+
+* `DROP_FUNCTION`: solo los usuarios con este permiso pueden cancelar el registro de UDFs
+
+* `READ_TIMESERIES`: solo los usuarios con este permiso pueden usar UDFs para consultas
+
+Para obtener más contenido relacionado con los permisos de usuario, consulte [Declaraciones de Administración de Cuenta].
+
+== Propiedades Configurables
+
+Al realizar consultas mediante una UDF, IoTDB puede indicar que no hay memoria suficiente. Puede resolver el problema configurando `udf_initial_byte_array_length_for_memory_control`, `udf_memory_budget_in_mb` y `udf_reader_transformer_collector_memory_proportion` en `iotdb-engine.properties` y reiniciando el servidor.
+
+
+== Contribuir UDF
+
+Esta parte presenta principalmente cómo los usuarios externos pueden contribuir con sus propias UDF a la comunidad de IoTDB.
+
+=== Prerrequisitos
+
+. Las UDF deben ser universales.
++
+El "universal" mencionado aquí se refiere a: Las UDF se pueden utilizar ampliamente en algunos escenarios. En otras palabras, la función UDF debe tener valor de reutilización y puede ser utilizada directamente por otros usuarios de la comunidad.
++
+Si no está seguro de si el UDF con el que desea contribuir es universal, puede enviar un correo electrónico a `dev@iotdb.apache.org` o crear un problema para iniciar una discusión.
+
+. La UDF con la que va a contribuir ha sido bien probada y puede ejecutarse normalmente en el entorno de producción.
+
+=== Lo que Necesita Preparar
+
+
+. Código fuente UDF
+
+. Casos de prueba
+
+. Instrucciones
+
+==== Código Fuente UDF
+
+. Cree la clase principal de UDF y las clases relacionadas en `src/main/java/org/apache/iotdb/db/query/udf/builtin ` o en sus subcarpetas.
+
+. Registre su UDF en src/main/java/org/apache/iotdb/db/query/udf/builtin/BuiltinFunction.java.
+
+==== Casos de Prueba
+
+Como mínimo, debe escribir pruebas de integración para la UDF.
+
+Puede agregar una clase de prueba en server/src/test/java/org/apache/iotdb/db/integration.
+
+==== Instrucciones
+
+Las instrucciones deben incluir: el nombre y la función de la UDF, los parámetros de atributo que deben proporcionarse cuando se ejecuta la UDF, los escenarios aplicables y los ejemplos de uso, etc.
+
+Las instrucciones deben agregarse en docs/UserGuide/Operation Manual/DML Data Manipulation Language.md.
+
+==== Envíe un PR
+
+Cuando haya preparado el código fuente de UDF, los casos de prueba y las instrucciones, estará listo para enviar una solicitud de pull (PR) en [Github]. Puede consultar nuestra guía de contribución de código para enviar un PR: [Pull Request Guide].
+
+== Bibliotecas de Implementación UDF Conocidad
+
+* [IoTDB-Quality], una biblioteca UDF sobre la calidad de los datos, incluida la elaboración de perfiles de datos, la evaluación de la calidad de los datos y la reparación de datos, etc.
+
+== Preguntas y Respuestas
+
+P1: *¿Cómo modificar la UDF registrada?*
+
+R1: Suponga que el nombre de la UDF es `example` y el nombre completo de la clase es `org.apache.iotdb.udf.ExampleUDTF`, que se introduce con `example.jar`.
+
+. Descargue la función registrada ejecutando `DROP FUNCTION example`.
+
+. Elimine `example.jar` en `iotdb-server-0.12.0-SNAPSHOT/ext/udf`.
+
+. Modifique la lógica en `org.apache.iotdb.udf.ExampleUDTF` y vuelva a empaquetarla. El nombre del paquete JAR aún puede ser `example.jar`.
+
+. Cargue el nuevo paquete JAR en `iotdb-server-0.12.0-SNAPSHOT/ext/udf`.
+
+. Cargue la nueva UDF ejecutando `CREATE FUNCTION example AS "org.apache.iotdb.udf.ExampleUDTF"`.

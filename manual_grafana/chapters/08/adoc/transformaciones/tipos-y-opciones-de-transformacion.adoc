@@ -1,0 +1,519 @@
+= Tipos y opciones de transformación
+
+Grafana viene con las siguientes transformaciones:
+
+* <<Tipos y opciones de transformación>>
+** <<Reducir>>
+** <<Fusionar>>
+** <<Filtrar datos por nombre>>
+** <<Filtrar datos por consulta>>
+** <<Organizar campos>>
+** <<Unir por campo (unión externa)>>
+** <<Agregar campo desde cálculo>>
+** <<Etiquetas a campos>>
+*** <<Nombre del campo de valor>>
+*** <<Comportamiento de fusión>>
+** <<Ordenar por>>
+** <<Agrupar por>>
+** <<Concatenar campos>>
+** <<Series a filas>>
+** <<Filtrar datos por valor>>
+** <<Cambiar el nombre por expresiones regulares>>
+
+Siga leyendo para obtener descripciones detalladas de cada tipo de transformación y las opciones disponibles para cada una, así como sugerencias sobre cómo usarlas.
+
+== Reducir
+
+La transformación _Reducir_ aplicará un cálculo a cada campo del marco y devolverá un valor único. Los campos de tiempo se eliminan al aplicar esta transformación.
+
+Considere la entrada:
+
+Consulta A:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Temperatura |Tiempo de Actividad
+|2020-07-07 11:34:20 |12.3 |256122
+|2020-07-07 11:24:20 |15.4 |1230233
+|===
+
+Consulta B:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |AQI |Errores
+|2020-07-07 11:34:20 |6.5 |15
+|2020-07-07 11:24:20 |3.2 |5
+|===
+
+El transformador de reducción tiene dos modos:
+
+* *De serie a filas:* crea una fila para cada campo y una columna para cada cálculo.
+* *Reducir campos:* mantiene la estructura del marco existente, pero contrae cada campo en un solo valor.
+
+Por ejemplo, si utilizó el *Primer* y *Último* cálculo con una transformación de *Serie a filas*, el resultado sería:
+
+[cols=",,",options="header",]
+|===
+|Campo |Primero |Último
+|Temperatura |12.3 |15.4
+|Tiempo de Actividad |256122 |1230233
+|AQI |6.5 |3.2
+|Errores |15 |5
+|===
+
+*Reducir* *campos* con el *Último* cálculo dan como resultado dos marcos, cada uno con una fila:
+
+Consulta A:
+
+[cols=",",options="header",]
+|===
+|Temperatura |Tiempo de Actividad
+|15.4 |1230233
+|===
+
+Consulta B:
+
+[cols=",",options="header",]
+|===
+|AQI |Errores
+|3.2 |5
+|===
+
+== Unir
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.1+.
+====
+
+Utilice esta transformación para combinar el resultado de varias consultas en un solo resultado. Esto es útil cuando se usa la visualización de tabla. Los valores que se pueden combinar se combinan en la misma fila. Los valores se pueden combinar si los campos compartidos contienen los mismos datos. Para obtener información, consulte el xref:paneles/visualizaciones/panel-de-tabla.adoc[panel de Tabla].
+
+En el siguiente ejemplo, tenemos dos consultas que devuelven datos de tabla. Se visualiza como dos tablas separadas antes de aplicar la transformación.
+
+Consulta A:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Trabajo |Tiempo de Actividad
+|2020-07-07 11:34:20 |node |25260122
+|2020-07-07 11:24:20 |postgre |123001233
+|===
+
+Consulta B:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Trabajo |Errores
+|2020-07-07 11:34:20 |node |15
+|2020-07-07 11:24:20 |postgre |5
+|===
+
+Aquí está el resultado después de aplicar la transformación Fusionar.
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |Trabajo |Errores |Tiempo de Actividad
+|2020-07-07 11:34:20 |node |15 |25260122
+|2020-07-07 11:24:20 |postgre |5 |123001233
+|===
+
+== Filtrar datos por nombre
+
+Utilice esta transformación para eliminar partes de los resultados de la consulta.
+
+Grafana muestra el campo *Identificador*, seguido de los campos devueltos por su consulta.
+
+Puede aplicar filtros de dos formas:
+
+* Ingrese una expresión regular.
+* Haga clic en un campo para alternar el filtrado en ese campo. Los campos filtrados se muestran con texto gris oscuro, los campos sin filtrar tienen texto blanco.
+
+En el siguiente ejemplo, eliminé el campo Mín. de los resultados.
+
+Aquí está la tabla de consulta original. (Se trata de datos de transmisión, por lo que los números cambian con el tiempo y entre capturas de pantalla).
+
+image::image51.png[https://grafana.com/static/img/docs/transformations/filter-name-table-before-7-0.png,width=624,height=178]
+
+Aquí está la tabla después de que apliqué la transformación para eliminar el campo Mín.
+
+image::image52.png[https://grafana.com/static/img/docs/transformations/filter-name-table-after-7-0.png,width=624,height=274]
+
+Aquí está la misma consulta usando una visualización de Estadísticas.
+
+image::image53.png[https://grafana.com/static/img/docs/transformations/filter-name-stat-after-7-0.png,width=624,height=248]
+
+== Filtrar datos por consulta
+
+Utilice esta transformación en paneles que tengan varias consultas, si desea ocultar una o más de las consultas.
+
+Grafana muestra las letras de identificación de la consulta en texto gris oscuro. Haga clic en un identificador de consulta para alternar el filtrado. Si la letra de la consulta es blanca, se muestran los resultados. Si la letra de consulta es oscura, los resultados están ocultos.
+
+En el siguiente ejemplo, el panel tiene tres consultas (A, B, C). Eliminé la consulta B de la visualización.
+
+image::image54.png[https://grafana.com/static/img/docs/transformations/filter-by-query-stat-example-7-0.png,width=624,height=227]
+
+[NOTE]
+====
+Esta transformación no está disponible para Graphite porque esta fuente de datos no admite la correlación de datos devueltos con consultas.
+====
+
+== Organizar campos
+
+Utilice esta transformación para cambiar el nombre, reordenar u ocultar los campos devueltos por la consulta.
+
+[NOTE]
+====
+Esta transformación solo funciona en paneles con una única consulta. Si su panel tiene varias consultas, debe aplicar una transformación de Combinación externa o eliminar las consultas adicionales.
+====
+
+Grafana muestra una lista de campos devueltos por la consulta. Usted puede:
+
+* Cambiar el orden de los campos colocando el cursor sobre un campo. El cursor se convierte en una mano y luego puede arrastrar el campo a su nuevo lugar.
+* Ocultar o mostrar un campo haciendo clic en el icono de ojo junto al nombre del campo.
+* Cambiar el nombre de los campos escribiendo un nuevo nombre en el cuadro *Cambiar nombre*.
+
+En el siguiente ejemplo, oculté el campo de valor y renombré Máx. y Mín.
+
+image::image55.png[https://grafana.com/static/img/docs/transformations/organize-fields-stat-example-7-0.png,width=624,height=299]
+
+== Unir por campo (unión externa)
+
+Utilice esta transformación para unir varias series de tiempo a partir de un conjunto de resultados por campo.
+
+Esta transformación es especialmente útil si desea combinar consultas para poder calcular los resultados de los campos.
+
+En el siguiente ejemplo, tengo una consulta de plantilla que muestra datos de series de tiempo de varios servidores en una visualización de tabla. Solo puedo ver los resultados de una consulta a la vez.
+
+image::image56.png[https://grafana.com/static/img/docs/transformations/join-fields-before-7-0.png,width=624,height=283]
+
+Apliqué una transformación para unir los resultados de la consulta usando el campo de tiempo. Ahora puedo ejecutar cálculos, combinar y organizar los resultados en esta nueva tabla.
+
+image::image57.png[https://grafana.com/static/img/docs/transformations/join-fields-after-7-0.png,width=624,height=323]
+
+== Agregar campo desde cálculo
+
+Utilice esta transformación para agregar un nuevo campo calculado a partir de otros dos campos. Cada transformación le permite agregar un nuevo campo.
+
+* *Modo:* seleccione un modo:
+** *Reducir fila:* aplique el cálculo seleccionado en cada fila de campos seleccionados de forma independiente.
+** *Opción binaria:* aplique operaciones matemáticas básicas (sumar, multiplicar, etc.) en valores en una sola fila de dos campos seleccionados.
+* *Nombre de campo:* seleccione los nombres de los campos que desea utilizar en el cálculo del nuevo campo.
+* *Cálculo:* si selecciona el modo *Reducir fila*, aparece el campo *Cálculo*. Haga clic en el campo para ver una lista de opciones de cálculo que puede utilizar para crear el nuevo campo. Para obtener información sobre los cálculos disponibles, consulte la xref:paneles/lista-de-calculos.adoc[Lista de cálculos].
+* *Operación:* si selecciona el modo de *Opción binaria*, aparecen los campos *Operación*. Estos campos le permiten realizar operaciones matemáticas básicas con valores en una sola fila de dos campos seleccionados. También puede utilizar valores numéricos para operaciones binarias.
+* *Alias:* (opcional) ingrese el nombre de su nuevo campo. Si lo deja en blanco, el nombre del campo coincidirá con el cálculo.
+* *Reemplazar todos los campos:* (Opcional) Seleccione esta opción si desea ocultar todos los demás campos y mostrar solo el campo calculado en la visualización.
+
+En el siguiente ejemplo, agregué dos campos juntos y los llamé Suma.
+
+image::image58.png[https://grafana.com/static/img/docs/transformations/add-field-from-calc-stat-example-7-0.png,width=624,height=325]
+
+== Etiquetas a campos
+
+Esta transformación cambia los resultados de las series de tiempo que incluyen etiquetas o chapas en una estructura de tabla donde cada etiqueta se convierte en su propio campo.
+
+Dado un resultado de consulta de dos series de tiempo:
+
+* Serie 1: etiquetas Servidor = Servidor A, Centro de datos = UE
+* Serie 2: etiquetas Servidor = Servidor B, Centro de datos = UE
+
+Esto daría como resultado una tabla como esta:
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |Servidor |Centro de Datos |Valor
+|2020-07-07 11:34:20 |Servidor A |UE |1
+|2020-07-07 11:34:20 |Servidor B |UE |2
+|===
+
+=== Nombre del campo de valor
+
+Si seleccionó Servidor como el Nombre del campo valor, obtendría un campo por cada valor de la etiqueta Servidor.
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |Centro de Datos |Servidor A |Servidor B
+|2020-07-07 11:34:20 |UE |1 |2
+|===
+
+=== Comportamiento de fusión
+
+La transformación de etiquetas a campos es internamente dos transformaciones separadas. El primero actúa sobre series únicas y extrae etiquetas a los campos. El segundo es la transformación <<fusionar>> que une todos los resultados en una sola tabla. La transformación de fusión intenta unirse en todos los campos coincidentes. Este paso de combinación es obligatorio y no se puede desactivar.
+
+Para ilustrar esto, aquí hay un ejemplo en el que tiene dos consultas que devuelven series de tiempo sin etiquetas superpuestas.
+
+* Serie 1: etiquetas Servidor=ServidorA
+* Serie 2: etiquetas Centro de datos=UE
+
+Esto primero dará como resultado estas dos tablas:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Servidor |Valor
+|2020-07-07 11:34:20 |ServidorA |10
+|===
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Centro de Datos |Valor
+|2020-07-07 11:34:20 |UE |20
+|===
+
+Después de fusionar:
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |Servidor |Valor |Centro de Datos
+|2020-07-07 11:34:20 |ServidorA |10 |
+|2020-07-07 11:34:20 | |20 |UE
+|===
+
+== Ordenar por
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.4+.
+====
+
+Esta transformación ordenará cada cuadro por el campo configurado. Cuando se marca reverse, los valores regresarán en el orden opuesto.
+
+== Agrupar por
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.2+.
+====
+
+Esta transformación agrupa los datos por un valor de campo (columna) especificado y procesa los cálculos en cada grupo. Haga clic para ver una lista de opciones de cálculo. Para obtener información sobre los cálculos disponibles, consulte la xref:paneles/lista-de-calculos.adoc[Lista de cálculos].
+
+A continuación, se muestra un ejemplo de datos originales.
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |ID del Servidor |Temperatura de la CPU |Estado del Servidor
+|2020-07-07 11:34:20 |servidor 1 |80 |Apagado
+|2020-07-07 11:34:20 |servidor 3 |62 |OK
+|2020-07-07 10:32:20 |servidor 2 |90 |Sobrecarga
+|2020-07-07 10:31:22 |servidor 3 |55 |OK
+|2020-07-07 09:30:57 |servidor 3 |62 |Reiniciando
+|2020-07-07 09:30:05 |servidor 2 |88 |OK
+|2020-07-07 09:28:06 |servidor 1 |80 |OK
+|2020-07-07 09:25:05 |servidor 2 |88 |OK
+|2020-07-07 09:23:07 |servidor 1 |86 |OK
+|===
+
+Esta transformación tiene dos pasos. Primero, especifica uno o varios campos para agrupar los datos. Esto agrupará todos los valores iguales de esos campos, como si los hubiera ordenado. Por ejemplo, si agrupamos por el campo ID de servidor, entonces agruparía los datos de esta manera:
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |ID del Servidor |Temperatura de la CPU |Estado del Servidor
+|2020-07-07 11:34:20 |*servidor 1* |80 |Apagado
+|2020-07-07 09:28:06 |*servidor 1* |80 |OK
+|2020-07-07 09:23:07 |*servidor 1* |86 |OK
+|2020-07-07 10:32:20 |servidor 2 |90 |Sobrecarga
+|2020-07-07 09:30:05 |servidor 2 |88 |OK
+|2020-07-07 09:25:05 |servidor 2 |88 |OK
+|2020-07-07 11:34:20 |*servidor 3* |62 |OK
+|2020-07-07 10:31:22 |*servidor 3* |55 |OK
+|2020-07-07 09:30:57 |*servidor 3* |62 |Reinicio
+|===
+
+Todas las filas con el mismo valor de ID de servidor se agrupan.
+
+Después de elegir el campo por el que desea agrupar sus datos, puede agregar varios cálculos en los otros campos y aplicar el cálculo a cada grupo de filas. Por ejemplo, podríamos querer calcular la temperatura promedio de la CPU para cada uno de esos servidores. Entonces, podemos agregar el cálculo _promedio_ aplicado en el campo de temperatura de la CPU para obtener lo siguiente:
+
+[cols=",",options="header",]
+|===
+|ID del Servidor |Temperatura de la CPU (promedio)
+|servidor 1 |82
+|servidor 2 |88.6
+|servidor 3 |59.6
+|===
+
+Y podemos agregar más de un cálculo. Por ejemplo:
+
+* Para el campo Tiempo, podemos calcular el _Último_ valor, para saber cuándo se recibió el último punto de datos para cada servidor.
+* Para el campo Estado del Servidor, podemos calcular el _Último_ valor para saber cuál es el último valor de estado para cada servidor.
+* Para el campo Temperatura, también podemos calcular el _Último_ valor para saber cuál es la última temperatura monitoreada para cada servidor
+
+Entonces obtendríamos:
+
+[cols=",,,,",options="header",]
+|===
+|ID del Servidor |Temperatura de la CPU (promedio) |Temperatura de la CPU (última) |Hora (última) |Estado del Servidor (último)
+|servidor 1 |82 |80 |2020-07-07 11:34:20 |Apagado
+|servidor 2 |88.6 |90 |2020-07-07 10:32:20 |Sobrecarga
+|servidor 3 |59.6 |62 |2020-07-07 11:34:20 |OK
+|===
+
+Esta transformación le permite extraer información clave de su serie temporal y mostrarla de manera conveniente.
+
+== Concatenar campos
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.3+.
+====
+
+Esta transformación combina todos los campos de todos los cuadros en un resultado.
+
+Considere:
+
+Consulta A:
+
+[cols=",",options="header",]
+|===
+|Temperatura |Tiempo de Actividad
+|15.4 |1230233
+|===
+
+Consulta B:
+
+[cols=",",options="header",]
+|===
+|AQI |Errores
+|3.2 |5
+|===
+
+Después de concatenar los campos, el marco de datos sería:
+
+[cols=",,,",options="header",]
+|===
+|Temperatura |Tiempo de Actividad |AQI |Errores
+|15.4 |1230233 |3.2 |5
+|===
+
+== Series a filas
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.1+.
+====
+
+Utilice esta transformación para combinar el resultado de varias consultas de datos de series de tiempo en un solo resultado. Esto es útil cuando se usa la visualización de tabla.
+
+El resultado de esta transformación contendrá tres columnas: Tiempo, Métrica y Valor. La columna Métrica se agrega para que pueda ver fácilmente desde qué consulta se origina la métrica. Personalice este valor definiendo Etiqueta en la consulta de origen.
+
+En el siguiente ejemplo, tenemos dos consultas que devuelven datos de series de tiempo. Se visualiza como dos tablas separadas antes de aplicar la transformación.
+
+Consulta A:
+
+[cols=",",options="header",]
+|===
+|Tiempo |Temperatura
+|2020-07-07 11:34:20 |25
+|2020-07-07 10:31:22 |22
+|2020-07-07 09:30:05 |19
+|===
+
+Consulta B:
+
+[cols=",",options="header",]
+|===
+|Tiempo |Humedad
+|2020-07-07 11:34:20 |24
+|2020-07-07 10:32:20 |29
+|2020-07-07 09:30:57 |33
+|===
+
+Este es el resultado después de aplicar la transformación Serie a filas.
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Métrica |Valor
+|2020-07-07 11:34:20 |Temperatura |25
+|2020-07-07 11:34:20 |Humedad |22
+|2020-07-07 10:32:20 |Humedad |29
+|2020-07-07 10:31:22 |Temperatura |22
+|2020-07-07 09:30:57 |Humedad |33
+|2020-07-07 09:30:05 |Temperatura |19
+|===
+
+== Filtrar datos por valor
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.4+.
+====
+
+Esta transformación le permite filtrar sus datos directamente en Grafana y eliminar algunos puntos de datos del resultado de su consulta. Tiene la opción de incluir o excluir datos que coincidan con una o más condiciones que defina. Las condiciones se aplican en un campo seleccionado.
+
+Esta transformación es muy útil si su fuente de datos no filtra de forma nativa por valores. También puede usar esto para restringir los valores que se mostrarán si está usando una consulta compartida.
+
+Las condiciones disponibles para todos los campos son:
+
+* *Regex:* coincide con una expresión regular
+* *Is Null:* coincide si el valor es nulo
+* *Is Not Null:* coincide si el valor no es nulo
+* *Equal:* coincide si el valor es igual al valor especificado
+* *Different:* coincide si el valor es diferente al valor especificado
+
+Las condiciones disponibles para los campos numéricos son:
+
+* *Greater:* coincide si el valor es mayor que el valor especificado
+* *Lower:* coincide si el valor es inferior al valor especificado
+* *Greater or equal:* coincide si el valor es mayor o igual
+* *Lower or equal:* coincide si el valor es menor o igual
+* *Range:* hace coincidir un rango entre un mínimo y un máximo especificado, incluyendo el mínimo y el máximo
+
+Considere el siguiente conjunto de datos:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Temperatura |Altitud
+|2020-07-07 11:34:23 |32 |101
+|2020-07-07 11:34:22 |28 |125
+|2020-07-07 11:34:21 |26 |110
+|2020-07-07 11:34:20 |23 |98
+|2020-07-07 10:32:24 |31 |95
+|2020-07-07 10:31:22 |20 |85
+|2020-07-07 09:30:57 |19 |101
+|===
+
+Si *Incluye* los puntos de datos que tienen una temperatura inferior a 30 ° C, la configuración se verá de la siguiente manera:
+
+* Tipo de filtro: Include
+* Condición: filas donde `Temperature` coincide con `Lower Than` `100`
+
+Y obtendrá el siguiente resultado, donde solo se incluyen las temperaturas inferiores a 30 ° C:
+
+[cols=",,",options="header",]
+|===
+|Tiempo |Temperatura |Altitud
+|2020-07-07 11:34:22 |28 |125
+|2020-07-07 11:34:21 |26 |110
+|2020-07-07 11:34:20 |23 |98
+|2020-07-07 10:31:22 |20 |85
+|2020-07-07 09:30:57 |19 |101
+|===
+
+Puede agregar más de una condición al filtro. Por ejemplo, es posible que desee incluir los datos solo si la altitud es superior a 100. Para hacerlo, agregue esa condición a la siguiente configuración:
+
+* Tipo de filtro: `Include` (incluye) filas que `Match All` (coincidan con todas) las condiciones
+* Condición 1: filas donde `Temperature` coincide `Lower Than` `30`
+* Condición 2: filas en las que `Altitude` coincide `Greater Than` `100`
+
+Cuando tiene más de una condición, puede elegir si desea que la acción (incluir / excluir) se aplique en filas que *Coincidan con todos* (*Match all*) las condiciones o que *Coincidan* *con cualquiera* (*Match any*) de las condiciones que agregó.
+
+En el ejemplo anterior, elegimos *Coincidir con todos* (*Match all*) porque queríamos incluir las filas que tienen una temperatura inferior a 30 _Y_ una altitud superior a 100. Si quisiéramos incluir las filas que tienen una temperatura inferior a 30 _O_ una altitud superior a 100 en su lugar, entonces seleccionaríamos *Coincidir* *con cualquiera* (*Match any*). Esto incluiría la primera fila en los datos originales, que tiene una temperatura de 32 ° C (no coincide con la primera condición) pero una altitud de 101 (que coincide con la segunda condición), por lo que está incluida.
+
+Las condiciones que no son válidas o están configuradas de forma incompleta se ignoran.
+
+== Cambiar el nombre por expresiones regulares
+
+[NOTE]
+====
+Esta transformación está disponible en Grafana 7.4+.
+====
+
+Utilice esta transformación para cambiar el nombre de partes de los resultados de consulta utilizando una expresión regular y un patrón de reemplazo.
+
+Puede especificar una expresión regular, que solo se aplica a las coincidencias, junto con un patrón de reemplazo que admita referencias anteriores. Por ejemplo, imaginemos que está visualizando el uso de CPU por host y desea eliminar el nombre de dominio. Puede establecer la expresión regular en `([^\.]+)\..+` y el patrón de reemplazo en `$1`, `web-01.example.com` se convertiría en `web-01`.
+
+En el siguiente ejemplo, eliminamos el prefijo de los tipos de eventos. En la imagen anterior, puede ver que todo tiene el prefijo `system`.
+
+image::image59.png[https://grafana.com/static/img/docs/transformations/rename-by-regex-before-7-3.png,width=624,height=133]
+
+Con la transformación aplicada, puede ver que nos queda solo el resto de la cadena.
+
+image::image60.png[https://grafana.com/static/img/docs/transformations/rename-by-regex-after-7-3.png,width=624,height=244]

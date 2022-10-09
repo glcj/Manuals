@@ -1,0 +1,12 @@
+= Herramienta de Visualización del Historial de Consultas
+
+La herramienta de visualización del historial de consultas de IoTDB utiliza una página web de supervisión para proporcionar un servicio de métricas para ver el historial de consultas y el tiempo de ejecución de SQL. También proporciona el uso de memoria y CPU del host actual.
+
+El puerto de la herramienta de visualización del historial de consultas de IoTDB es `8181`. Simplemente imprima su ip: `8181` en su navegador, y la vista de página se verá así:
+
+image::imagen-25.png[]
+
+[NOTE]
+====
+Actualmente, solo admitimos mostrar la relación de CPU de los sistemas operativos Windows y Linux. Si está utilizando otro sistema operativo, es posible que reciba una información de advertencia: "No se puede obtener la proporción de cpu porque este sistema operativo no es compatible".
+====

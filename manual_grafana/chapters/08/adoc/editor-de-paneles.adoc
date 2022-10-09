@@ -1,0 +1,68 @@
+= Editor de paneles
+
+Esta página describe las partes del editor de paneles de Grafana y enlaces a donde puede encontrar más información.
+
+image::image34.png[https://grafana.com/static/img/docs/panel-editor/panel-editor-7-0.png,width=624,height=358]
+
+== Abra el editor de paneles
+
+Hay varias formas de acceder al editor del panel, también llamado pantalla *Editar panel*, _modo de edición_ o _modo de edición de panel_:
+
+* Haga clic en el icono *Agregar panel* en la parte superior de la pantalla y luego haga clic en *Agregar nuevo panel*. El nuevo panel se abre en el editor de paneles. Para obtener instrucciones detalladas sobre cómo agregar un panel, consulte xref:paneles/agregar-un-panel.adoc[Agregar un panel].
+* Haga clic en el título de un panel existente y luego haga clic en *Editar*. El panel se abre en modo de edición.
+* Haga clic en cualquier lugar de un panel existente y luego presione *e* en su teclado. El panel se abre en modo de edición.
+
+== Cambiar el tamaño de las secciones del editor del panel
+
+Arrastre para cambiar el tamaño de las secciones del editor de paneles. Si el panel lateral se vuelve demasiado estrecho, las pestañas Panel, Campo y Anulaciones cambian a una lista desplegable.
+
+image::image35.gif[https://grafana.com/static/img/docs/panel-editor/resize-panel-editor-panels-7-0.gif,width=624,height=415]
+
+== Partes del editor de paneles
+
+Esta sección describe las partes de la pantalla del editor del panel y un poco sobre los campos, opciones o tareas asociadas con cada parte. Algunas secciones de esta página enlazan con páginas en las que las secciones o tareas están documentadas de forma más completa.
+
+=== Encabezamiento
+
+La sección de encabezado enumera el nombre del tablero en el que se encuentra el panel y algunos comandos del tablero. También puede hacer clic en la flecha *Regresar* para regresar al tablero.
+
+image::image36.png[https://grafana.com/static/img/docs/panel-editor/edit-panel-header-7-0.png,width=624,height=26]
+
+En el lado derecho del encabezado se encuentran las siguientes opciones:
+
+* *Icono de configuración del panel (engranaje):* haga clic para acceder a la configuración del tablero.
+* *Descartar:* descarta todos los cambios que ha realizado en el panel desde la última vez que guardó el tablero.
+* *Guardar:* guarda el tablero, incluidos todos los cambios que ha realizado en el editor de paneles.
+* *Aplicar:* aplica los cambios que realizó y luego cierra el editor del panel, lo que lo regresa al tablero. Tendrá que guardar el tablero para conservar los cambios aplicados.
+
+=== Vista previa de visualización
+
+La sección de vista previa de visualización contiene opciones de visualización, controles de rango de tiempo, la vista previa de visualización y (si corresponde) el título del panel, los ejes y la leyenda.
+
+image::image37.png[https://grafana.com/static/img/docs/panel-editor/visualization-preview-7-0.png,width=624,height=157]
+
+* *Rellenar:* la vista previa de visualización llenará el espacio disponible en la parte de vista previa. Si cambia el ancho del panel lateral o la altura del panel inferior, la visualización se adaptará para llenar cualquier espacio disponible.
+* *Ajustar:* la vista previa de visualización llenará el espacio disponible pero conservará la relación de aspecto del panel.
+* *Exacto:* la vista previa de visualización tendrá el tamaño exacto que el tamaño en el tablero. Si no hay suficiente espacio disponible, la visualización se reducirá conservando la relación de aspecto.
+* *Controles de rango de tiempo:* para obtener más información, consulte xref:tableros/controles-de-rango-de-tiempo.adoc[Controles de rango de tiempo].
+
+=== Sección de datos (panel inferior)
+
+La sección contiene pestañas donde ingresa consultas, transforma sus datos y crea reglas de alerta (si corresponde).
+
+image::image38.png[https://grafana.com/static/img/docs/panel-editor/data-section-7-0.png,width=624,height=170]
+
+* *Pestaña Consultar:* seleccione su fuente de datos e ingrese las consultas aquí. Para obtener más información, consulte xref:paneles/consultas.adoc[Consultas].
+* *Pestaña Transformar:* aplique transformaciones de datos. Para obtener más información, consulte xref:paneles/transformaciones.adoc[Transformaciones].
+* *Pestaña Alertar:* escriba reglas de alerta. Para obtener más información, consulte xref:alertas/crear-alertas.adoc[Crear alertas].
+
+=== Opciones de panel y campo (panel lateral)
+
+La sección contiene pestañas donde controlas casi todos los aspectos de cómo se visualizan tus datos. No todas las pestañas están disponibles para cada visualización.
+
+Las funciones de estas pestañas se documentan en los siguientes temas:
+
+* xref:paneles/agregar-un-panel.adoc[Agregar un panel] describe la configuración básica del panel.
+* Las opciones de xref:paneles/visualizaciones.adoc[visualizaciones] varían ampliamente. Se describen en el tema de visualización individual.
+* Las xref:paneles/opciones-de-campo.adoc[opciones de campo y anulaciones] le permiten controlar casi todos los aspectos de su visualización, incluidas las unidades, las asignaciones de valores y los xref:paneles/umbrales.adoc[Umbrales].
+* Los xref:enlaces/enlaces-del-panel.adoc[Enlaces de panel] y los xref:enlaces/enlaces-de-datos.adoc[Enlaces de datos] le ayudan a conectar su visualización con otros recursos.

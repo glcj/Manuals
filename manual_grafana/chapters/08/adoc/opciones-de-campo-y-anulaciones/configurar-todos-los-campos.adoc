@@ -1,0 +1,53 @@
+= Configurar todos los campos
+
+Para cambiar la forma en que todos los campos muestran los datos, puede cambiar una opción en la pestaña Campo. En la pestaña Anulaciones, puede anular las opciones de campo para xref:paneles/opciones-de-campo-y-anulaciones/configurar-campos-especificos.adoc[campos específicos].
+
+Por ejemplo, puede cambiar el número de lugares decimales que se muestran en todos los campos cambiando la opción *Decimales*. Para obtener más información sobre las opciones, consulte:
+
+* xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-estandar.adoc[Opciones de campo estándar], se aplican a todas las visualizaciones que permiten transformaciones.
+* xref:paneles/visualizaciones/panel-de-tabla/opciones-de-campo-de-tabla.adoc[Opciones de campo de tabla], que solo se aplican a visualizaciones de panel de tabla.
+
+== Cambiar una opción de campo
+
+Puede cambiar tantas opciones como desee.
+
+[arabic]
+. Navegue hasta el panel que desea editar, haga clic en el título del panel y luego haga clic en *Editar*.
+. Haga clic en la pestaña *Campo*.
+. Busque la opción que desea cambiar. Puede definir:
+** xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-estandar.adoc[Opciones de campo estándar], que se aplican a todas las visualizaciones de panel que permiten transformaciones.
+** xref:paneles/visualizaciones/panel-de-tabla/opciones-de-campo-de-tabla.adoc[Opciones de campo de tabla], que solo se aplican a visualizaciones de panel de tabla.
+. Agregue opciones agregando valores en los campos. Para devolver las opciones a los valores predeterminados, elimine el texto blanco en los campos.
+. Cuando termine, haga clic en *Guardar* para guardar todas las ediciones del panel en el tablero.
+
+== Ejemplo de opción de campo
+
+Supongamos que nuestro conjunto de resultados es un marco de datos que consta de dos campos: tiempo y temperatura.
+
+[cols=",",options="header",]
+|===
+|tiempo |temperatura
+|2020-01-02 03:04:00 |45.0
+|2020-01-02 03:05:00 |47.0
+|2020-01-02 03:06:00 |48.0
+|===
+
+Cada campo (columna) de esta estructura puede tener aplicadas opciones de campo que alteran la forma en que se muestran sus valores. Esto significa que puede, por ejemplo, establecer la Unidad en Temperatura > Celsius, lo que da como resultado la siguiente tabla:
+
+[cols=",",options="header",]
+|===
+|tiempo |temperatura
+|2020-01-02 03:04:00 |45.0 ° C
+|2020-01-02 03:05:00 |47.0 ° C
+|2020-01-02 03:06:00 |48.0 ° C
+|===
+
+Mientras estamos en eso, el lugar decimal no agrega nada a esta pantalla. Puede cambiar los decimales de `auto` a cero (`0`), lo que da como resultado la siguiente tabla:
+
+[cols=",",options="header",]
+|===
+|tiempo |temperatura
+|2020-01-02 03:04:00 |45 ° C
+|2020-01-02 03:05:00 |47 ° C
+|2020-01-02 03:06:00 |48 ° C
+|===

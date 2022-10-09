@@ -1,0 +1,73 @@
+= Compartir un panel
+
+Puede compartir un panel como un enlace directo, como una instantánea o como un enlace incrustado.
+
+Para compartir un panel:
+
+[arabic]
+. Haga clic en el título de un panel para abrir el menú del panel.
+. Haga clic en *Compartir*. Se abre el cuadro de diálogo para compartir y muestra la pestaña Vínculo.
+
+image::image167.png[Panel share direct link,width=624,height=348]
+
+== Usar enlace directo
+
+La pestaña Enlace tiene el rango de tiempo actual, las variables de plantilla y el tema seleccionado de forma predeterminada. Opcionalmente, puede habilitar una URL abreviada para compartir.
+
+Para compartir un enlace directo:
+
+[arabic]
+. Haga clic en *Copiar*. Esto copia la URL predeterminada o abreviada en el portapapeles.
+. Envíe la URL copiada a un usuario de Grafana con autorización para ver el enlace.
+. Opcionalmente, también puede hacer clic en *Imagen renderizada de enlace directo* para compartir una imagen del panel.
+
+Para obtener más información, consulte el tema xref:administracion/procesamiento-de-imagenes.adoc[Procesamiento de imágenes].
+
+Aquí hay un ejemplo de un enlace a un PNG renderizado del lado del servidor:
+
+[source,Bash]
+----
+https://play.grafana.org/d/000000012/grafana-play-home?orgId=1&from=1568719680173&to=1568726880174&panelId=4&fullscreen
+----
+
+=== Parámetros de cadena de consulta para imágenes renderizadas del lado del servidor
+
+* *width:* ancho en píxeles. El valor predeterminado es 800.
+* *height:* altura en píxeles. El valor predeterminado es 400.
+* *tz:* zona horaria en el formato `UTC%2BHH%3AMM` donde HH y MM se compensan en horas y minutos después de UTC
+* *timeout:* número de segundos. El tiempo de espera se puede aumentar si la consulta del panel necesita más de los 30 segundos predeterminados.
+* *scale:* valor numérico para configurar el factor de escala del dispositivo. El valor predeterminado es 1. Utilice un valor más alto para producir imágenes más detalladas (DPI más alto). Compatible con Grafana v7.0 +.
+
+== Publicar instantánea
+
+Una instantánea del panel comparte un panel interactivo públicamente. Grafana elimina los datos confidenciales dejando solo los datos de métricas visibles y los nombres de las series incrustados en su tablero. Cualquiera que tenga el enlace puede acceder a las instantáneas del panel.
+
+Puede publicar instantáneas en su instancia local o en http://snapshot.raintank.io/[snapshot.raintank.io]. Este último es un servicio gratuito proporcionado por http://raintank.io/[Raintank], que le permite publicar instantáneas del tablero en una instancia externa de Grafana. Opcionalmente, puede establecer un tiempo de vencimiento si desea que la instantánea se elimine después de un cierto período de tiempo.
+
+image::image168.png[Panel share snapshot,width=624,height=475]
+
+Para publicar una instantánea:
+
+[arabic]
+. En el cuadro de diálogo Compartir Panel, haga clic en *Instantánea* para abrir la pestaña.
+. Haga clic en *Instantánea local* o *Publicar en snapshot.raintank.io*. Esto genera el enlace de la instantánea.
+. Copie el enlace de la instantánea y compártalo dentro de su organización o públicamente en la web.
+
+Si creó una instantánea por error, haga clic en *eliminar instantánea* para eliminar la instantánea de su instancia de Grafana.
+
+== Insertar panel
+
+Puede incrustar un panel mediante un iframe en otro sitio web. A menos que se habilite el permiso de acceso anónimo, el espectador debe iniciar sesión en Grafana para ver el gráfico.
+
+image::image169.png[Panel share embed,width=624,height=349]
+
+A continuación, se muestra un ejemplo del código HTML:
+
+[source,HTML]
+----
+<iframe src="https://snapshot.raintank.io/dashboard-solo/snapshot/y7zwi2bZ7FcoTlB93WN7yWO4aMiz3pZb?from=1493369923321&to=1493377123321&panelId=4" width="650" height="300" frameborder="0"></iframe>
+----
+
+El resultado es un gráfico Grafana interactivo incrustado en un iframe:
+
+image::image170.png[image,width=624,height=290]

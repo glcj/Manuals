@@ -1,0 +1,62 @@
+= Panel de series de tiempo
+
+[NOTE]
+====
+Esta es una función beta. El panel de series de tiempo reemplazará al panel de gráficos en las versiones futuras.
+====
+
+El panel de series de tiempo es una visualización robusta para trazar datos de series de tiempo. Se puede representar como una línea, una ruta de puntos o una serie de barras. Este tipo de gráfico es lo suficientemente versátil como para mostrar casi cualquier dato de series de tiempo.
+
+== Opciones de campo y datos
+
+Las visualizaciones de series de tiempo le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+También puede usar las opciones de campo para crear diferentes tipos de gráficos o ajustar sus ejes:
+
+* xref:paneles/visualizaciones/panel-de-series-de-tiempo/graficar-series-de-tiempo-como-lineas.adoc[Graficar series de tiempo como líneas]
+* xref:paneles/visualizaciones/panel-de-series-de-tiempo/graficar-series-de-tiempo-como-barras.adoc[Graficar series de tiempo como barras]
+* xref:paneles/visualizaciones/panel-de-series-de-tiempo/graficar-series-de-tiempo-como-puntos.adoc[Graficar series de tiempo como puntos]
+* xref:paneles/visualizaciones/panel-de-series-de-tiempo/cambiar-visualizacion-del-eje.adoc[Cambiar visualización del eje]
+
+== Opciones de pantalla
+
+[NOTE]
+====
+Puede migrar las visualizaciones del Panel de gráfico a Visualizaciones de series temporales. Para migrar, en la pestaña Panel, haga clic en Visualización de *serie temporal*. Grafana transfiere todas las configuraciones aplicables. (Mientras está en beta, la migración aún se está refinando. ¡Mejorará a medida que pase el tiempo!)
+====
+
+=== Modo de información sobre herramientas
+
+Cuando pasa el cursor sobre el gráfico, Grafana puede mostrar información sobre herramientas. Elija cómo se comportan las descripciones emergentes.
+
+* *Único:* la información sobre herramientas flotante muestra solo una serie única, la que está sobre la que se desplaza en el gráfico.
+* *Todo:* la información sobre herramientas flotante muestra todas las series en el gráfico. Grafana destaca la serie sobre la que se desplaza en negrita en la lista de series en la información sobre herramientas.
+* *Oculto:* no muestra la información sobre herramientas cuando interactúa con el gráfico.
+
+[NOTE]
+====
+Utilice una modificación para ocultar series individuales de la información sobre herramientas.
+====
+
+=== Modo de la leyenda
+
+Utilice esta configuración para refinar cómo aparece la leyenda en su visualización.
+
+* *Lista:* muestra la leyenda como una lista. Este es un modo de visualización predeterminado de la leyenda.
+* *Tabla:* muestra la leyenda como una tabla.
+* *Oculto:* oculta la leyenda.
+
+=== Colocación de la leyenda
+
+Elija dónde mostrar la leyenda.
+
+* *Abajo:* debajo del gráfico.
+* *Derecha:* a la derecha del gráfico.
+
+=== Cálculos de la leyenda
+
+Elija cuál de los xref:paneles/lista-de-calculos.adoc[cálculos estándar] mostrar en la leyenda. Puedes tener más de uno.

@@ -1,0 +1,588 @@
+= Lenguaje de Definición de Datos (DDL)
+
+== Gestión de Grupos de Almacenamiento
+
+=== Crear Grupo de Almacenamiento
+
+Según el modelo de almacenamiento podemos configurar el grupo de almacenamiento correspondiente. Las sentencias SQL para crear grupos de almacenamiento son las siguientes:
+
+[source]
+----
+IoTDB > set storage group to root.ln
+IoTDB > set storage group to root.sgcc
+----
+
+Por tanto, podemos crear dos grupos de almacenamiento utilizando las dos sentencias SQL anteriores.
+
+Vale la pena señalar que cuando la ruta en sí o la capa principal/secundaria de la ruta ya está configurada como un grupo de almacenamiento, la ruta no puede configurarse como un grupo de almacenamiento. Por ejemplo, no es factible establecer `root.ln.wf01` como un grupo de almacenamiento cuando existen dos grupos de almacenamiento `root.ln` y `root.sgcc`. El sistema muestra el mensaje de error correspondiente como se muestra a continuación:
+
+[source]
+----
+IoTDB> set storage group to root.ln.wf01
+Msg: 300: root.ln has already been set to storage group.
+----
+
+El LayerName del grupo de almacenamiento solo puede ser caracteres, números, guiones bajos y guiones.
+
+Además, si se implementa en un sistema Windows, LayerName no distingue entre mayúsculas y minúsculas, lo que significa que no está permitido configurar los grupos de almacenamiento `root.ln` y `root.LN` al mismo tiempo.
+
+=== Mostrar Grupo de Almacenamiento
+
+Después de crear el grupo de almacenamiento, podemos usar la instrucción [SHOW STORAGE GROUP] y [SHOW STORAGE GROUP <PrefixPath>] para ver los grupos de almacenamiento. Las declaraciones SQL son las siguientes:
+
+[source]
+----
+IoTDB> show storage group
+IoTDB> show storage group root.ln
+----
+
+[source]
+----
++-------------+
+|storage group|
++-------------+
+|    root.sgcc|
+|      root.ln|
++-------------+
+Total line number = 2
+It costs 0.060s
+----
+
+=== Eliminar Grupo de Almacenamiento
+
+El usuario puede utilizar la instrucción `DELETE STORAGE GROUP <PrefixPath>` para eliminar todos los grupos de almacenamiento bajo prefixPath. Tenga en cuenta que los datos del grupo de almacenamiento también se eliminarán.
+
+[source]
+----
+IoTDB > DELETE STORAGE GROUP root.ln
+IoTDB > DELETE STORAGE GROUP root.sgcc
+// delete all data, all timeseries and all storage groups
+IoTDB > DELETE STORAGE GROUP root.*
+----
+
+== Gestión de Series Temporales
+
+=== Crear Series Temporales
+
+De acuerdo con el modelo de almacenamiento seleccionado anteriormente, podemos crear series de tiempo correspondientes en los dos grupos de almacenamiento respectivamente. Las declaraciones SQL para crear series temporales son las siguientes:
+
+[source]
+----
+IoTDB > create timeseries root.ln.wf01.wt01.status with datatype=BOOLEAN,encoding=PLAIN
+IoTDB > create timeseries root.ln.wf01.wt01.temperature with datatype=FLOAT,encoding=RLE
+IoTDB > create timeseries root.ln.wf02.wt02.hardware with datatype=TEXT,encoding=PLAIN
+IoTDB > create timeseries root.ln.wf02.wt02.status with datatype=BOOLEAN,encoding=PLAIN
+IoTDB > create timeseries root.sgcc.wf03.wt01.status with datatype=BOOLEAN,encoding=PLAIN
+IoTDB > create timeseries root.sgcc.wf03.wt01.temperature with datatype=FLOAT,encoding=RLE
+----
+
+Observe que cuando en la declaración CREATE TIMESERIES el método de codificación entra en conflicto con el tipo de datos, el sistema muestra el mensaje de error correspondiente como se muestra a continuación:
+
+[source]
+----
+IoTDB> create timeseries root.ln.wf02.wt02.status WITH DATATYPE=BOOLEAN, ENCODING=TS_2DIFF
+error: encoding TS_2DIFF does not support BOOLEAN
+----
+
+Consulte [Codificación] para conocer la correspondencia entre el tipo de datos y la codificación.
+
+=== Eliminar Series Temporales
+
+Para eliminar la serie temporal que creamos antes, podemos usar la instrucción `DELETE TimeSeries <PrefixPath>`.
+
+El uso es el siguiente:
+
+[source]
+----
+IoTDB> delete timeseries root.ln.wf01.wt01.status
+IoTDB> delete timeseries root.ln.wf01.wt01.temperature, root.ln.wf02.wt02.hardware
+IoTDB> delete timeseries root.ln.wf02.*
+----
+
+=== Mostrar Series Temporales
+
+. SHOW LATEST? TIMESERIES prefixPath? showWhereClause? limitClause?
++
+Hay cuatro cláusulas opcionales agregadas en SHOW TIMESERIES, devuelve información de series de tiempo
+
+La información de la serie temporal incluye: ruta de la serie temporal, alias de medición, grupo de almacenamiento al que pertenece, tipo de datos, tipo de codificación, tipo de compresión, etiquetas y atributos.
+
+Ejemplos:
+
+. SHOW TIMESERIES
++
+Presenta toda la información de la serie temporal en formato JSON.
+
+. SHOW TIMESERIES `<Path>`
+
+Devuelve toda la información de la serie temporal en la `<Path>.<Path>` dada, debe ser una ruta de prefijo o una ruta con estrella o una ruta de serie temporal. Las declaraciones SQL son las siguientes:
+
+[source]
+----
+IoTDB> show timeseries root
+IoTDB> show timeseries root.ln
+----
+
+Los resultados se muestran a continuación respectivamente:
+
+[source]
+----
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+|                     timeseries|   alias|storage group|dataType|encoding|compression|                                       tags|                                              attributes|
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+|root.sgcc.wf03.wt01.temperature|    null|    root.sgcc|   FLOAT|     RLE|     SNAPPY|                                       null|                                                    null|
+|     root.sgcc.wf03.wt01.status|    null|    root.sgcc| BOOLEAN|   PLAIN|     SNAPPY|                                       null|                                                    null|
+|             root.turbine.d1.s1|newAlias| root.turbine|   FLOAT|     RLE|     SNAPPY|{"newTag1":"newV1","tag4":"v4","tag3":"v3"}|{"attr2":"v2","attr1":"newV1","attr4":"v4","attr3":"v3"}|
+|     root.ln.wf02.wt02.hardware|    null|      root.ln|    TEXT|   PLAIN|     SNAPPY|                                       null|                                                    null|
+|       root.ln.wf02.wt02.status|    null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|                                       null|                                                    null|
+|  root.ln.wf01.wt01.temperature|    null|      root.ln|   FLOAT|     RLE|     SNAPPY|                                       null|                                                    null|
+|       root.ln.wf01.wt01.status|    null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|                                       null|                                                    null|
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+Total line number = 7
+It costs 0.016s
+
++-----------------------------+-----+-------------+--------+--------+-----------+----+----------+
+|                   timeseries|alias|storage group|dataType|encoding|compression|tags|attributes|
++-----------------------------+-----+-------------+--------+--------+-----------+----+----------+
+|   root.ln.wf02.wt02.hardware| null|      root.ln|    TEXT|   PLAIN|     SNAPPY|null|      null|
+|     root.ln.wf02.wt02.status| null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|null|      null|
+|root.ln.wf01.wt01.temperature| null|      root.ln|   FLOAT|     RLE|     SNAPPY|null|      null|
+|     root.ln.wf01.wt01.status| null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|null|      null|
++-----------------------------+-----+-------------+--------+--------+-----------+----+----------+
+Total line number = 4
+It costs 0.004s
+----
+
+. SHOW TIMESERIES (`<PrefixPath>`)? WhereClause
++
+Devuelve toda la información de la serie temporal que satisface la condición where y comienza con el prefixPath Las sentencias SQL son las siguientes:
+
+[source]
+----
+ALTER timeseries root.ln.wf02.wt02.hardware ADD TAGS unit=c
+ALTER timeseries root.ln.wf02.wt02.status ADD TAGS description=test1
+show timeseries root.ln where unit=c
+show timeseries root.ln where description contains 'test1'
+----
+
+Los resultados se muestran a continuación respectivamente:
+
+[source]
+----
++--------------------------+-----+-------------+--------+--------+-----------+------------+----------+
+|                timeseries|alias|storage group|dataType|encoding|compression|        tags|attributes|
++--------------------------+-----+-------------+--------+--------+-----------+------------+----------+
+|root.ln.wf02.wt02.hardware| null|      root.ln|    TEXT|   PLAIN|     SNAPPY|{"unit":"c"}|      null|
++--------------------------+-----+-------------+--------+--------+-----------+------------+----------+
+Total line number = 1
+It costs 0.005s
+
++------------------------+-----+-------------+--------+--------+-----------+-----------------------+----------+
+|              timeseries|alias|storage group|dataType|encoding|compression|                   tags|attributes|
++------------------------+-----+-------------+--------+--------+-----------+-----------------------+----------+
+|root.ln.wf02.wt02.status| null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|{"description":"test1"}|      null|
++------------------------+-----+-------------+--------+--------+-----------+-----------------------+----------+
+Total line number = 1
+It costs 0.004s
+----
+
+[NOTE]
+====
+Tenga en cuenta que solo admitimos una condición en la cláusula where. O es un filtro igual o es un filtro `contains`. En ambos casos, la propiedad en la condición where debe ser una etiqueta.
+====
+
+. SHOW TIMESERIES LIMIT INT OFFSET INT
++
+Devuelve toda la información de la serie temporal a partir del desplazamiento y limita el número de series devueltas.
+
+. SHOW LATEST TIMESERIES
++
+Toda la información de la serie temporal devuelta debe ordenarse en orden descendente según la última marca de tiempo de la serie temporal.
+
+Vale la pena señalar que cuando la ruta consultada no existe, el sistema no devolverá series de tiempo.
+
+=== Contar Series Temporales
+
+IoTDB puede utilizar `COUNT TIMESERIES <Path>` para contar el número de series temporales en la ruta. Las declaraciones SQL son las siguientes:
+
+[source]
+----
+IoTDB > COUNT TIMESERIES root
+IoTDB > COUNT TIMESERIES root.ln
+IoTDB > COUNT TIMESERIES root.ln.*.*.status
+IoTDB > COUNT TIMESERIES root.ln.wf01.wt01.status
+----
+
+Además, `LEVEL` podría definirse para mostrar el número de series de tiempo de cada nodo en el nivel dado en el árbol de metadatos actual. Esto podría usarse para consultar el número de sensores debajo de cada dispositivo. La gramática es: `COUNT TIMESERIES <Path> GROUP BY LEVEL = <INTEGER>`.
+
+Por ejemplo, si hay varias series temporales (use `show timeseries` para mostrar todas las series temporales):
+
+[source]
+----
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+|                     timeseries|   alias|storage group|dataType|encoding|compression|                                       tags|                                              attributes|
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+|root.sgcc.wf03.wt01.temperature|    null|    root.sgcc|   FLOAT|     RLE|     SNAPPY|                                       null|                                                    null|
+|     root.sgcc.wf03.wt01.status|    null|    root.sgcc| BOOLEAN|   PLAIN|     SNAPPY|                                       null|                                                    null|
+|             root.turbine.d1.s1|newAlias| root.turbine|   FLOAT|     RLE|     SNAPPY|{"newTag1":"newV1","tag4":"v4","tag3":"v3"}|{"attr2":"v2","attr1":"newV1","attr4":"v4","attr3":"v3"}|
+|     root.ln.wf02.wt02.hardware|    null|      root.ln|    TEXT|   PLAIN|     SNAPPY|                               {"unit":"c"}|                                                    null|
+|       root.ln.wf02.wt02.status|    null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|                    {"description":"test1"}|                                                    null|
+|  root.ln.wf01.wt01.temperature|    null|      root.ln|   FLOAT|     RLE|     SNAPPY|                                       null|                                                    null|
+|       root.ln.wf01.wt01.status|    null|      root.ln| BOOLEAN|   PLAIN|     SNAPPY|                                       null|                                                    null|
++-------------------------------+--------+-------------+--------+--------+-----------+-------------------------------------------+--------------------------------------------------------+
+Total line number = 7
+It costs 0.004s
+----
+
+Entonces el árbol de metadatos será el siguiente:
+
+image::imagen-10.jpeg[]
+
+Como puede verse, `root` se considera como `LEVEL=0`. Entonces, cuando ingresa declaraciones como:
+
+[source]
+----
+IoTDB > COUNT TIMESERIES root GROUP BY LEVEL=1
+IoTDB > COUNT TIMESERIES root.ln GROUP BY LEVEL=2
+IoTDB > COUNT TIMESERIES root.ln.wf01 GROUP BY LEVEL=2
+----
+
+Obtendrá los siguientes resultados:
+
+[source]
+----
++------------+-----+
+|      column|count|
++------------+-----+
+|   root.sgcc|    2|
+|root.turbine|    1|
+|     root.ln|    4|
++------------+-----+
+Total line number = 3
+It costs 0.002s
+
++------------+-----+
+|      column|count|
++------------+-----+
+|root.ln.wf02|    2|
+|root.ln.wf01|    2|
++------------+-----+
+Total line number = 2
+It costs 0.002s
+
++------------+-----+
+|      column|count|
++------------+-----+
+|root.ln.wf01|    2|
++------------+-----+
+Total line number = 1
+It costs 0.002s
+----
+
+[NOTE]
+====
+La ruta de las series temporales es solo una condición de filtro, que no tiene relación con la definición de nivel.
+====
+
+=== Gestión de Etiquetas y Atributos
+
+También podemos agregar un alias, etiqueta adicional e información de atributos mientras creamos una serie temporal. Las sentencias SQL para crear series temporales con información adicional de etiquetas y atributos se amplían de la siguiente manera:
+
+[source]
+----
+create timeseries root.turbine.d1.s1(temperature) with datatype=FLOAT, encoding=RLE, compression=SNAPPY tags(tag1=v1, tag2=v2) attributes(attr1=v1, attr2=v2)
+----
+
+La `temperature` entre paréntesis es un alias del sensor `s1`. Entonces podemos usar `temperature` para reemplazar `s1` en cualquier lugar.
+
+[NOTE]
+====
+IoTDB también admite el [uso de la función AS] para establecer un alias. La diferencia entre los dos es: el alias establecido por la función AS se usa para reemplazar el nombre completo de la serie de tiempo, temporal y no vinculado con la serie de tiempo; mientras que el alias mencionado anteriormente solo se usa como el alias del sensor, que está vinculado con él y se puede usar de manera equivalente al nombre del sensor original.
+====
+
+La única diferencia entre etiqueta y atributo es que mantendremos un índice invertido en la etiqueta, por lo que podemos usar la propiedad de etiqueta en la cláusula show timeseries where que puede ver en la siguiente sección `Show Timeseries`.
+
+[NOTE]
+====
+Tenga en cuenta que el tamaño de la etiqueta adicional y la información del atributo no debe exceder el `tag_attribute_total_size`.
+====
+
+Podemos actualizar la información de la etiqueta después de crearla de la siguiente manera:
+
+. Cambiar el nombre de la etiqueta/clave de atributo
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 RENAME tag1 TO newTag1
+----
+
+. Restablecer el valor de la etiqueta/atributo
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 SET newTag1=newV1, attr1=newV1
+----
+
+.  Eliminar la etiqueta/atributo existente
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 DROP tag1, tag2
+----
+
+. Agregar nuevas etiquetas
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 ADD TAGS tag3=v3, tag4=v4
+----
+
+. Agregar nuevos atributos 
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 ADD ATTRIBUTES attr3=v3, attr4=v4
+----
+
+. Insertar alias, etiquetas y atributos
++
+[NOTE]
+====
+Agregue un alias o un nuevo valor-clave si el alias o la clave no existe; de ​​lo contrario, actualice el anterior con un nuevo valor.
+====
++
+[source]
+----
+ALTER timeseries root.turbine.d1.s1 UPSERT ALIAS=newAlias TAGS(tag3=v3, tag4=v4) ATTRIBUTES(attr3=v3, attr4=v4)
+----
+
+== Gestión de Nodos
+
+=== Mostrar Rutas Secundarias
+
+[source]
+----
+SHOW CHILD PATHS prefixPath
+----
+
+Devuelve todas las rutas secundarias del prefixPath, el prefixPath podría contener *.
+
+Ejemplo:
+
+. Devolver las rutas secundarios de root.ln: muestra las rutas secundarias root.ln
+
+[source]
+----
++------------+
+| child paths|
++------------+
+|root.ln.wf01|
+|root.ln.wf02|
++------------+
+Total line number = 2
+It costs 0.002s
+----
+
+[NOTE]
+====
+Obtener todas las rutas en forma de root.xx.xx.xx ： mostrar las rutas secundarias root.xx.xx
+====
+
+=== Mostrar Nodos Secundarios
+
+[source]
+----
+SHOW CHILD NODES prefixPath
+----
+
+Devuelve todos los nodos secundarios de prefixPath.
+
+Ejemplo:
+
+. Devolver los nodos secundarios de la raíz: mostrar la raíz de los nodos secundarios
+
+[source]
+----
++------------+
+| child nodes|
++------------+
+|          ln|
++------------+
+----
+
+. Devolver los nodos secundarios de root.vehicle ： mostrar los nodos secundarios root.ln
+
+[source]
+----
++------------+
+| child nodes|
++------------+
+|        wf01|
+|        wf02|
++------------+
+----
+
+=== Contar Nodos
+
+IoTDB puede usar `COUNT NODES <PrefixPath> LEVEL=<INTEGER>` para contar el número de nodos en el nivel dado en el árbol de metadatos actual. Esto podría usarse para consultar el número de dispositivos. El uso es el siguiente:
+
+[source]
+----
+IoTDB > COUNT NODES root LEVEL=2
+IoTDB > COUNT NODES root.ln LEVEL=2
+IoTDB > COUNT NODES root.ln.wf01 LEVEL=3
+----
+
+En cuanto al ejemplo y el árbol de metadatos mencionados anteriormente, puede obtener los siguientes resultados:
+
+[source]
+----
++-----+
+|count|
++-----+
+|    4|
++-----+
+Total line number = 1
+It costs 0.003s
+
++-----+
+|count|
++-----+
+|    2|
++-----+
+Total line number = 1
+It costs 0.002s
+
++-----+
+|count|
++-----+
+|    1|
++-----+
+Total line number = 1
+It costs 0.002s
+----
+
+[NOTE]
+====
+La ruta de las series temporales es solo una condición de filtro, que no tiene relación con la definición de nivel. `PrefixPath` podría contener `*`, pero todos los nodos después de `*` serían ignorados. Solo la ruta de prefijo antes de `*` es válida.
+====
+
+=== Mostrar Dispositivos
+
+. SHOW DEVICES prefixPath? (WITH STORAGE GROUP)? limitClause? #showDevices
+
+Similar a `Show Timeseries`, IoTDB también admite dos formas de ver dispositivos:
+
+. La declaración `SHOW DEVICES` presenta la información de todos los dispositivos, que es igual a `SHOW DEVICES root`.
+
+. La declaración `SHOW DEVICES <PrefixPath>` especifica `PrefixPath` y devuelve la información de los dispositivos en el nivel dado.
+
+La declaración SQL es la siguiente:
+
+[source]
+----
+IoTDB> show devices
+IoTDB> show devices root.ln
+----
+
+Puede obtener resultados a continuación:
+
+[source]
+----
++-------------------+
+|            devices|
++-------------------+
+|  root.ln.wf01.wt01|
+|  root.ln.wf02.wt02|
+|root.sgcc.wf03.wt01|
+|    root.turbine.d1|
++-------------------+
+Total line number = 4
+It costs 0.002s
+
++-----------------+
+|          devices|
++-----------------+
+|root.ln.wf01.wt01|
+|root.ln.wf02.wt02|
++-----------------+
+Total line number = 2
+It costs 0.001s
+----
+
+Para ver la información de los dispositivos con el grupo de almacenamiento, podemos usar la declaración `SHOW DEVICES WITH STORAGE GROUP`.
+
+. La declaración `SHOW DEVICES WITH STORAGE GROUP` presenta la información de todos los dispositivos con su grupo de almacenamiento.
+
+. La instrucción `SHOW DEVICES <PrefixPath> WITH STORAGE GROUP` especifica `PrefixPath` y devuelve la información de los dispositivos en el nivel dado con la información de su grupo de almacenamiento.
+
+La declaración SQL es la siguiente:
+
+[source]
+----
+IoTDB> show devices with storage group
+IoTDB> show devices root.ln with storage group
+----
+
+Puede obtener resultados a continuación:
+
+[source]
+----
++-------------------+-------------+
+|            devices|storage group|
++-------------------+-------------+
+|  root.ln.wf01.wt01|      root.ln|
+|  root.ln.wf02.wt02|      root.ln|
+|root.sgcc.wf03.wt01|    root.sgcc|
+|    root.turbine.d1| root.turbine|
++-------------------+-------------+
+Total line number = 4
+It costs 0.003s
+
++-----------------+-------------+
+|          devices|storage group|
++-----------------+-------------+
+|root.ln.wf01.wt01|      root.ln|
+|root.ln.wf02.wt02|      root.ln|
++-----------------+-------------+
+Total line number = 2
+It costs 0.001s
+----
+
+== TTL
+
+IoTDB admite la configuración TTL de nivel de almacenamiento, lo que significa que puede eliminar datos antiguos de forma automática y periódica. El beneficio de usar TTL es que, con suerte, puede controlar el uso total del espacio en disco y evitar que la máquina se quede sin discos. Además, el rendimiento de la consulta puede disminuir a medida que aumenta el número total de archivos y el uso de memoria también aumenta a medida que hay más archivos. La eliminación oportuna de estos archivos ayuda a mantener un alto nivel de rendimiento de consultas y reduce el uso de memoria.
+
+=== Configurar TTL
+
+La declaración SQL para configurar TTL es la siguiente:
+
+[source]
+----
+IoTDB> set ttl to root.ln 3600000
+----
+
+Este ejemplo significa que para los datos en `root.ln`, solo quedará el de la última hora, el más antiguo se elimina o se hace invisible.
+
+=== Desarmar TTL
+
+Para desarmar TTL, podemos usar la siguiente instrucción SQL:
+
+[source]
+----
+IoTDB> unset ttl to root.ln
+----
+
+Después de desarmar TTL, todos los datos serán aceptados en `root.ln`
+
+=== Mostrar TTL
+
+Para mostrar TTL, podemos usar la siguiente declaración SQL:
+
+[source]
+----
+IoTDB> SHOW ALL TTL
+IoTDB> SHOW TTL ON StorageGroupNames
+----
+
+El ejemplo SHOW ALL TTL proporciona el TTL para todos los grupos de almacenamiento. El ejemplo SHOW TTL ON root.group1, root.group2, root.group3 muestra el TTL para los tres grupos de almacenamiento especificados. Nota: el TTL para los grupos de almacenamiento que no tienen un TTL configurado se mostrará como nulo.

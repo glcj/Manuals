@@ -1,0 +1,116 @@
+= Autenticación de Grafana
+
+Grafana, por supuesto, tiene un sistema de autenticación de usuario integrado con autenticación de contraseña habilitada de forma predeterminada. Puede deshabilitar la autenticación habilitando el acceso anónimo. También puede ocultar el formulario de inicio de sesión y solo permitir el inicio de sesión a través de un proveedor de autenticación (mencionado anteriormente). También hay opciones para permitir el registro automático.
+
+== Inicio de sesión y tokens de corta duración
+
+****
+Lo siguiente se aplica cuando se utiliza la autenticación de usuario integrada de Grafana, LDAP (sin proxy de autenticación) o la integración de OAuth.
+****
+
+Grafana está utilizando tokens de corta duración como mecanismo para verificar usuarios autenticados. Estos tokens de corta duración se rotan cada `token_rotation_interval_minutes` para un usuario autenticado activo.
+
+Un usuario autenticado activo al que han rotado su token extenderá el tiempo `login_maximum_inactive_lifetime_days` desde "ahora" que Grafana recordará al usuario. Esto significa que un usuario puede cerrar su navegador y regresar antes de `now + login_maximum_inactive_lifetime_days` y aún estar autenticado. Esto es cierto siempre que el tiempo transcurrido desde el inicio de sesión del usuario sea inferior a `login_maximum_lifetime_days`.
+
+=== Cierre de sesión remoto
+
+Puede cerrar sesión desde otros dispositivos eliminando las sesiones iniciadas desde la parte inferior de la página de su perfil. Si es un usuario administrador de Grafana, también puede hacer lo mismo para cualquier usuario desde la vista Administrador del servidor / Editar usuario.
+
+== Ajustes
+
+Ejemplo:
+
+[source,Bash]
+----
+[auth]
+
+# Login cookie name
+login_cookie_name = grafana_session
+
+# The lifetime (days) an authenticated user can be inactive before being required to login at next visit. Default is 7 days.
+login_maximum_inactive_lifetime_days = 7
+
+# The maximum lifetime (days) an authenticated user can be logged in since login time before being required to login. Default is 30 days.
+login_maximum_lifetime_days = 30
+
+# How often should auth tokens be rotated for authenticated users when being active. The default is each 10 minutes.
+token_rotation_interval_minutes = 10
+
+# The maximum lifetime (seconds) an api key can be used. If it is set all the api keys should have limited lifetime that is lower than this value.
+api_key_max_seconds_to_live = -1
+----
+
+=== Autenticación anónima
+
+Puede hacer que Grafana sea accesible sin necesidad de iniciar sesión habilitando el acceso anónimo en el archivo de configuración. Para obtener más información, consulte xref:administracion/seguridad.adoc[Implicaciones de permitir el acceso anónimo a los tableros].
+
+Ejemplo:
+
+[source,Bash]
+----
+[auth.anonymous]
+enabled = true
+
+# Organization name that should be used for unauthenticated users
+org_name = Main Org.
+
+# Role for unauthenticated users, other valid values are `Editor` and `Admin`
+org_role = Viewer
+
+# Hide the Grafana version text from the footer and help tooltip for unauthenticated users (default: false)
+hide_version = true
+----
+
+Si cambia el nombre de su organización en la interfaz de usuario de Grafana, esta configuración debe actualizarse para que coincida con el nuevo nombre.
+
+=== Autenticación básica
+
+La autenticación básica está habilitada de forma predeterminada y funciona con el sistema integrado de autenticación de contraseña de usuario de Grafana y la integración de autenticación LDAP.
+
+Para deshabilitar la autenticación básica:
+
+[source,Bash]
+----
+[auth.basic]
+enabled = false
+----
+
+=== Desactivar formulario de inicio de sesión
+
+Puede ocultar el formulario de inicio de sesión de Grafana utilizando los siguientes ajustes de configuración.
+
+[source,Bash]
+----
+[auth]
+disable_login_form = true
+----
+
+=== Inicio de sesión automático de OAuth
+
+Configure en verdadero para intentar iniciar sesión con OAuth automáticamente, omitiendo la pantalla de inicio de sesión. Esta configuración se ignora si se configuran varios proveedores de OAuth. El valor predeterminado es falso.
+
+[source,Bash]
+----
+[auth]
+oauth_auto_login = true
+----
+
+=== Ocultar el menú de cierre de sesión
+
+Establezca la opción que se detalla a continuación en verdadero para ocultar el enlace del menú de cierre de sesión. Útil si usa un proxy de autenticación.
+
+[source,Bash]
+----
+[auth]
+disable_signout_menu = true
+----
+
+=== Redireccionamiento de URL después de cerrar sesión
+
+URL a la que redirigir al usuario después de cerrar sesión en Grafana. Esto se puede utilizar, por ejemplo, para habilitar el cierre de sesión del proveedor de oauth.
+
+[source,Bash]
+----
+[auth]
+signout_redirect_url =
+----

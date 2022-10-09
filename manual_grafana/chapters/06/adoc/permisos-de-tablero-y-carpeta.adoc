@@ -1,0 +1,44 @@
+= Otorgar permisos de tablero y carpeta
+
+Puede asignar y eliminar permisos para roles de organización, usuarios y equipos para tableros y carpetas de tableros específicos.
+
+Este tema explica cómo otorgar permisos a carpetas y tableros específicos.
+
+Para obtener más información sobre cómo denegar el acceso a ciertos usuarios de Grafana, consulte xref:permisos/restringir-acceso.adoc[Restricción del acceso].
+
+image::image21.png[Folder permissions,width=624,height=277]
+
+== Niveles de permisos
+
+Grafana tiene tres niveles de permisos que se pueden asignar. Estos permisos son independientes de los xref:permisos/roles-de-la-organizacion.adoc[roles de la organización].
+
+[arabic]
+. *Administrar:* puede crear, editar o eliminar tableros. Puede crear, editar y eliminar carpetas. También puede cambiar los permisos del tablero y de la carpeta.
+. *Editar:* puede crear y editar tableros. _No_ se pueden cambiar los permisos de la carpeta o el tablero, ni agregar, editar o eliminar carpetas.
+. *Ver:* solo puede ver tableros y carpetas existentes.
+
+== Otorgar permisos de carpeta
+
+Los permisos de carpeta se aplican a la carpeta y a todos los tableros que contiene.
+
+* En la barra lateral, pase el mouse sobre el ícono *Tableros* (cuadrados) y luego haga clic en *Administrar*.
+* Pase el cursor del mouse sobre una carpeta y luego haga clic en *Ir a carpeta*.
+* Vaya a la pestaña *Permisos* y luego haga clic en *Agregar permiso*.
+* En *Agregar permiso para*, seleccione *Usuario*, *Equipo* o una de las opciones de rol.
+* En el segundo cuadro, seleccione el usuario o equipo para el que desea agregar permiso. Omita este paso si seleccionó un rol en el paso anterior.
+* En el tercer cuadro, seleccione el permiso que desea agregar.
+* Clic en *Guardar*.
+
+== Otorgar permisos de tablero
+
+[arabic]
+. En la esquina superior derecha de su tablero, haga clic en el icono de engranaje para ir a la *Configuración del tablero*.
+. Vaya a la pestaña *Permisos* y luego haga clic en *Agregar permiso*.
+. En *Agregar permiso para*, seleccione *Usuario*, *Equipo* o una de las opciones de rol.
+. En el segundo cuadro, seleccione el usuario o equipo para el que desea agregar permiso. Omita este paso si seleccionó un rol en el paso anterior.
+. En el tercer cuadro, seleccione el permiso que desea agregar.
+. Clic en *Guardar*.
+
+== Editar permisos
+
+Para cambiar los permisos existentes, navegue a la página de permisos como se describe arriba. En lugar de hacer clic en *Agregar permiso*, cambie o elimine los permisos ya asignados. Los cambios entran en vigor de inmediato.

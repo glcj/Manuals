@@ -1,0 +1,23 @@
+= Herramienta MlogParser
+
+Después de la versión 0.12.x, IoTDB codifica archivos de metadatos en formato binario.
+
+Si desea analizar los metadatos de una manera legible por humanos, puede utilizar esta herramienta para analizar el archivo de metadatos especificado.
+
+La herramienta puede analizar archivos instantáneos y archivos mlog.
+
+== Cómo Utilizar
+
+Linux/MacOS
+
+[source]
+----
+./mLogParser.sh -f /your path/mlog.bin -o /your path/mlog.txt
+----
+
+Windows
+
+[source]
+----
+.\mLogParser.bat -f \your path\mlog.bin -o \your path\mlog.txt
+----

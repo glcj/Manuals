@@ -1,0 +1,208 @@
+= Administrar usuarios como Administrador de Servidor
+
+Este tema explica las tareas de administración de usuarios realizadas por los administradores de Grafana Server.
+
+Para realizar cualquiera de estas tareas, debe iniciar sesión en Grafana en una cuenta con permisos de administrador de Grafana Server. Para obtener más información sobre los permisos de administrador de Grafana, consulte xref:permisos/permisos.adoc#_rol_de_administrador_de_servidor_de_grafana[rol de Administrador de Servidor de Grafana].
+
+[NOTE]
+====
+La función de administrador del servidor Grafana no existe en Grafana Cloud. Los usuarios de Grafana Cloud no pueden realizar las tareas enumeradas en esta sección.
+====
+
+== Ver la lista de cuentas de usuario del servidor
+
+Vea una lista completa de usuarios con cuentas en su servidor Grafana.
+
+[arabic]
+. Pase el cursor sobre el icono de *Administrador del Servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Usuarios*.
+
+Grafana muestra todas las cuentas de usuario en el servidor, enumeradas en orden alfabético por nombre de usuario. La siguiente información es mostrada:
+
+* *Inicio de sesión:* el valor en el campo *Nombre de usuario* de la cuenta.
+* *Correo electrónico:* el correo electrónico asociado con la cuenta de usuario.
+* *Nombre:* el valor en el campo *Nombre* de la cuenta.
+* *Visto:* cuánto tiempo hace que el usuario inició sesión. Si nunca ha iniciado sesión, se muestra el tiempo más largo predeterminado (10 años).
+* *Estado del administrador del servidor:* si la cuenta de usuario tiene configurada la opción de *administrador de Grafana*, se muestra un icono de escudo.
+* *Estado de la cuenta:* si la cuenta está deshabilitada, se muestra la etiqueta *Deshabilitada*.
+
+image::image6.png[Server Admin user list,width=624,height=281]
+
+== Ver detalles de la cuenta de usuario
+
+Ver todos los detalles asociados con una cuenta de usuario específica.
+
+[arabic]
+. Pase el cursor sobre el icono de *Administrador de Servidor* (escudo) hasta que aparezca un menú.
+. Haz clic en *Usuarios*.
+. Haga clic en la cuenta de usuario que desea ver. Si es necesario, use el campo de búsqueda en la parte superior de la pestaña para buscar la cuenta de usuario específica que necesita.
+
+Cada cuenta de usuario contiene las siguientes secciones.
+
+=== Información del usuario
+
+Esta sección de la cuenta contiene información básica del usuario. Los usuarios pueden cambiar los valores en estos campos por su propia cuenta.
+
+* Nombre
+* Correo electrónico
+* Nombre de usuario
+* Contraseña
+
+image::image7.png[Server Admin user information section,width=624,height=224]
+
+=== Permisos
+
+Esto indica si la cuenta de usuario tiene la marca de administrador de Grafana aplicada o no. Si es *Sí*, entonces el usuario es un administrador de Grafana Server.
+
+image::image8.png[Server Admin Permissions section,width=624,height=80]
+
+=== Organizaciones
+
+Esta sección enumera las organizaciones a las que pertenece la cuenta de usuario y los roles que desempeñan dentro de cada organización.
+
+image::image9.png[Server Admin Organizations section,width=624,height=130]
+
+=== Sesiones
+
+Vea las sesiones recientes en las que el usuario inició sesión, incluso cuándo inició sesión e información sobre el sistema con el que inició sesión. Puede forzar cierres de sesión si es necesario.
+
+image::image10.png[Server Admin Sessions section,width=624,height=125]
+
+== Agregar una cuenta de usuario
+
+Cree una nueva cuenta de usuario a nivel de servidor.
+
+Pase el cursor sobre el icono de *Server Admin* (escudo) hasta que aparezca un menú.
+
+[arabic]
+. Haz clic en *Usuarios*.
+. Haga clic en *Nuevo usuario*.
+. Ingrese la siguiente información: - *Nombre* - Requerido. - *Correo electrónico*: opcional si se ingresa un nombre de usuario. - Nombre de usuario: opcional si se ingresa un *correo electrónico*. – *Contraseña* - Requerido.
+. Haga clic en *Crear usuario*.
+
+El usuario puede cambiar toda esta información después de iniciar sesión. Para obtener instrucciones, consulte el xref:administrar-usuarios/tareas-de-cuenta-de-usuario/perfil-de-cuenta-de-usuario.adoc[perfil de la cuenta de usuario de Grafana] y xref:administrar-usuarios/tareas-de-cuenta-de-usuario/cambie-su-contraseña.adoc[cambie su contraseña].
+
+== Editar una cuenta de usuario
+
+Cambie la información o la configuración en una cuenta de usuario individual.
+
+=== Editar la información de usuario
+
+Edite la información de una cuenta de usuario existente, incluido el nombre, correo electrónico, nombre de usuario y contraseña.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Información del usuario, haga clic en *Editar* junto al campo que desea cambiar.
+. Ingrese el nuevo valor y luego haga clic en *Guardar*.
+
+=== Cambiar la contraseña en una cuenta de usuario
+
+Los usuarios pueden cambiar sus propias contraseñas, pero los administradores del servidor también pueden cambiar las contraseñas de los usuarios.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Información del usuario, haga clic en *Editar* junto al campo *Contraseña*.
+. Ingrese el nuevo valor y luego haga clic en *Guardar*. Grafana requiere un valor de al menos cuatro caracteres en este campo.
+
+=== Eliminar una cuenta de usuario
+
+Elimina permanentemente una cuenta de usuario del servidor.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Haga clic en *Eliminar usuario*.
+. Haga clic en *Eliminar usuario* para confirmar la acción.
+
+=== Habilitar o deshabilitar una cuenta de usuario
+
+Active o desactive temporalmente el acceso a la cuenta, pero no elimine la cuenta del servidor.
+
+==== Deshabilitar cuenta de usuario
+
+Evite que un usuario inicie sesión con esta cuenta, pero no elimine la cuenta. Puede desactivar una cuenta si un colega se toma un año sabático.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Haga clic en *Desactivar usuario*.
+. Haga clic en *Deshabilitar usuario* para confirmar la acción.
+
+==== Habilitar una cuenta de usuario
+
+Reactivar una cuenta de usuario deshabilitada.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Haga clic en *Habilitar usuario*.
+
+== Agregar/eliminar la bandera de administrador de Grafana
+
+Otorgue o elimine la función de administrador del servidor Grafana de una cuenta de usuario.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Permisos, haga clic en *Cambiar*.
+. Haga clic en *Sí* o *No*, dependiendo de si desea o no que esta cuenta de usuario tenga el rol de Administrador de servidor de grafana.
+. Haga clic en *Cambiar*.
+
+La próxima vez que este usuario inicie sesión, se actualizarán sus permisos.
+
+== Agregar un usuario a una organización
+
+Agregue una cuenta de usuario a una organización existente. Las cuentas de usuario pueden pertenecer a varias organizaciones, pero cada cuenta de usuario debe pertenecer al menos a una organización.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Organizaciones, haga clic en *Agregar usuario a la organización*.
+. En la ventana *Agregar a una organización*, seleccione la *Organización* a la que está agregando el usuario.
+. Seleccione el *rol* que debe tener el usuario en la organización.
+. Haga clic en *Agregar a la organización*.
+
+== Eliminar un usuario de una organización
+
+Elimine una cuenta de usuario de una organización a la que está asignada actualmente.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Organizaciones, haga clic en *Eliminar de la organización* junto a la organización de la que desea eliminar al usuario.
+. Haz clic en *Confirmar eliminación*.
+
+== Cambiar el rol de organización
+
+Cambie el rol de organización asignado a una cuenta de usuario.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. En la sección Organizaciones, haga clic en *Cambiar rol* junto a la organización para la que desea cambiar la función de usuario.
+. Seleccione el nuevo rol y luego haga clic en *Guardar*.
+
+== Ver y administrar sesiones de usuario
+
+Vea cuándo un usuario inició sesión por última vez e información sobre cómo inició sesión. También puede forzar a la cuenta a cerrar sesión en Grafana.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Desplácese hacia abajo hasta la sección Sesiones para ver las sesiones asociadas con esta cuenta de usuario.
+
+== Obligar a un usuario a cerrar sesión en Grafana
+
+Si sospecha que una cuenta de usuario está comprometida o ya no está autorizada para acceder al servidor de Grafana, puede forzar el cierre de sesión de la cuenta.
+
+=== Forzar el cierre de sesión de un dispositivo
+
+Cierre la cuenta de usuario de un dispositivo específico que haya iniciado sesión en Grafana.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Desplácese hacia abajo hasta la sección Sesiones.
+. Haga clic en *Forzar cierre de sesión* junto a la entrada de la sesión que desea cerrar sesión en Grafana.
+. Haga clic en *Confirmar cierre de sesión*.
+
+=== Forzar el cierre de sesión de todos los dispositivos
+
+Cierre la cuenta de usuario de todos los dispositivos que estén conectados a Grafana.
+
+[arabic]
+. Haga clic en la cuenta de usuario que desea editar. Si es necesario, use el campo de búsqueda para encontrar la cuenta.
+. Desplácese hacia abajo hasta la sección Sesiones.
+. Haga clic en *Forzar cierre de sesión de todos los dispositivos*.
+. Haga clic en *Forzar cierre de sesión*.

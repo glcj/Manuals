@@ -1,0 +1,34 @@
+= Agregar una fuente de datos
+
+Antes de poder crear su primer tablero, debe agregar su fuente de datos.
+
+[NOTE]
+====
+Solo los usuarios con el rol de Administrador de la organización pueden agregar fuentes de datos.
+====
+
+[arabic]
+. Mueva el cursor al engranaje del menú lateral que le mostrará el menú de configuración. Si el menú lateral no está visible, haga clic en el icono de Grafana en la esquina superior izquierda. Haga clic en *Configuración* > *Fuentes de datos* en el menú lateral y se lo dirigirá a la página de fuentes de datos donde puede agregar y editar fuentes de datos. También puede hacer clic en el engranaje.
+
+image::image22.png[https://grafana.com/static/img/docs/v52/sidemenu-datasource.png,width=540,height=310]
+
+[arabic, start=2]
+. Mueva el cursor al icono de engranaje en el menú lateral que mostrará las opciones de configuración.
+
+image::image23.png[https://grafana.com/static/img/docs/v75/sidemenu-datasource-7-5.png,width=170,height=212]
+
+[arabic, start=3]
+. Haga clic en *Fuentes de datos*. Se abre la página de fuentes de datos que muestra una lista de fuentes de datos configuradas previamente para la instancia de Grafana.
+. Haga clic en *Agregar fuente de datos* para ver una lista de todas las fuentes de datos admitidas.
+
+image::image24.png[https://grafana.com/static/img/docs/v75/add-data-source-7-5.png,width=624,height=603]
+
+[arabic, start=5]
+. Busque una fuente de datos específica ingresando el nombre en el cuadro de diálogo de búsqueda. O puede desplazarse por las fuentes de datos admitidas agrupadas en series de tiempo, registro, rastreo y otras categorías.
+. Mueva el cursor sobre la fuente de datos que desea agregar.
+
+image::image25.png[https://grafana.com/static/img/docs/v75/select-data-source-7-5.png,width=624,height=99]
+
+[arabic, start=7]
+. Haga clic en *Seleccionar*. Se abre la página de configuración de la fuente de datos.
+. Configure la fuente de datos siguiendo las instrucciones específicas de esa fuente de datos. Consulte xref:fuentes-de-datos/fuentes-de-datos.adoc[Fuentes de datos] para obtener enlaces a instrucciones de configuración para todas las fuentes de datos compatibles.

@@ -1,0 +1,62 @@
+= Requisitos de Grafana
+
+Esta página enumera los requisitos mínimos de hardware y software para instalar Grafana.
+
+Para ejecutar Grafana, debe tener un sistema operativo compatible, hardware que cumpla o supere los requisitos mínimos, una base de datos compatible y un navegador compatible.
+
+Grafana utiliza otro software de código abierto. Consulte https://github.com/grafana/grafana/blob/master/package.json[package.json] para obtener una lista completa.
+
+== Sistemas operativos compatibles
+
+Los siguientes sistemas operativos son compatibles con la instalación de Grafana:
+
+* Debian / Ubuntu
+* Linux basado en RPM (CentOS, Fedora, OpenSuse, RedHat)
+* Mac OS
+* xref:instalacion/instalar-en-windows.adoc[Windows]
+
+La instalación de Grafana en otros sistemas operativos es posible, pero no se recomienda ni se da soporte.
+
+== Recomendaciones de hardware
+
+Grafana no usa muchos recursos y es muy liviano en el uso de memoria y CPU.
+
+Memoria mínima recomendada: 255 MB, CPU mínimo recomendado: 1
+
+Algunas funciones pueden requerir más memoria o CPU. Las características que requieren más recursos incluyen:
+
+* xref:administracion/representacion-de-imagenes.adoc#_requisitos[Representación de imágenes del lado del servidor]
+* xref:alertas/alertas.adoc[Alertas]
+* xref:api-http/fuente-de-datos.adoc[Proxy de fuente de datos]
+
+== Bases de datos compatibles
+
+Grafana requiere una base de datos para almacenar sus datos de configuración, como usuarios, fuentes de datos y tableros. Los requisitos exactos dependen del tamaño de la instalación de Grafana y de las funciones utilizadas.
+
+Grafana admite las siguientes bases de datos:
+
+* SQLite
+* MySQL
+* PostgreSQL
+
+De forma predeterminada, Grafana instala y usa SQLite, que es una base de datos incrustada almacenada en la ubicación de instalación de Grafana.
+
+[NOTE]
+====
+Las versiones 9.5.18, 9.4.23, 9.6.14, 10.9, 11.4 y 12-beta2 de PostgreSQL se ven afectadas por un error (registrado por el proyecto PostgreSQL como el https://www.postgresql.org/message-id/flat/15865-17940eacc8f8b081%40postgresql.org[error #15865]) que impide que esas versiones se utilicen con Grafana. El error se ha corregido en versiones más recientes de PostgreSQL.
+====
+
+== Navegadores web compatibles
+
+Grafana es compatible con la versión actual de los siguientes navegadores. Es posible que las versiones anteriores de estos navegadores no sean compatibles, por lo que siempre debe actualizar a la última versión cuando utilice Grafana.
+
+* Chrome / Chromium
+* Firefox
+* Safari
+* Microsoft Edge
+* Internet Explorer 11 solo es totalmente compatible con las versiones de Grafana anteriores a la v6.0.
+
+[NOTE]
+====
+Habilite siempre JavaScript en su navegador. No se admite la ejecución de Grafana sin JavaScript habilitado en el navegador.
+====

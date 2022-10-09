@@ -1,0 +1,17 @@
+== Loki en Grafana
+
+Grafana se envía con soporte integrado para Loki para versiones superiores a [6.0]. Se recomienda encarecidamente utilizar [6.3] o posterior para aprovechar la nueva funcionalidad de xref:logql/logql.adoc[LogQL].
+
+. Inicie sesión en su instancia de Grafana. Si es la primera vez que ejecuta Grafana, el nombre de usuario y la contraseña están predeterminados a `admin`.
+. En Grafana, vaya a `Configuración` > `Fuentes de datos` a través del icono de engranaje en la barra lateral izquierda.
+. Haga clic en el botón grande `+ Agregar fuente de datos`.
+. Elija a Loki de la lista.
+. El campo URL http debe ser la dirección de su servidor Loki. Por ejemplo, cuando se ejecuta localmente o con Docker mediante la asignación de puertos, es probable que la dirección sea `http://localhost:3100`. Cuando se ejecuta con docker-compose o Kubernetes, es probable que la dirección sea `http://loki:3100`.
+. Para ver los registros, haga clic en `Explorar` en la barra lateral, seleccione la fuente de datos de Loki en el menú desplegable superior izquierdo y luego elija un flujo de registro usando el botón `Etiquetas de registro`.
+. Obtenga más información sobre las consultas leyendo sobre el lenguaje de consulta xref:logql/logql.adoc[LogQL] de Loki.
+
+Lea más sobre la función Explorar de Grafana en la [Documentación de Grafana] y sobre cómo buscar y filtrar registros con Loki.
+
+++++
+Para configurar la fuente de datos mediante el aprovisionamiento, consulte [Configuración de Grafana mediante aprovisionamiento] en la documentación de Grafana y asegúrese de ajustar la URL de manera similar a como se muestra arriba.
+++++

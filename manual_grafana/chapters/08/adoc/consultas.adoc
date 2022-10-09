@@ -1,0 +1,131 @@
+= Consultas
+
+Las _consultas_ son la forma en que los paneles de Grafana se comunican con las fuentes de datos para obtener datos para la visualización. Una consulta es una pregunta escrita en el lenguaje de consulta utilizado por la fuente de datos. Grafana pregunta: "Oye, fuente de datos, ¿me enviarías estos datos organizados de esta manera?" Si la consulta está formada correctamente, la fuente de datos responde. La frecuencia con la que se envía la consulta a la fuente de datos y la cantidad de puntos de datos que se recopilan se pueden ajustar en las opciones de fuente de datos del panel.
+
+Grafana admite hasta 26 consultas por panel.
+
+== Editores de consultas
+
+Los editores de consultas son formularios que le ayudan a redactar consultas. Dependiendo de su fuente de datos, el editor de consultas puede proporcionar autocompletado, nombres de métricas o sugerencias de variables.
+
+Debido a la diferencia entre los lenguajes de consulta, las fuentes de datos pueden tener editores de consultas que se ven diferentes. A continuación, se muestran dos ejemplos de editores de consultas:
+
+=== Editor de consultas de InfluxDB
+
+image::image39.png[https://grafana.com/static/img/docs/queries/influxdb-query-editor-7-2.png,width=624,height=257]
+
+=== Editor de consultas de Prometheus (PromQL)
+
+image::image40.png[https://grafana.com/static/img/docs/queries/prometheus-query-editor-7-4.png,width=624,height=137]
+
+== Sintaxis de la consulta
+
+Las fuentes de datos tienen diferentes lenguajes de consulta y sintaxis para solicitar los datos. Aquí hay dos ejemplos de consultas:
+
+=== PostgreSQL
+
+----
+SELECT hostname FROM host WHERE region IN($region)
+----
+
+=== PromQL
+
+----
+query_result(max_over_time(<metric>[$\{__range_s}s]) != <state>)
+----
+
+Para obtener más información sobre cómo escribir una consulta para su fuente de datos, consulte la documentación específica de la xref:fuentes-de-datos/fuentes-de-datos.adoc[fuente de datos de Grafana].
+
+== Interfaz de usuario de la pestaña de consulta
+
+La pestaña Consultar consta de los siguientes elementos:
+
+* Selector de fuente de datos
+* Opciones de consulta
+* Botón del inspector de consultas
+* Lista de editores de consultas
+* Expresiones
+
+image::image41.png[https://grafana.com/static/img/docs/queries/query-editor-7-2.png,width=624,height=169]
+
+=== Selector de fuente de datos
+
+El selector de fuente de datos es una lista desplegable. Haga clic en él para seleccionar una fuente de datos que haya agregado. Cuando crea un panel, Grafana selecciona automáticamente su fuente de datos predeterminada. Para obtener más información sobre cómo agregar fuentes de datos, consulte xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[Agregar una fuente de datos].
+
+image::image42.png[https://grafana.com/static/img/docs/queries/data-source-selector-7-0.png,width=554,height=1236]
+
+Además de las fuentes de datos que ha configurado en su Grafana, hay tres fuentes de datos especiales disponibles:
+
+* *Grafana:* una fuente de datos integrada que genera datos de recorridos aleatorios. Útil para probar visualizaciones y ejecutar experimentos.
+* *Mixta:* seleccione esta opción para consultar varias fuentes de datos en el mismo panel. Cuando se selecciona esta fuente de datos, Grafana le permite seleccionar una fuente de datos para cada nueva consulta que agregue.
+** La primera consulta utilizará la fuente de datos que se seleccionó antes de seleccionar *Mixta*.
+** No puede cambiar una consulta existente para utilizar la fuente de datos mixta.
+* *Tablero:* seleccione esta opción para usar un conjunto de resultados de otro panel en el mismo tablero.
+
+=== Opciones de consulta
+
+Haga clic en *Opciones de consulta* junto al selector de fuente de datos para ver la configuración de la fuente de datos seleccionada. Los cambios que realice aquí solo afectarán a las consultas realizadas en este panel.
+
+image::image43.png[https://grafana.com/static/img/docs/queries/data-source-options-7-0.png,width=624,height=143]
+
+Grafana establece valores predeterminados que se muestran en texto gris oscuro. Los cambios se muestran en texto blanco. Para devolver un campo a la configuración predeterminada, elimine el texto blanco del campo.
+
+Opciones de consulta de la fuente de datos del panel:
+
+* *Puntos de datos máximos:* si la fuente de datos lo admite, establece el número máximo de puntos de datos para cada serie devuelta. Si la consulta devuelve más puntos de datos que la configuración de puntos de datos máximos, la fuente de datos los consolida (reduce el número de puntos devueltos agregándolos por promedio o máximo u otra función).
++
+Hay dos razones principales para limitar el número de puntos, el rendimiento y suavizar la línea. El valor predeterminado es el ancho (o número de píxeles) del gráfico, ya que no tiene sentido tener más puntos de datos de los que puede mostrar el panel de gráficos.
++
+Con la transmisión de datos, el valor máximo de puntos de datos se usa para el búfer rodante. (La transmisión es un flujo continuo de datos y el almacenamiento en búfer es una forma de dividir la transmisión en partes). Loki transmite datos en el modo de seguimiento en vivo.
++
+* *Intervalo mínimo:* establece un límite mínimo para el intervalo calculado automáticamente, normalmente el intervalo mínimo de raspado. Si se guarda un punto de datos cada 15 segundos, no tiene sentido tener un intervalo inferior a ese. Otro caso de uso es establecerlo en un mínimo más alto que el intervalo de raspado para obtener consultas más detalladas y que funcionen bien.
+
+* *Intervalo:* el intervalo es un intervalo de tiempo que puede utilizar al agregar o agrupar puntos de datos por tiempo.
++
+Grafana calcula automáticamente un intervalo apropiado y se puede utilizar como variable en consultas basadas en plantillas. La variable está en segundos: `$__interval` o en milisegundos: `$__interval_ms`. Por lo general, se usa en funciones de agregación como suma o promedio. Por ejemplo, una consulta de Prometheus usando la variable de intervalo: `rate(http_requests_total[$__interval])`.
++
+Este intervalo automático se calcula en función del ancho del gráfico. Si el usuario aleja mucho, el intervalo se vuelve mayor, lo que resulta en una agregación de grano más grueso, mientras que si el usuario acerca el zoom, el intervalo disminuye, lo que resulta en una agregación de grano más fino.
++
+Para obtener más información, consulte xref:plantillas-y-variables/tipos-de-variables/variables-globales.adoc[Variables globales].
+
+* *Tiempo relativo:* puede anular el intervalo de tiempo relativo para paneles individuales, lo que hace que sean diferentes de lo que se selecciona en el selector de tiempo del tablero en la esquina superior derecha del tablero. Esto le permite mostrar métricas de diferentes períodos de tiempo o días en el mismo tablero.
+* *Cambio de tiempo:* la función de cambio de tiempo es otra forma de anular el rango de tiempo para paneles individuales. Solo funciona con rangos de tiempo relativos y le permite ajustar el rango de tiempo.
++
+Por ejemplo, puede cambiar el intervalo de tiempo para que el panel sea dos horas antes que el selector de tiempo del tablero. Para obtener más información, consulte xref:tableros/controles-de-rango-de-tiempo.adoc[Controles de rango de tiempo].
+
+* *Tiempo de espera de caché:* (este campo solo es visible si está disponible en su fuente de datos). Si su almacén de series de tiempo tiene un caché de consultas, esta opción puede anular el tiempo de espera de caché predeterminado. Especificado como un valor numérico en segundos.
+
+=== Botón del inspector de consultas
+
+Puede hacer clic en el *Inspector de consultas* para abrir la pestaña Consultar del inspector del panel, donde puede ver la solicitud de consulta enviada por el panel y la respuesta.
+
+Haga clic en *Actualizar* para ver el texto completo de la solicitud enviada por este panel al servidor.
+
+[NOTE]
+====
+Debe agregar al menos una consulta antes de que el inspector de consultas pueda devolver resultados.
+====
+
+Para obtener más información sobre el inspector de paneles, consulte xref:paneles/inspeccionar-un-panel.adoc[Inspeccionar un panel].
+
+=== Lista de editores de consultas
+
+En la interfaz de usuario, las consultas se organizan en filas de consultas contraíbles. Cada fila de consulta contiene un editor de consultas y se identifica con una letra (A, B, C, etc.).
+
+Usted puede:
+
+[cols=",",options="header",]
+|===
+|Icono |Descripción
+|image::image44.png[https://grafana.com/static/img/docs/queries/query-editor-help-7-4.png,width=56,height=58] |Alternar la ayuda del editor de consultas. Si es compatible con la fuente de datos, haga clic en este icono para mostrar información sobre cómo utilizar el editor de consultas o proporcionar acceso rápido a consultas comunes.
+|image::image45.png[https://grafana.com/static/img/docs/queries/duplicate-query-icon-7-0.png,width=56,height=58] |Copie una consulta. La duplicación de consultas es útil cuando se trabaja con varias consultas complejas que son similares y desea experimentar con diferentes variantes o realizar modificaciones menores.
+|image::image46.png[https://grafana.com/static/img/docs/queries/hide-query-icon-7-0.png,width=56,height=58] |Ocultar una consulta. Grafana no envía consultas ocultas a la fuente de datos.
+|image::image47.png[https://grafana.com/static/img/docs/queries/remove-query-icon-7-0.png,width=56,height=58] |Eliminar una consulta. La eliminación de una consulta la elimina de forma permanente, pero a veces puede recuperar las consultas eliminadas volviendo a las versiones del panel guardadas anteriormente.
+|image::image48.png[https://grafana.com/static/img/docs/queries/query-drag-icon-7-2.png,width=26,height=29] |Reordenar consultas. Cambie el orden de las consultas haciendo clic y manteniendo presionado el ícono de arrastrar, luego arrastre las consultas donde lo desee. El orden de los resultados refleja el orden de las consultas, por lo que a menudo puede ajustar sus resultados visuales según el orden de las consultas.
+|===
+
+=== Expresiones
+
+Si su fuente de datos los admite, Grafana muestra el botón *Expresión* y muestra cualquier expresión existente en la lista del editor de consultas.
+
+Para obtener más información sobre expresiones, consulte xref:paneles/expresiones.adoc[Expresiones].

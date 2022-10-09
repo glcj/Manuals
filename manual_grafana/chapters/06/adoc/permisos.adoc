@@ -1,0 +1,47 @@
+= Permisos
+
+Lo que puede hacer en Grafana está definido por los _permisos_ asociados con su cuenta de usuario.
+
+Hay tres tipos de permisos:
+
+* Permisos otorgados como Administrador de Servidor de Grafana
+* Permisos asociados con su rol en una organización
+* Permisos otorgados a una carpeta o tablero específico
+
+Se le pueden otorgar permisos basados ​​en:
+
+* Estado de Administrador de Servidor de Grafana.
+* Rol de la organización (Administrador, Editor o Espectador).
+* Permisos de carpeta o tablero asignados a su equipo (Administrador, Editor, Espectador).
+* Permisos de carpeta o panel asignados a su cuenta de usuario (Administrador, Editor, Espectador).
+* (Grafana Enterprise) Permisos de fuente de datos. Para obtener más información, consulte xref:grafana-enterprise/permisos-de-fuentes-de-datos.adoc[Permisos de fuentes de datos] en xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].
+* (Grafana Cloud) Grafana Cloud tiene roles adicionales. Para obtener más información, consulte los roles y permisos de Grafana Cloud.
+
+== Rol de Administrador de Servidor de Grafana
+
+Los Administradores de Servidor de Grafana tienen habilitada la marca de *Administrador de Grafana* en su cuenta. Pueden acceder al menú *Administrador del Servidor* y realizar las siguientes tareas:
+
+* Gestionar usuarios y permisos.
+* Crear, editar y eliminar organizaciones.
+* Ver la configuración de todo el servidor que se establece en el archivo de xref:administracion/configuracion.adoc[Configuración].
+* Ver las estadísticas del servidor Grafana, incluidos los usuarios totales y las sesiones activas.
+* Actualizar el servidor a Grafana Enterprise.
+
+[NOTE]
+====
+Este rol no existe en Grafana Cloud.
+====
+
+== Roles de organización
+
+Los usuarios pueden pertenecer a una o más organizaciones. La membresía de la organización de un usuario está vinculada a un rol que define lo que el usuario puede hacer en esa organización. Para obtener más información, consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización].
+
+== Permisos de tablero y carpeta
+
+Los permisos de tablero y carpeta le permiten eliminar los permisos predeterminados basados ​​en roles para Editores y Espectadores y asignar permisos a usuarios y equipos específicos. Obtenga más información sobre los [Permisos de tablero y carpeta].
+
+== Permisos de fuente de datos
+
+De forma predeterminada, cualquier usuario de esa organización puede consultar una fuente de datos en una organización. Por ejemplo, un usuario con el rol de `Viewer` aún puede emitir cualquier consulta posible a una fuente de datos, no solo aquellas consultas que existen en los tableros a los que tiene acceso.
+
+Los permisos de fuentes de datos le permiten cambiar los permisos predeterminados para las fuentes de datos y restringir los permisos de consulta a *Usuarios* y *Equipos* específicos. Para obtener más información, consulte xref:grafana-enterprise/permisos-de-fuentes-de-datos.adoc[Permisos de fuentes de datos] en xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].

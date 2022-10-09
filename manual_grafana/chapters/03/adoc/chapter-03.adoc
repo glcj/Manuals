@@ -1,0 +1,10 @@
+include::instalacion.adoc[]
+
+include::requisitos.adoc[]
+
+include::instalar-en-windows.adoc[]
+
+include::actualizar-grafana.adoc[]
+
+include::reinciar-grafana.adoc[]
+

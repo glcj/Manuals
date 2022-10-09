@@ -1,0 +1,33 @@
+= Documentación de Grafana
+
+Esta documentación es para la version estable más reciente (7.5.x) de Grafana.
+
+== Instalar Grafana
+
+====
+xref:instalacion/instalar-en-windows.adoc[*Instalar en Windows*]
+====
+
+== Guías
+
+====
+xref:comenzando/comenzando.adoc[*Comenzando*]
+
+Aprende lo básico de usar Grafana.
+====
+
+====
+xref:administracion/configuracion.adoc[*Configurar Grafana*]
+
+Revisa la configuración y opciones de instalación.
+====
+
+== Guías de fuentes de datos
+
+====
+xref:fuentes-de-datos/prometheus.adoc[*Prometheus*]
+====
+
+====
+xref:fuentes-de-datos/loki.adoc[*Loki*]
+====

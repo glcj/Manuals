@@ -1,0 +1,93 @@
+= Panel de mapa de calor
+
+La visualización del Panel mapa de calor le permite ver histogramas a lo largo del tiempo. Para obtener más información sobre histogramas, consulte xref:conceptos-basicos/histogramas-y-mapas-de-calor.adoc[Introducción a los histogramas y mapas de calor].
+
+image::image70.jpeg[https://grafana.com/static/img/docs/v43/heatmap_panel_cover.jpg,width=624,height=62]
+
+== Opciones de ejes
+
+Utilice esta configuración para ajustar cómo se muestran los ejes en su visualización.
+
+=== Eje Y
+
+* *Unidad:* la unidad de visualización para el valor del eje Y
+* *Escala:* la escala que se utilizará para el valor del eje Y.
+** *linear:* escala lineal.
+** *log (base 2):* Escala logarítmica con base 2.
+** *log (base 10):* Escala logarítmica con base 10.
+** *log (base 32):* Escala logarítmica con base 32.
+** *log (base 1024):* escala logarítmica con base 1024.
+* *Y-Min:* el valor Y mínimo (auto predeterminado).
+* *Y-Max:* el valor Y máximo (auto predeterminado).
+* *Decimales:* número de decimales para representar los valores del eje Y (auto predeterminado).
+
+=== Cubos
+
+[NOTE]
+====
+Si el formato de los datos son *Cubos de series temporales*, esta sección no estará disponible.
+====
+
+* *Cubos del eje Y:* número de cubos en el que se dividirá el eje Y.
+* *Tamaño:* (solo visible si la *Escala* es lineal). Tamaño de cada cubo del eje Y. Esta opción tiene prioridad sobre los *Cubos del Eje Y*.
+* *Factor de división:* (solo visible si la *Escala* es _logarítmica_ _(base 2)_ o superior). De forma predeterminada, Grafana divide los valores de Y por base logarítmica. Esta opción permite dividir cada cubo predeterminado en un número específico de cubos.
+* *Cubos del eje X:* número de cubos en los que se dividirá el eje X.
+* *Tamaño:* tamaño de cada cubo del eje X. Número o intervalo de tiempo (10s, 5m, 1h, etc.). Intervalos admitidos: ms, s, m, h, d, w, M, y. Esta opción tiene prioridad sobre los *Cubos del Eje X*.
+
+=== Atado al cubo
+
+Cuando el Formato de datos es Cubos de series temporales, la fuente de datos devuelve series con nombres que representan el límite del cubo. Pero según la fuente de datos, un límite puede ser superior o inferior. Esta opción permite ajustar un tipo de límite. Si se configura Auto, se elegirá una opción enlazada en función del tipo de fuente de datos de los paneles.
+
+=== Tamaño del cubo
+
+Grafana utiliza las opciones de tamaño y recuento de cubos para calcular el tamaño de cada celda en el mapa de calor. Puede definir el tamaño del cubo por recuento (el primer cuadro de entrada) o especificando un intervalo de tamaño. Para el eje Y, el intervalo de tamaño es solo un valor, pero para el cubo X puede especificar un intervalo de tiempo en la entrada Tamaño, por ejemplo, el rango de tiempo 1h. Esto hará que las celdas tengan 1 hora de ancho en el eje X.
+
+=== Formato de datos
+
+Elija una opción en la lista *Formato*.
+
+* *Series temporales:* Grafana clasifica todos los valores de las series temporales. Los tamaños e intervalos de los cubos se establecen en las opciones de Cubos.
+* *Cubos de series temporales:* cada serie temporal ya representa un depósito del eje Y. El nombre de la serie temporal (alias) debe ser un valor numérico que represente el intervalo superior o inferior del cubo. Grafana no clasifica, por lo que las opciones de tamaño del cubo están ocultas.
+
+== Opciones de pantalla
+
+Utilice esta configuración para refinar su visualización.
+
+=== Colores
+
+El espectro de colores controla el mapeo entre el recuento de valores (en cada cubo) y el color asignado a cada cubo. El color más a la izquierda del espectro representa el recuento mínimo y el color del lado derecho representa el recuento máximo. Algunos esquemas de color se invierten automáticamente cuando se usa el tema de día.
+
+También puede cambiar el modo de color a Opacidad. En este caso, el color no cambiará, pero la cantidad de opacidad cambiará con el recuento de cubos.
+
+* *Modo*
+** *opacidad:* valor del cubo representado por la opacidad de la celda. Celda opaca significa valor máximo.
+*** *Color:* color base de la celda.
+*** *Escala:* escala para asignar los valores del cubo a la opacidad.
+**** *linear:* escala lineal. El valor del cubo se asigna linealmente a la opacidad.
+**** *sqrt:* escala de potencia. Opacidad de celda calculada como valor ^ k, donde k es un valor de *Exponente* configurado. Si el exponente es menor que 1, obtendrás una escala logarítmica. Si el exponente es mayor que 1, obtendrás una escala exponencial. En el caso de 1, la escala será la misma que la lineal.
+*** *Exponente:* valor del exponente, mayor que 0.
+** *espectro:* valor del cubo representado por el color de la celda.
+*** *Esquema:* si el modo es *espectro*, seleccione un esquema de color.
+
+=== Escala de colores
+
+De forma predeterminada, Grafana calcula los colores de las celdas en función de los valores mínimos y máximos de los cubos. Con Min y Max puede sobrescribir esos valores. Piense en un valor de cubo como un eje Z y Min y Max como Z-Min y Z-Max respectivamente.
+
+* *Min:* valor mínimo que se utiliza para el cálculo del color de la celda. Si el valor del cubo es menor que Min, entonces se asigna al color "mínimo". El valor predeterminado es el valor mínimo de la serie.
+* *Max:* valor máximo que se utiliza para el cálculo del color de la celda. Si el valor del depósito es mayor que Max, entonces se asigna al color "máximo". El valor predeterminado es el valor máximo de la serie.
+
+=== Leyenda
+
+Elija si desea mostrar la leyenda del mapa de calor en la visualización o no.
+
+=== Cubos
+
+* *Ocultar cero:* no dibuje celdas con valores cero.
+* *Espacio:* espacio en píxeles entre celdas. El valor predeterminado es 1 píxel.
+* *Redondo:* redondez de la celda en píxeles. El valor predeterminado es 0.
+
+=== Información sobre herramientas
+
+* *Mostrar información sobre herramientas:* muestra información sobre herramientas de mapa de calor.
+* *Histograma:* muestra el histograma del eje Y en la información sobre herramientas. El histograma representa la distribución de los valores del cubo para la marca de tiempo específica.
+* *Decimales:* número de decimales para representar el valor del cubo (auto predeterminado).

@@ -1,0 +1,29 @@
+= Características
+
+* Despliegue flexible.
+
+IoTDB proporciona a los usuarios una herramienta de instalación con un solo clic en la nube, una herramienta de terminal usada una vez descomprimida y la herramienta de puente entre plataformas en la nube y herramientas de terminal (Herramienta de Sincronización de Datos).
+
+* Coste de almacenamiento reducido.
+
+IoTDB puede alcanzar una alta relación de compresión del almacenamiento en disco, lo que significa que IoTDB puede almacenar la misma cantidad de datos con un menor costo de disco de hardware.
+
+*Estructura de directorios eficiente.
+
+IoTDB admite la organización eficiente de estructuras de datos de series temporales complejas desde dispositivos de red inteligentes, la organización de datos de series temporales de dispositivos del mismo tipo, la estrategia de búsqueda difusa para directorios masivos y complejos de datos de series temporales.
+
+* Lectura y escritura de alto rendimiento.
+
+IoTDB admite millones de dispositivos de baja potencia con acceso a datos de conexión sólida, lectura y escritura de datos de alta velocidad para dispositivos de red inteligentes y dispositivos mixtos mencionados anteriormente.
+
+* Semántica de consultas extendida.
+
+IoTDB admite la alineación de tiempo para datos de series temporales en dispositivos y sensores, cálculo en el campo de series temporales (transformación de dominio de frecuencia) y compatibilidad con funciones de agregación extendidas en la dimensión temporal.
+
+* Fácil de empezar.
+
+IoTDB admite lenguaje similar a SQL, API estándar JDBC y herramientas de importación/exportación que son fáciles de usar.
+
+* Intensa integración con el ecosistema de Código Abierto.
+
+IoTDB admite ecosistemas de análisis Hadoop, Spark, etc. y la herramienta de visualización Grafana.

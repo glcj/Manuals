@@ -1,0 +1,9 @@
+= Administración
+
+== Administración
+
+Esta sección incluye información para administradores de Grafana, administradores de equipo y usuarios que realizan tareas administrativas:
+
+* xref:administracion/preferencias.adoc[Cambiar preferencias]
+* xref:administracion/configuracion.adoc[Configuración]
+* xref:administracion/seguridad.adoc[Seguridad]

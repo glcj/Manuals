@@ -1,0 +1,202 @@
+== Etiquetas
+
+Las etiquetas son pares de valores clave y se pueden definir como cualquier cosa. Nos gusta referirnos a ellos como metadatos para describir un flujo de registros. Si está familiarizado con Prometheus, hay algunas etiquetas que está acostumbrado a ver, como `job` e `instance`, y las usaré en los siguientes ejemplos.
+
+Las configuraciones de raspado que proporcionamos con Loki también definen estas etiquetas. Si está utilizando Prometheus, tener etiquetas consistentes entre Loki y Prometheus es uno de los superpoderes de Loki, lo que hace que sea increíblemente https://grafana.com/blog/2019/05/06/how-loki-correlates-metrics-and-logs-and-saves-you-money/[fácil correlacionar las métricas de su aplicación con sus datos de registro].
+
+== Cómo usa Loki las etiquetas
+
+Las etiquetas en Loki realizan una tarea muy importante: definen un flujo. Más específicamente, la combinación de cada clave y valor de etiqueta define el flujo. Si solo cambia un valor de etiqueta, se crea un nuevo flujo.
+
+Si está familiarizado con Prometheus, el término que se utiliza allí es serie; sin embargo, Prometheus tiene una dimensión adicional: nombre métrico. Loki simplifica esto porque no hay nombres de métricas, solo etiquetas, y decidimos usar flujos en lugar de series.
+
+== Demostración de etiquetas Loki
+
+Esta serie de ejemplos ilustrará casos de uso y conceptos básicos para el etiquetado en Loki.
+
+Tomemos un ejemplo:
+
+[source,YAML]
+----
+scrape_configs:
+- job_name: system
+  pipeline_stages:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: syslog
+      __path__: /var/log/syslog
+----
+
+Esta configuración seguirá un archivo y le asignará una etiqueta: `job=syslog`. Podría consultarlo así:
+
+----
+{job=”syslog”}
+----
+
+Esto creará un flujo en Loki.
+
+Ahora ampliemos un poco el ejemplo:
+
+[source,YAML]
+----
+scrape_configs:
+- job_name: system
+  pipeline_stages:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: syslog
+      __path__: /var/log/syslog
+- job_name: apache
+  pipeline_stages:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: apache
+      __path__: /var/log/apache.log
+----
+
+Ahora estamos siguiendo dos archivos. Cada archivo obtiene solo una etiqueta con un valor, por lo que Loki ahora almacenará dos flujos.
+
+Podemos consultar estos flujos de varias formas:
+
+----
+{job=”apache”} <- show me logs where the job label is apache
+{job=”syslog”} <- show me logs where the job label is syslog
+{job=~”apache|syslog”} <- show me logs where the job is apache **OR** syslog
+----
+
+En ese último ejemplo, usamos un comparador de etiquetas de expresiones regulares para registrar flujos que usan la etiqueta `job` con dos valores. Ahora considere cómo se podría usar también una etiqueta adicional:
+
+[source,YAML]
+----
+scrape_configs:
+- job_name: system
+  pipeline_stages:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+    job: syslog
+    env: dev
+    __path__: /var/log/syslog
+- job_name: apache
+  pipeline_stages:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+    job: apache
+    env: dev
+    __path__: /var/log/apache.log
+----
+
+Ahora, en lugar de una expresión regular, podríamos hacer esto:
+
+----
+{env=”dev”} <- devolverá todos los registros con env=dev, en este caso, esto incluye ambos flujos de registro
+----
+
+Con suerte, ahora estás empezando a ver el poder de las etiquetas. Al usar una sola etiqueta, puede consultar muchos flujos. Al combinar varias etiquetas diferentes, puede crear consultas de registro muy flexibles.
+
+Las etiquetas son el índice de los datos de registro de Loki. Se utilizan para encontrar el contenido del registro comprimido, que se almacena por separado como fragmentos. Cada combinación única de etiqueta y valores define un flujo, y los registros de un flujo se agrupan, comprimen y almacenan como fragmentos.
+
+Para que Loki sea eficiente y rentable, tenemos que usar etiquetas de manera responsable. La siguiente sección explorará esto con más detalle.
+
+== Cardinalidad
+
+Los dos ejemplos anteriores utilizan etiquetas definidas estáticamente con un solo valor; sin embargo, hay formas de definir etiquetas dinámicamente. Echemos un vistazo usando el registro de Apache y una expresión regular masiva que podría usar para analizar dicha línea de registro:
+
+----
+11.11.11.11 - frank [25/Jan/2000:14:00:01 -0500] "GET /1986.js HTTP/1.1" 200 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+----
+
+[source,YAML]
+----
+- job_name: system
+  pipeline_stages:
+    - regex:
+      expression: "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<user>\\S+) \\[(?P<timestamp>[\\w:/]+\\s[+\\-]\\d{4})\\] \"(?P<action>\\S+)\\s?(?P<path>\\S+)?\\s?(?P<protocol>\\S+)?\" (?P<status_code>\\d{3}|-) (?P<size>\\d+|-)\\s?\"?(?P<referer>[^\"]*)\"?\\s?\"?(?P<useragent>[^\"]*)?\"?$"
+  - labels:
+      action:
+      status_code:
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: apache
+      env: dev
+      __path__: /var/log/apache.log
+----
+
+Esta expresión regular coincide con todos los componentes de la línea de registro y extrae el valor de cada componente en un grupo de captura. Dentro del código de la fuente de información, estos datos se colocan en una estructura de datos temporal que permite usarlos para varios propósitos durante el procesamiento de esa línea de registro (momento en el que se descartan los datos temporales). Se pueden encontrar muchos más detalles sobre esto en la documentación de las xref:promtail/fuentes-de-informacion.adoc[Fuentes de información de Promtail].
+
+A partir de esa expresión regular, utilizaremos dos de los grupos de captura para establecer dinámicamente dos etiquetas según el contenido de la línea de registro en sí:
+
+action (e.g. action=”GET”, action=”POST”) status_code (e.g. status_code=”200”, status_code=”400”
+
+Y ahora veamos algunas líneas de ejemplo:
+
+----
+11.11.11.11 - frank [25/Jan/2000:14:00:01 -0500] "GET /1986.js HTTP/1.1" 200 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+11.11.11.12 - frank [25/Jan/2000:14:00:02 -0500] "POST /1986.js HTTP/1.1" 200 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+11.11.11.13 - frank [25/Jan/2000:14:00:03 -0500] "GET /1986.js HTTP/1.1" 400 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+11.11.11.14 - frank [25/Jan/2000:14:00:04 -0500] "POST /1986.js HTTP/1.1" 400 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+----
+
+En Loki se crearían las siguientes corrientes:
+
+----
+{job=”apache”,env=”dev”,action=”GET”,status_code=”200”} 11.11.11.11 - frank [25/Jan/2000:14:00:01 -0500] "GET /1986.js HTTP/1.1" 200 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+{job=”apache”,env=”dev”,action=”POST”,status_code=”200”} 11.11.11.12 - frank [25/Jan/2000:14:00:02 -0500] "POST /1986.js HTTP/1.1" 200 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+{job=”apache”,env=”dev”,action=”GET”,status_code=”400”} 11.11.11.13 - frank [25/Jan/2000:14:00:03 -0500] "GET /1986.js HTTP/1.1" 400 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+{job=”apache”,env=”dev”,action=”POST”,status_code=”400”} 11.11.11.14 - frank [25/Jan/2000:14:00:04 -0500] "POST /1986.js HTTP/1.1" 400 932 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7 GTB6"
+----
+
+Esas cuatro líneas de registros se convertirían en cuatro flujos separados y comenzarían a llenar cuatro trozos fragmentos.
+
+Cualquier línea de registro adicional que coincida con esas combinaciones de etiqueta/valores se agregaría al flujo existente. Si aparece otra combinación única de etiquetas (p. Ej., status_code=”500”), se crea otro nuevo flujo.
+
+Imagínese ahora si establece una etiqueta para `ip`. No solo cada solicitud de un usuario se convierte en un flujo único. Cada solicitud con una acción o status_code diferente del mismo usuario obtendrá su propio flujo.
+
+Haciendo algunos cálculos rápidos, si hay tal vez cuatro acciones comunes (GET, PUT, POST, DELETE) y tal vez cuatro códigos de estado comunes (¡aunque podría haber más de cuatro!), Esto sería 16 flujos y 16 fragmentos separados. Ahora multiplique esto por cada usuario si usamos una etiqueta para `ip`. Puede tener rápidamente miles o decenas de miles de flujos.
+
+Esto es cardinalidad alta. Esto puede matar a Loki.
+
+Cuando hablamos de _cardinalidad_, nos referimos a la combinación de etiquetas y valores y al número de flujos que crean. La cardinalidad alta consiste en usar etiquetas con una amplia gama de valores posibles, como `ip`, *o* combinar muchas etiquetas, incluso si tienen un conjunto de valores pequeño y finito, como usar `status_code` y `action`.
+
+La cardinalidad alta hace que Loki cree un índice enorme (lea: $$$$) y descargue miles de pequeños fragmentos en el almacén de objetos (lea: lento). Actualmente, Loki funciona muy mal en esta configuración y será la menos rentable y la menos divertida de ejecutar y usar.
+
+== Rendimiento óptimo de Loki con paralelización
+
+Ahora puede estar preguntando: si usar muchas etiquetas o etiquetas con muchos valores es malo, ¿cómo se supone que debo consultar mis registros? Si ninguno de los datos está indexado, ¿las consultas no serán realmente lentas?
+
+Como vemos personas que usan Loki y están acostumbradas a otras soluciones con muchos índices, parece que se sienten obligadas a definir muchas etiquetas para consultar sus registros de manera efectiva. Después de todo, muchas otras soluciones de registro tienen que ver con el índice, y esta es la forma común de pensar.
+
+Al usar Loki, es posible que deba olvidar lo que sabe y ver cómo se puede resolver el problema de manera diferente con la paralelización. El superpoder de Loki es dividir las consultas en pequeñas partes y enviarlas en paralelo para que pueda consultar grandes cantidades de datos de registro en pequeñas cantidades de tiempo.
+
+Este tipo de enfoque de fuerza bruta puede no parecer ideal, pero permítanme explicar por qué lo es.
+
+Los índices grandes son complicados y costosos. A menudo, un índice de texto completo de sus datos de registro es del mismo tamaño o más grande que los datos de registro en sí. Para consultar sus datos de registro, necesita cargar este índice y, para mejorar el rendimiento, probablemente debería estar en la memoria. Esto es difícil de escalar y, a medida que ingiere más registros, su índice aumenta rápidamente.
+
+Ahora hablemos de Loki, donde el índice suele ser un orden de magnitud menor que el volumen de registro ingerido. Por lo tanto, si está haciendo un buen trabajo para mantener sus flujos y su rotación al mínimo, el índice crece muy lentamente en comparación con los registros ingeridos.
+
+Loki efectivamente mantendrá sus costos estáticos lo más bajos posible (tamaño de índice y requisitos de memoria, así como almacenamiento de registros estáticos) y hará que el rendimiento de la consulta sea algo que pueda controlar en tiempo de ejecución con escalado horizontal.
+
+Para ver cómo funciona, analicemos nuestro ejemplo de cómo consultar los datos de su registro de acceso para obtener una dirección IP específica. No queremos usar una etiqueta para almacenar la IP. En su lugar, usamos una xref:logql:logql.adoc#expresion-de-filtro[expresión de filtro] para consultarlo:
+
+----
+{job=”apache”} |= “11.11.11.11”
+----
+
+Detrás de escena, Loki dividirá esa consulta en partes más pequeñas y abrirá cada fragmento para los flujos que coinciden con las etiquetas y comenzará a buscar esta dirección IP.
+
+El tamaño de esos fragmentos y la cantidad de paralelización se pueden configurar y se basan en los recursos que aprovisione. Si lo desea, puede configurar el intervalo de fragmentos hasta 5m, implementar 20 consultadores y procesar gigabytes de registros en segundos. ¡O puede volverse loco y aprovisionar 200 consultadores y procesar terabytes de registros!
+
+Esta compensación de índices más pequeños y consultas de fuerza bruta paralelas frente a un índice de texto completo más grande/más rápido es lo que le permite a Loki ahorrar costos en comparación con otros sistemas. El costo y la complejidad de operar un índice grande son altos y, por lo general, son fijos: lo paga las 24 horas del día si lo está consultando o no.
+
+Los beneficios de este diseño significan que puede tomar la decisión sobre la potencia de consulta que desea tener y puede cambiar eso a necesidad. El rendimiento de la consulta se convierte en una función de cuánto dinero desea gastar en ella. Mientras tanto, los datos están fuertemente comprimidos y almacenados en almacenes de objetos de bajo costo como S3 y GCS. Esto reduce los costos operativos fijos al mínimo y, al mismo tiempo, permite una capacidad de consulta increíblemente rápida.

@@ -1,0 +1,10 @@
+= Instalar Grafana
+
+Esta sección analiza los requisitos de hardware y software, así como el proceso de instalación de Grafana en diferentes sistemas operativos. Esta sección tiene los siguientes temas:
+
+* xref:instalacion/requisitos.adoc[Requisitos]
+* xref:instalacion/instalar-en-windows.adoc[Instalar en Windows]
+
+Para obtener instrucciones de actualización, consulte xref:instalacion/actualizar-grafana.adoc[Actualizar Grafana]. Para reiniciar Grafana, consulte xref:instalacion/reiniciar-grafana.adoc[Reiniciar Grafana].
+
+Para instalar Grafana Enterprise, consulte las instrucciones para instalar Grafana en su sistema. Luego, consulte xref:grafana-enterprise/licencia/activar-licencia.adoc[Activar una licencia empresarial].

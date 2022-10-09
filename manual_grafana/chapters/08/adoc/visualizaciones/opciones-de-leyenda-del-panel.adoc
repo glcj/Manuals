@@ -1,0 +1,31 @@
+= Leyenda
+
+Utilice la leyenda para ajustar cómo muestra una visualización la serie. Esta funcionalidad de leyenda solo se aplica a algunos paneles ahora, pero eventualmente será común a todas las visualizaciones.
+
+Este tema se aplica actualmente a las siguientes visualizaciones:
+
+* xref:paneles/visualizaciones/panel-de-grafico-circular.adoc[Panel de gráfico circular]
+* xref:paneles/visualizaciones/panel-de-series-de-tiempo.adoc[Panel de series de tiempo]
+
+== Alternar serie
+
+Para alternar una serie: Haga clic en la etiqueta de la serie en la leyenda para aislar la serie en la visualización. Todas las demás series están ocultas en la visualización. Los datos de la serie oculta todavía son accesibles.
+
+Use Cmd/Ctrl+clic en la etiqueta de la serie para ocultar la serie aislada y quitar la palanca.
+
+[NOTE]
+====
+Esta opción es persistente cuando guarda el tablero.
+====
+
+image::image63.png[Toggle series visibility,width=624,height=282]
+
+Esto crea una anulación del sistema que oculta las otras series. Puede ver esta anulación en la pestaña Anulaciones. Si elimina la anulación, se quita la alternancia.
+
+image::image64.png[Series toggle override example,width=600,height=208]
+
+== Cambiar el color de la serie
+
+Haga clic en el icono de la serie (línea de color al lado de la etiqueta de la serie) en la leyenda para cambiar el color de la serie seleccionada.
+
+image::image65.png[Change legend series color,width=624,height=249]

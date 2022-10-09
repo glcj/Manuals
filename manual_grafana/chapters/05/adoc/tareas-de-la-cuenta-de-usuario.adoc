@@ -1,0 +1,5 @@
+= Tareas de la cuenta de usuario
+
+Grafana le permite administrar ciertos aspectos de su cuenta de usuario, incluido el nombre de usuario, el correo electrónico y la contraseña.
+
+También puede ver aspectos importantes de su cuenta, como las organizaciones y roles asignados y las sesiones de Grafana asociadas con la cuenta.

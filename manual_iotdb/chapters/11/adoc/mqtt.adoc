@@ -1,0 +1,102 @@
+= Protocolo MQTT
+
+[MQTT] es un protocolo de conectividad de máquina a máquina (M2M)/"Internet de las cosas". Fue diseñado como un transporte de mensajería de publicación/suscripción extremadamente ligero. Es útil para conexiones con ubicaciones remotas donde se requiere una pequeña huella de código y/o el ancho de banda de la red es un bien escaso.
+
+IoTDB admite el protocolo MQTT v3.1 (un estándar OASIS). El servidor IoTDB incluye un servicio MQTT integrado que permite que los dispositivos remotos envíen mensajes directamente al servidor IoTDB.
+
+image::imagen-13.png[]
+
+== Servicio MQTT integrado
+
+El servicio MQTT integrado proporciona la capacidad de conexión directa a IoTDB a través de MQTT. Escucha los mensajes de publicación de los clientes MQTT y luego escribe los datos en el almacenamiento inmediatamente. El tema MQTT corresponde a la serie temporal de IoTDB. La carga útil de los mensajes se puede formatear en eventos mediante `PayloadFormatter` que cargó java SPI, y la implementación predeterminada es `JSONPayloadFormatter`. El formateador `json` predeterminado admite dos formatos json, y el siguiente es un ejemplo de carga útil de mensaje MQTT:
+
+[source, json]
+----
+ {
+      "device":"root.sg.d1",
+      "timestamp":1586076045524,
+      "measurements":["s1","s2"],
+      "values":[0.530635,0.530635]
+ }
+----
+
+o
+
+[source, json]
+----
+{
+      "device":"root.sg.d1",
+      "timestamps":[1586076045524,1586076065526],
+      "measurements":["s1","s2"],
+      "values":[[0.530635,0.530635], [0.530655,0.530695]]
+  }
+----
+
+image::imagen-14.png[]
+
+== Configuraciones MQTT
+
+El servicio IoTDB MQTT carga configuraciones de `${IOTDB_HOME}/${IOTDB_CONF}/iotdb-engine.properties` de forma predeterminada.
+
+Las configuraciones son las siguientes:
+
+[cols="1,1,1"]
+|===
+|Nombre 
+|Descripción 
+|Predeterminado
+
+|`enable_mqtt_service` 
+|si habilitar o no el servicio MQTT 
+|`false`
+
+|`mqtt_host` 
+|el host de enlace del servicio MQTT 
+|`0.0.0.0`
+
+|`mqtt_port` 
+|el puerto de enlace del servicio MQTT 
+|`1883`
+
+|`mqtt_handler_pool_size` 
+|el tamaño del grupo de controladores para entregar los mensajes MQTT 
+|`1`
+
+|`mqtt_payload_formatter` 
+|el formateador de carga útil del mensaje MQTT 
+|`json`
+
+|`mqtt_max_message_size` 
+|el tamaño máximo de mensaje MQTT en bytes
+|`1048576`
+|===
+
+== Ejemplos de Codificación
+
+El siguiente es un ejemplo en el que un cliente MQTT envía mensajes al servidor IoTDB.
+
+[source, Java]
+----
+MQTT mqtt = new MQTT();
+mqtt.setHost("127.0.0.1", 1883);
+mqtt.setUserName("root");
+mqtt.setPassword("root");
+
+BlockingConnection connection = mqtt.blockingConnection();
+connection.connect();
+
+Random random = new Random();
+for (int i = 0; i < 10; i++) {
+    String payload = String.format("{\n" +
+            "\"device\":\"root.sg.d1\",\n" +
+            "\"timestamp\":%d,\n" +
+            "\"measurements\":[\"s1\"],\n" +
+            "\"values\":[%f]\n" +
+            "}", System.currentTimeMillis(), random.nextDouble());
+
+    connection.publish("root.sg.d1.s1", payload.getBytes(), QoS.AT_LEAST_ONCE, false);
+}
+
+connection.disconnect();
+
+----

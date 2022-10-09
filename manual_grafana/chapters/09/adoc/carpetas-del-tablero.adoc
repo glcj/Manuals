@@ -1,0 +1,42 @@
+= Carpetas del tablero
+
+Las carpetas son una forma de organizar y agrupar tableros, muy útil si tiene muchos tableros o varios equipos que utilizan la misma instancia de Grafana.
+
+[NOTE]
+====
+Solo los administradores y superadministradores de Grafana pueden crear, editar o eliminar carpetas. Consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización] para obtener más información.
+====
+
+== Cómo crear una carpeta
+
+* Cree una carpeta utilizando el enlace Crear carpeta en el menú lateral (debajo del menú Crear (icono +))
+* Utilice el botón Crear carpeta en la página Administrar Tableros.
+* Al guardar un tablero, puede elegir una carpeta para guardar el tablero o crear una nueva carpeta.
+
+En la página Crear Carpeta, ingrese un nombre único para la carpeta y luego haga clic en Crear.
+
+== Administrar tableros
+
+image::image150.png[https://grafana.com/static/img/docs/v50/manage_dashboard_menu.png,width=205,height=329]
+
+Hay una nueva página Administrar Tableros donde puede realizar una variedad de tareas:
+
+* crear una carpeta
+* crear un tablero
+* mover tableros a carpetas
+* eliminar varios tableros
+* navegue a una página de carpeta (donde puede establecer permisos para una carpeta y/o sus tableros)
+
+== Página de carpeta del tablero
+
+Para llegar a la página de la carpeta del tablero, haga clic en el icono de engranaje que aparece cuando pasa el cursor sobre una carpeta en la lista del tablero en el resultado de la búsqueda o en la página Administrar Tableros.
+
+La Página de la carpeta del tablero es similar a la página Administrar Tableros y es donde puede realizar las siguientes tareas:
+
+* Le permite mover o eliminar tableros en una carpeta.
+* Cambiar el nombre de una carpeta (en la pestaña Configuración).
+* Configure los permisos para la carpeta (heredados por los tableros de la carpeta).
+
+== Permisos
+
+Los permisos se pueden asignar a una carpeta y heredarlos a los tableros que contienen. Se utiliza una Lista de Control de Acceso (ACL) en la que se pueden asignar permisos al *Rol de la organización*, al *Equipo* y al *Usuario* individual. Lea los documentos de xref:permisos-de-tablero-y-carpeta/permisos-de-tablero-y-carpeta.adoc[Permisos de tablero y carpeta] para obtener más detalles sobre el sistema de permisos.

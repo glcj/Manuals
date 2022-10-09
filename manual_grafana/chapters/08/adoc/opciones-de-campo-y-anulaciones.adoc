@@ -1,0 +1,30 @@
+= Opciones de campo y anulaciones
+
+Esta sección explica qué son las opciones de campo y las anulaciones de campo en Grafana y cómo usarlas. También incluye xref:paneles/opciones-de-campo-y-anulaciones.adoc#_ejemplos[ejemplos] si necesita una idea de cómo esta función podría ser útil en el mundo real.
+
+El modelo de datos utilizado en Grafana, el xref:desarrolladores/complementos/marcos-de-datos.adoc[marco de datos], es una estructura de tabla orientada a columnas que unifica tanto las series de tiempo como los resultados de las consultas de tabla. Cada columna dentro de esta estructura se llama _campo_. Un campo puede representar una sola serie temporal o una columna de tabla.
+
+Las opciones de campo le permiten cambiar cómo se muestran los datos en sus visualizaciones. Las opciones y anulaciones que aplica no cambian los datos, cambian la forma en que Grafana muestra los datos.
+
+== Opciones de campo
+
+Las _opciones de campo_, tanto estándar como personalizadas, se pueden encontrar en la pestaña Campo en el editor de paneles. Los cambios en esta pestaña se aplican a todos los campos (es decir, series/columnas). Por ejemplo, si cambia la unidad a porcentaje, todos los campos con valores numéricos se muestran en porcentajes. Aprenda a aplicar una opción de campo en xref:paneles/opciones-de-campo-y-anulaciones/configurar-todos-los-campos.adoc[Configurar todos los campos].
+
+== Anulaciones de campo
+
+Las _anulaciones de campo_ se pueden agregar en la pestaña Anulaciones en el editor de paneles. Allí puede agregar las mismas opciones que encuentra en la pestaña Campo, pero solo se aplican a campos específicos. Obtenga información sobre cómo aplicar una anulación en xref:paneles/opciones-de-campo-y-anulaciones/configurar-campos-especificos.adoc[Configurar campos específicos].
+
+== Opciones de campo disponibles y anulaciones
+
+Los tipos de opciones de campo son comunes tanto a las opciones de campo como a las anulaciones de campo. La única diferencia es si el cambio se aplicará a todos los campos (se aplicará en la pestaña Campo) o a un subconjunto de campos (se aplicará en la pestaña Anulaciones).
+
+[arabic]
+. Las xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-estandar.adoc[opciones de campo estándar] se aplican a todas las visualizaciones de panel que permiten transformaciones.
+. xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-de-tabla.adoc[Opciones de campo de tabla], que solo se aplican a visualizaciones de tabla.
+
+== Ejemplos
+
+A continuación, se muestran algunos ejemplos de cómo puede utilizar esta función:
+
+* xref:paneles/opciones-de-campo-y-anulaciones/configurar-todos-los-campos.adoc#_ejemplo_de_opcion_de_campo[Ejemplo de opción de campo]
+* xref:paneles/opciones-de-campo-y-anulaciones/configurar-campos-especificos.adoc#_ejemplos_de_campo_de_tabla[Ejemplo de anulación de campo]

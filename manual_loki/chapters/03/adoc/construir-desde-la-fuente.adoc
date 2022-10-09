@@ -1,0 +1,28 @@
+= Construir desde la fuente
+
+Para construir Loki manualmente, necesita clonar el repositorio de GitHub y luego `make Loki`.
+
+== Prerrequisitos
+
+* Go 1.14 o posterior
+* Make
+* Docker (para actualizar archivos protobuf y archivos yacc)
+
+== Construya manualmente en su sistema local
+
+Clone Loki en `$GOPATH/src/github.com/grafana/loki`:
+
+[source,bash]
+----
+git clone https://github.com/grafana/loki $GOPATH/src/github.com/grafana/loki
+----
+
+Luego cambie a ese directorio y ejecute `make loki`:
+
+[source,bash]
+----
+cd $GOPATH/src/github.com/grafana/loki
+make loki
+----
+
+Se creará un archivo en ./cmd/loki/loki y es el binario final construido.

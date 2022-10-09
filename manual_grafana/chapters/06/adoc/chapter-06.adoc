@@ -1,0 +1,13 @@
+
+include::permisos.adoc[]
+
+include::roles-de-la-organizacion.adoc[]
+
+include::permisos-de-tablero-y-carpeta.adoc[]
+
+include::restringir-acceso.adoc[]
+
+include::permisos-de-fuente-de-datos.adoc[]
+
+
+

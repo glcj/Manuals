@@ -1,0 +1,1402 @@
+= Apéndice 1: Parámetros de Configuración
+
+Antes de comenzar a usar IoTDB, primero debe configurar los archivos de configuración. Para su comodidad, ya hemos establecido la configuración predeterminada en los archivos.
+
+En total, proporcionamos a los usuarios tres tipos de módulos de configuración:
+
+* Archivo de configuración del entorno (`iotdb-env.bat`, `iotdb-env.sh`). El archivo de configuración predeterminado para el elemento de configuración del entorno. Los usuarios pueden configurar los elementos de configuración del sistema relevantes de JAVA-JVM en el archivo.
+
+* archivo de configuración del sistema (`iotdb-engine.properties`).
+
+    ** `iotdb-engine.properties`: el archivo de configuración predeterminado para el elemento de configuración de la capa del motor de IoTDB. Los usuarios pueden configurar los parámetros relacionados con el motor IoTDB en el archivo, como el puerto de escucha del servicio JDBC (`rpc_port`), el directorio de almacenamiento de datos sin secuencia (`unsequence_data_dir`), etc. Además, los usuarios pueden configurar la información sobre TsFile, como el tamaño de los datos escritos al disco por tiempo (`group_size_in_byte`).
+
+* archivo de configuración de registro (`logback.xml`)
+
+Los archivos de configuración de los tres elementos de configuración se encuentran en el directorio de instalación de IoTDB: carpeta `$IOTDB_HOME/conf`.
+
+== Configuración de Modificación en Caliente
+
+Para la comodidad de los usuarios, el servidor IoTDB proporciona a los usuarios una función de modificación en caliente, es decir, modificar algunos parámetros de configuración en `iotdb engine.properties` durante el funcionamiento del sistema y aplicándolas al sistema de forma inmediata. En los parámetros que se describen a continuación, estos parámetros cuya forma de `Effective` es `trigger`, admiten la modificación en caliente.
+
+Modo de activación: el cliente envía el comando `load configuration` al servidor IoTDB. Consulte el Capítulo 4 para conocer el uso del cliente.
+
+== Archivo de Configuración del Entorno de IoTDB
+
+El archivo de configuración del entorno se utiliza principalmente para configurar los parámetros relacionados con el entorno Java cuando se está ejecutando el servidor IoTDB, como la configuración relacionada con JVM. Esta parte de la configuración se pasa a la JVM cuando se inicia el servidor IoTDB. Los usuarios pueden ver el contenido del archivo de configuración del entorno viendo el archivo `iotdb-env.sh` (o `iotdb-env.bat`).
+
+Los detalles de cada variable son los siguientes:
+
+* MAX_HEAP_SIZE
+
+[cols="1,1"]
+|===
+|Nombre
+|MAX_HEAP_SIZE
+
+|Descripción
+|El tamaño máximo de memoria de pila que IoTDB puede usar al inicio.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|En Linux o MacOS, el valor predeterminado es una cuarta parte de la memoria. En Windows, el valor predeterminado para sistemas de 32 bits es 512M y el valor predeterminado para sistemas de 64 bits es 2G.
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* HEAP_NEWSIZE
+
+[cols="1,1"]
+|===
+|Nombre
+|HEAP_NEWSIZE
+
+|Descripción
+|El tamaño mínimo de memoria de pila que IoTDB puede usar al inicio.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|En Linux o MacOS, el valor predeterminado es mínimo {núcleos * 100M, un cuarto de MAX_HEAP_SIZE}. En Windows, el valor predeterminado para sistemas de 32 bits es 512M y el valor predeterminado para sistemas de 64 bits es 2G.
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* JMX_LOCAL
+
+[cols="1,1"]
+|===
+|Nombre
+|JMX_LOCAL
+
+|Descripción
+|Modo de monitoreo JMX, configurado como sí para permitir solo monitoreo local, no para permitir monitoreo remoto.
+
+|Tipo
+|Cadena numerada: "true", "false"
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* JMX_PORT
+
+[cols="1,1"]
+|===
+|Nombre
+|JMX_PORT
+
+|Descripción
+|Puerto de escucha JMX. Confirme que el puerto no es un puerto reservado del sistema y que no está ocupado.
+
+|Tipo
+|Entero corto: [0,65535]
+
+|Predeterminado
+|`31999`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* JMX_IP
+
+[cols="1,1"]
+|===
+|Nombre
+|JMX_IP
+
+|Descripción
+|Dirección de escucha de JMX. Solo tiene efecto si JMX_LOCAL=false. 0.0.0.0 nunca está permitido.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`127.0.0.1`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+== Autorización JMX
+
+Le *recomendamos encarecidamente* que *cambie la contraseña* para la conexión remota JMX.
+
+El usuario y las contraseñas están en `${IOTDB_CONF}/conf/jmx.password`.
+
+Las definiciones de permisos están en `${IOTDB_CONF}/conf/jmx.access`.
+
+== Archivo de Configuración del Sistema IoTDB
+
+=== Capa de Archivo
+
+* compressor
+
+[cols="1,1"]
+|===
+|Nombre
+|compressor
+
+|Descripción
+|Método de compresión de datos.
+
+|Tipo
+|Cadena enumerada: “UNCOMPRESSED”, “SNAPPY”
+
+|Predeterminado
+|`UNCOMPRESSED`
+
+|Efectivo
+|Activado
+|===
+
+* group_size_in_byte
+
+[cols="1,1"]
+|===
+|Nombre
+|group_size_in_byte
+
+|Descripción
+|El tamaño de los datos escritos en el disco por vez.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`134217728`
+
+|Efectivo
+|Activado
+|===
+
+* page_size_in_byte
+
+[cols="1,1"]
+|===
+|Nombre
+|page_size_in_byte
+
+|Descripción
+|El tamaño máximo de una sola página escrita en la memoria cuando se escribe cada columna en la memoria (en bytes).
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`65536`
+
+|Efectivo
+|Activado
+|===
+
+* max_number_of_points_in_page
+
+[cols="1,1"]
+|===
+|Nombre
+|max_number_of_points_in_page
+
+|Descripción
+|El número máximo de puntos de datos (marcas de tiempo - grupos valorados) contenidos en una página.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`1048576`
+
+|Efectivo
+|Activado
+|===
+
+* max_degree_of_index_node
+
+[cols="1,1"]
+|===
+|Nombre
+|max_degree_of_index_node
+
+|Descripción
+|El grado máximo del árbol de índice de metadatos (es decir, el número máximo de hijos de cada nodo).
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`256`
+
+|Efectivo
+|Solo se permite modificar en la primera puesta en marcha.
+|===
+
+* max_string_length
+
+[cols="1,1"]
+|===
+|Nombre
+|max_string_length
+
+|Descripción
+|La longitud máxima de una sola cadena (número de caracteres).
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`128`
+
+|Efectivo
+|Activado.
+|===
+
+* time_series_data_type
+
+[cols="1,1"]
+|===
+|Nombre
+|time_series_data_type
+
+|Descripción
+|Tipo de datos de marca de tiempo.
+
+|Tipo
+|Cadena enumerada: "INT32", "INT64"
+
+|Predeterminado
+|`Int64`
+
+|Efectivo
+|Activado.
+|===
+
+* time_encoder
+
+[cols="1,1"]
+|===
+|Nombre
+|time_encoder
+
+|Descripción
+|Tipo de codificación de la columna de tiempo
+
+|Tipo
+|Cadena enumerada: “TS_2DIFF”,“PLAIN”,“RLE”
+
+|Predeterminado
+|`TS_2DIFF`
+
+|Efectivo
+|Activado
+|===
+
+* value_encoder
+
+[cols="1,1"]
+|===
+|Nombre
+|value_encoder
+
+|Descripción
+|Tipo de codificación de la columna de valor
+
+|Tipo
+|Cadena enumerada: “TS_2DIFF”,“PLAIN”,“RLE”
+
+|Predeterminado
+|`PLAIN`
+
+|Efectivo
+|Activado
+|===
+
+* float_precision
+
+[cols="1,1"]
+|===
+|Nombre
+|float_precision
+
+|Descripción
+|La precisión del número de punto flotante (el número de dígitos después del punto decimal)
+
+|Tipo
+|Int32
+
+|Predeterminado
+|El valor predeterminado es 2 dígitos. Nota: El número de coma flotante de 32 bits tiene una precisión decimal de 7 bits y el número de coma flotante de 64 bits tiene una precisión decimal de 15 bits. Si el ajuste está fuera del rango, no tendrá ningún significado práctico.
+
+|Efectivo
+|Activado
+|===
+
+* bloomFilterErrorRate
+
+[cols="1,1"]
+|===
+|Nombre
+|float_precision
+
+|Descripción
+|La tasa de falsos positivos del filtro de floración en cada TsFile. El filtro Bloom comprueba si una serie temporal determinada está en el archivo ts antes de cargar los metadatos. Esto puede mejorar el rendimiento de la carga de metadatos y omitir el archivo ts que no contiene series de tiempo especificadas. Si desea obtener más información sobre su mecanismo, puede consultar: [página wiki de filtro de floración].
+
+|Tipo
+|float, (0, 1)
+
+|Predeterminado
+|`0.05`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+=== Capa de Motor
+
+* rpc_address
+
+[cols="1,1"]
+|===
+|Nombre
+|rpc_address
+
+|Descripción
+|El servicio jdbc escucha la dirección.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`0.0.0.0`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* rpc_port
+
+[cols="1,1"]
+|===
+|Nombre
+|rpc_port
+
+|Descripción
+|El servicio jdbc escucha en el puerto. Confirme que el puerto no es un puerto reservado del sistema y que no está ocupado.
+
+|Tipo
+|Entero corto: [0,65535]
+
+|Predeterminado
+|`6667`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* rpc_thrift_compression_enable
+
+[cols="1,1"]
+|===
+|Nombre
+|rpc_thrift_compression_enable
+
+|Descripción
+|Si habilita la compresión de ahorro (usando GZIP).
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* rpc_advanced_compression_enable
+
+[cols="1,1"]
+|===
+|Nombre
+|rpc_advanced_compression_enable
+
+|Descripción
+|Si habilita la compresión avanzada de thrift.
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* time_zone
+
+[cols="1,1"]
+|===
+|Nombre
+|time_zone
+
+|Descripción
+|La zona horaria en la que se encuentra el servidor, el valor predeterminado es la hora de Beijing (+8).
+
+|Tipo
+|Cadena de zona horaria
+
+|Predeterminado
+|`+08:00`
+
+|Efectivo
+|Activado
+|===
+
+* base_dir
+
+[cols="1,1"]
+|===
+|Nombre
+|base_dir
+
+|Descripción
+|La carpeta del sistema IoTDB. Se recomienda utilizar una ruta absoluta..
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`data`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* data_dirs
+
+[cols="1,1"]
+|===
+|Nombre
+|base_dir
+
+|Descripción
+|Los directorios de archivos de datos. Varios directorios están separados por comas. El directorio de inicio de la ruta relativa está relacionado con el sistema operativo. Se recomienda utilizar una ruta absoluta. Si la ruta no existe, el sistema la creará automáticamente.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`data/data`
+
+|Efectivo
+|Activado
+|===
+
+* wal_dir
+
+[cols="1,1"]
+|===
+|Nombre
+|wal_dir
+
+|Descripción
+|Ruta de almacenamiento del registro de escritura anticipada. Se recomienda utilizar una ruta absoluta.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`data/wal`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* enable_wal
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_wal
+
+|Descripción
+|Si se habilita el registro previo a la escritura. El valor predeterminado es verdadero (habilitado) y falso significa cerrado.
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Activado
+|===
+
+* enable_mem_control
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_mem_control
+
+|Descripción
+|Habilita el control de memoria para evitar OOM
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* memtable_size_threshold
+
+[cols="1,1"]
+|===
+|Nombre
+|memtable_size_threshold
+
+|Descripción
+|Tamaño máximo de memoria
+
+|Tipo
+|Largo
+
+|Predeterminado
+|`1073741824`
+
+|Efectivo
+|Cuando `enable_mem_contro`l es falso y después de reiniciar el sistema
+|===
+
+* avg_series_point_number_threshold
+
+[cols="1,1"]
+|===
+|Nombre
+|avg_series_point_number_threshold
+
+|Descripción
+|Número medio máximo de puntos de cada serie en `memtable`
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`10000`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* tsfile_size_threshold
+
+[cols="1,1"]
+|===
+|Nombre
+|tsfile_size_threshold
+
+|Descripción
+|Tamaño máximo de TsFiles
+
+|Tipo
+|Largo
+
+|Predeterminado
+|`536870912`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* enable_partition
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_partition
+
+|Descripción
+|Si habilita la partición de tiempo para los datos, si está deshabilitada, todos los datos pertenecen a la partición 0
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Solo se permite modificar en la primera puesta en marcha
+|===
+
+* partition_interval
+
+[cols="1,1"]
+|===
+|Nombre
+|partition_interval
+
+|Descripción
+|Rango de tiempo para dividir el grupo de almacenamiento, los datos de la serie de tiempo se dividirán en grupos por este rango de tiempo
+
+|Tipo
+|Int64
+
+|Predeterminado
+|`604800`
+
+|Efectivo
+|Solo se permite modificar en la primera puesta en marcha
+|===
+
+
+* concurrent_writing_time_partition
+
+[cols="1,1"]
+|===
+|Nombre
+|concurrent_writing_time_partition
+
+|Descripción
+|Esta configuración decide cuántas particiones de tiempo en un grupo de almacenamiento se pueden insertar al mismo tiempo.
+Por ejemplo, su intervalo de partición es 86400 y desea insertar datos en 5 días diferentes.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`1`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* multi_dir_strategy
+
+[cols="1,1"]
+|===
+|Nombre
+|multi_dir_strategy
+
+|Descripción
+|La estrategia de IoTDB para seleccionar directorios para TsFile en `tsfile_dir`. Puede usar un nombre de clase simple o un nombre completo de la clase. El sistema proporciona las siguientes tres estrategias:
+
+. `SequenceStrategy`: IoTDB selecciona el directorio de `tsfile_dir` en orden, atraviesa todos los directorías en tsfile_dir a su vez, y sigue contando;
+
+. `MaxDiskUsableSpaceFirstStrategy`: IoTDB primero selecciona el directorio con el mayor espacio libre en disco en `tsfile_dir`;
+
+. `MinFolderOccupiedSpaceFirstStrategy`: IoTDB prefiere el directorio con el menor espacio utilizado en `tsfile_dir`;
+
+. `UserDfineStrategyPackage` (política definida por el usuario)
+Puede completar una política definida por el usuario de las siguientes formas:
+
+.. Heredar la clase `cn.edu.tsinghua.iotdb.conf.directories.strategy.DirectoryStrategy` e implementar su propio método de estrategia;
+
+.. Complete la clase de configuración con el nombre completo de la clase implementada (nombre del paquete más el nombre de la clase, `UserDfineStrategyPackage`);
+
+.. Agregue el archivo jar al proyecto.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`MaxDiskUsableSpaceFirstStrategy`
+
+|Efectivo
+|Activado
+|===
+
+* tsfile_size_threshold
+
+[cols="1,1"]
+|===
+|Nombre
+|tsfile_size_threshold
+
+|Descripción
+|Cuando un tamaño de TsFile en el disco excede este umbral, TsFile se cierra y abre un nuevo TsFile para aceptar escrituras de datos. La unidad es byte y el valor predeterminado es 2G.
+
+|Tipo
+|Int64
+
+|Predeterminado
+|`536870912`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* tag_attribute_total_size
+
+[cols="1,1"]
+|===
+|Nombre
+|tag_attribute_total_size
+
+|Descripción
+|El tamaño máximo de persistencia de etiquetas y atributos de cada serie temporal.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`700`
+
+|Efectivo
+|Solo se permite modificar en la primera puesta en marcha
+|===
+
+* enable_partial_insert
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_partial_insert
+
+|Descripción
+|Si continuar escribiendo otras medidas si algunas medidas fallan en una inserción.
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+
+* mtree_snapshot_interval
+
+[cols="1,1"]
+|===
+|Nombre
+|mtree_snapshot_interval
+
+|Descripción
+|El menor número de líneas de intervalo de mlog.txt al crear un punto de control y guardar una instantánea de MTree. Unidad: números de línea.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`100000`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* flush_wal_threshold
+
+[cols="1,1"]
+|===
+|Nombre
+|flush_wal_threshold
+
+|Descripción
+|Una vez que WAL alcanza este valor, se descarga en el disco y es posible perder como máximo las operaciones `flush_wal_threshold`.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`10000`
+
+|Efectivo
+|Activado
+|===
+
+* force_wal_period_in_ms
+
+[cols="1,1"]
+|===
+|Nombre
+|force_wal_period_in_ms
+
+|Descripción
+|El período durante el cual el registro se ve obligado periódicamente a descargarse en el disco (en milisegundos).
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`10`
+
+|Efectivo
+|Activado
+|===
+
+* fetch_size
+
+[cols="1,1"]
+|===
+|Nombre
+|fetch_size
+
+|Descripción
+|La cantidad de datos leídos cada vez por lotes (el número de tiras de datos, es decir, el número de marcas de tiempo diferentes).
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`10000`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* merge_concurrent_threads
+
+[cols="1,1"]
+|===
+|Nombre
+|merge_concurrent_threads
+
+|Descripción
+|El máximo de subprocesos que se pueden utilizar cuando se combinan datos no secuenciales. Cuanto más grande es, más IO y coste de CPU. Cuanto menor sea el valor, más ocupado estará el disco, cuando los datos sin secuencia son demasiado grandes, la lectura será más lenta.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`0`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* enable_stat_monitor
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_stat_monitor
+
+|Descripción
+|Si se habilitan las estadísticas en segundo plano.
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* concurrent_flush_thread
+
+[cols="1,1"]
+|===
+|Nombre
+|concurrent_flush_thread
+
+|Descripción
+|El número de subproceso utilizado para realizar la operación cuando IoTDB escribe datos en la memoria en el disco. Si el valor es menor o igual a 0, entonces se usa el número de núcleos de CPU instalados en la máquina. El valor predeterminado es 0.
+
+|Tipo
+|Int32
+
+|Predeterminado
+|`0`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* tsfile_storage_fs
+
+[cols="1,1"]
+|===
+|Nombre
+|tsfile_storage_fs
+
+|Descripción
+|El sistema de archivos de almacenamiento de Tsfile y archivos de datos relacionados. Actualmente se admiten el sistema de archivos LOCAL y HDFS.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`LOCAL`
+
+|Efectivo
+|Solo se permite modificar en la primera puesta en marcha
+|===
+
+* core_site_path
+
+[cols="1,1"]
+|===
+|Nombre
+|core_site_path
+
+|Descripción
+|Ruta de archivo absoluta de core-site.xml si Tsfile y los archivos de datos relacionados se almacenan en HDFS.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`/etc/hadoop/conf/core-site.xml`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* hdfs_site_path
+
+[cols="1,1"]
+|===
+|Nombre
+|hdfs_site_path
+
+|Descripción
+|Ruta de archivo absoluta de hdfs-site.xml si Tsfile y los archivos de datos relacionados se almacenan en HDFS.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`/etc/hadoop/conf/hdfs-site.xml`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* hdfs_ip
+
+[cols="1,1"]
+|===
+|Nombre
+|hdfs_ip
+
+|Descripción
+|IP de HDFS si Tsfile y los archivos de datos relacionados se almacenan en HDFS. Si hay más de un hdfs_ip en la configuración, se utiliza Hadoop HA.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`localhost`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* hdfs_port
+
+[cols="1,1"]
+|===
+|Nombre
+|hdfs_port
+
+|Descripción
+|Puerto de HDFS si Tsfile y los archivos de datos relacionados se almacenan en HDFS.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`9000`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* dfs_nameservices
+
+[cols="1,1"]
+|===
+|Nombre
+|dfs_nameservices
+
+|Descripción
+|Servicios de nombres de HDFS HA ​​si se usa Hadoop HA.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`hdfsnamespace`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* dfs_ha_namenodes
+
+[cols="1,1"]
+|===
+|Nombre
+|dfs_ha_namenodes
+
+|Descripción
+|Nodos de nombres bajo los servicios de nombres DFS de HDFS HA ​​si se usa Hadoop HA.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`nn1, nn2`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* dfs_ha_automatic_failover_enabled
+
+[cols="1,1"]
+|===
+|Nombre
+|dfs_ha_automatic_failover_enabled
+
+|Descripción
+|Si se usa la conmutación por error automática si se usa Hadoop HA.
+
+|Tipo
+|Booleano
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* dfs_client_failover_proxy_provider
+
+[cols="1,1"]
+|===
+|Nombre
+|dfs_client_failover_proxy_provider
+
+|Descripción
+|Proveedor de proxy si usa Hadoop HA y habilita la conmutación por error automática.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* hdfs_use_kerberos
+
+[cols="1,1"]
+|===
+|Nombre
+|hdfs_use_kerberos
+
+|Descripción
+|Si usa kerberos para autenticar hdfs.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* kerberos_keytab_file_path
+
+[cols="1,1"]
+|===
+|Nombre
+|kerberos_keytab_file_path
+
+|Descripción
+|Ruta completa del archivo keytab de Kerberos.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`/path`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* kerberos_principal
+
+[cols="1,1"]
+|===
+|Nombre
+|kerberos_principal
+
+|Descripción
+|Kerberos pricipal.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|Su principal
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* authorizer_provider_class
+
+[cols="1,1"]
+|===
+|Nombre
+|authorizer_provider_class
+
+|Descripción
+|El nombre de la clase del servicio de autorización.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`org.apache.iotdb.db.auth.authorizer.LocalFileAuthorizer`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* openID_url
+
+[cols="1,1"]
+|===
+|Nombre
+|openID_url
+
+|Descripción
+|El servidor openID si `OpenIdAuthorizer` está habilitado.
+
+|Tipo
+|De cadena (String (a http url))
+
+|Predeterminado
+|`no`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* thrift_max_frame_size
+
+[cols="1,1"]
+|===
+|Nombre
+|thrift_max_frame_size
+
+|Descripción
+|Los bytes máximos en una solicitud/respuesta RPC.
+
+|Tipo
+|Largo
+
+|Predeterminado
+|`67108864 (si >= 8 * 1024 * 1024)`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+== Creación Automática de Esquemas e Inferencia de Tipos
+
+* enable_auto_create_schema
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_auto_create_schema
+
+|Descripción
+|Si se crea automáticamente la serie temporal cuando se reciben datos de una serie temporal que no existen.
+
+|Tipo
+|`true` o `false`
+
+|Predeterminado
+|`true`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* default_storage_group_level
+
+[cols="1,1"]
+|===
+|Nombre
+|default_storage_group_level
+
+|Descripción
+|El nivel de grupo de almacenamiento cuando se crea un esquema automáticamente está habilitado. Por ejemplo, si recibimos un punto de datos de root.sg0.d1.s2, configuraremos root.sg0 como el grupo de almacenamiento si el nivel del grupo de almacenamiento es 1. (la raíz es el nivel 0).
+
+|Tipo
+|Entero
+
+|Predeterminado
+|`1`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* boolean_string_infer_type
+
+[cols="1,1"]
+|===
+|Nombre
+|boolean_string_infer_type
+
+|Descripción
+|A qué tipo se deben asignar los valores "verdadero" y "falso".
+
+|Tipo
+|`BOOLEAN` o `TEXT`
+
+|Predeterminado
+|`BOOLEAN`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* integer_string_infer_type
+
+[cols="1,1"]
+|===
+|Nombre
+|integer_string_infer_type
+
+|Descripción
+|A qué tipo se debe resolver una cadena entera como "67" en una consulta.
+
+|Tipo
+|`INT32`, `INT64`, `DOUBLE`, `FLOAT` o `TEXT`
+
+|Predeterminado
+|`DOUBLE`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+
+* nan_string_infer_type
+
+[cols="1,1"]
+|===
+|Nombre
+|nan_string_infer_type
+
+|Descripción
+|A qué tipo se debe resolver el valor NaN en una consulta.
+
+|Tipo
+|`DOUBLE`, `FLOAT` o `TEXT`
+
+|Predeterminado
+|`FLOAT`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* floating_string_infer_type
+
+[cols="1,1"]
+|===
+|Nombre
+|floating_string_infer_type
+
+|Descripción
+|A qué tipo se debe resolver una cadena de número flotante como "6.7" en una consulta.
+
+|Tipo
+|`DOUBLE`, `FLOAT` o `TEXT`
+
+|Predeterminado
+|`FLOAT`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* enable_partition
+
+[cols="1,1"]
+|===
+|Nombre
+|enable_partition
+
+|Descripción
+|si habilita la partición de datos. Si está deshabilitado, todos los datos pertenecen a la partición 0.
+
+|Tipo
+|`BOOLEAN`
+
+|Predeterminado
+|`false`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+* partition_interval
+
+[cols="1,1"]
+|===
+|Nombre
+|partition_interval
+
+|Descripción
+|Rango de tiempo para particionar datos dentro de cada grupo de almacenamiento, la unidad es la segunda.
+
+|Tipo
+|`LONG`
+
+|Predeterminado
+|`604800`
+
+|Efectivo
+|Después de reiniciar el sistema
+|===
+
+== Habilitar el Registro de GC
+
+El registro de GC está desactivado de forma predeterminada. Para ajustar el rendimiento, es posible que desee recopilar la información del GC.
+
+Para habilitar el registro de GC, simplemente agregue un parámetro `printgc` cuando inicie el servidor.
+
+[source,Bash]
+----
+nohup sbin/start-server.sh printgc >/dev/null 2>&1 &
+----
+
+O
+
+[source,Bash]
+----
+sbin\start-server.bat printgc
+----
+
+El registro de GC se almacena en `IOTDB_HOME/logs/gc.log`. Habrá como máximo 10 archivos gc.log. * Y cada uno puede alcanzar los 10 MB.

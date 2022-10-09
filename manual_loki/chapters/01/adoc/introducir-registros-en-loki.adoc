@@ -1,0 +1,75 @@
+== Introducir registros en Loki
+
+Después de xref:instalacion/local.adoc[instalar y ejecutar Loki], probablemente desee obtener registros de otras aplicaciones.
+
+Para obtener los registros de la aplicación en Loki, debe editar el archivo de configuración de xref:clientes/promtail.adoc[Promtail].
+
+Información detallada sobre la configuración de Promtail está disponible en la xref:clientes/promtail/configuracion.adoc[Configuración de Promtail].
+
+Las siguientes instrucciones le ayudarán a comenzar.
+
+. Si aún no lo ha hecho, descargue un archivo de configuración de Promtail. Mantenga un registro de dónde está, porque deberá citarlo cuando ejecute el binario.
++
+----
+wget https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/promtail/promtail-local-config.yaml
+----
++
+. Abra el archivo de configuración en el editor de texto de su elección. Debería verse similar a esto:
++
+----
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: varlogs
+      __path__: /var/log/*log
+----
+
+Las siete líneas debajo de `scrape_configs` son las que envían los registros que genera Loki a Loki, que luego los muestra en la línea de comando y http://localhost:3100/metrics.
+
+. Copie las siete líneas debajo de `scrape_configs` y luego péguelas debajo del trabajo original (también puede editar las siete líneas originales).
++
+A continuación se muestra un ejemplo que envía registros desde una instalación predeterminada de Grafana a Loki. Actualizamos los siguientes campos:
++
+** job_name: esto diferencia los registros recopilados de otros grupos de registros.
+** target: opcional para static_configs, sin embargo, a menudo se define porque en versiones anteriores de Promtail no era opcional. Este fue un artefacto de usar directamente el código de descubrimiento de servicio de Prometheus que requería esta entrada.
+** labels: etiqueta estática que se aplica a cada línea de registro raspada por esta definición. Buenos ejemplos serían el nombre del entorno, el nombre del trabajo o el nombre de la aplicación.
+** path: la ruta hacia donde se almacenan los registros que quiero que Loki consuma.
++
+----
+- job_name: grafana
+  static_configs:
+  - targets:
+      - grafana
+    labels:
+      job: grafana
+      __path__: "C:/Program Files/GrafanaLabs/grafana/data/log/grafana.log"
+----
++
+. Ingrese el siguiente comando para ejecutar Promtail. Los ejemplos siguientes asumen que ha colocado el archivo de configuración en el mismo directorio que el binario.
++
+*Windows*
++
+----
+.\promtail-windows-amd64.exe --config.file=promtail-local-config.yaml
+----
++
+*Linux*
++
+----
+./promtail-linux-amd64 -config.file=promtail-local-config.yaml
+----
+
+Ahora debería ver los registros de su aplicación. Si está utilizando Grafana, es posible que deba actualizar su instancia para ver los registros.

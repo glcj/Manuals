@@ -1,0 +1,30 @@
+= Aplicar transformaciones
+
+Puede aplicar transformaciones desde la pestaña Transformar del editor de panel de Grafana, que se encuentra junto a la pestaña Consultas. Consulte también, xref:paneles/transformaciones/aplicar-transformaciones.adoc#_transformaciones_de_depuracion[Transformaciones de depuración].
+
+Para aplicar una transformación:
+
+[arabic]
+. Navegue hasta el panel donde desea agregar una o más transformaciones.
+. Haga clic en el título del panel y luego en *Editar*.
+. Haga clic en la pestaña *Transformar*.
+. Haga clic en una transformación para seleccionarla.
++
+Se muestra una fila de transformación. Puede configurar las opciones de transformación aquí. Para obtener más información, consulte Tipos y opciones de transformación.
++
+[arabic, start=5]
+. Haga clic en *Agregar transformación* para aplicar otra transformación.
++
+Esta siguiente transformación actúa sobre el conjunto de resultados devuelto por la transformación anterior.
++
+image::image49.png[https://grafana.com/static/img/docs/transformations/transformations-7-0.png,width=624,height=137]
+
+== Eliminar una transformación
+
+Para eliminar una transformación que ya no es necesaria, haga clic en el icono de la papelera.
+
+== Depurar transformaciones
+
+Para ver los conjuntos de resultados de entrada y salida de la transformación, haga clic en el icono de error (bicho) en el lado derecho de la fila de transformación, Grafana muestra la vista de depuración de transformación debajo de la fila de transformación.
+
+image::image50.png[https://grafana.com/static/img/docs/transformations/debug-transformations-7-0.png,width=624,height=314]

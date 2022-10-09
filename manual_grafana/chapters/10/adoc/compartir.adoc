@@ -1,0 +1,16 @@
+= Compartir tableros y paneles
+
+Grafana le permite compartir tableros y paneles con otros usuarios dentro de una organización y, en determinadas situaciones, públicamente en la Web. Puede compartir usando:
+
+* Un enlace directo
+* Una captura instantánea
+* Un enlace integrado (solo para paneles)
+* Un enlace de exportación (solo para tableros)
+
+Consulte xref:compartir/compartir-un-tablero.adoc[Compartir un tablero] y xref:compartir/compartir-un-panel.adoc[Compartir un panel] para obtener más información.
+
+Debe tener un permiso de espectador autorizado para ver una imagen representada por un enlace directo.
+
+También se requiere el mismo permiso para ver enlaces incrustados a menos que tenga habilitado el permiso de acceso anónimo para su instancia de Grafana. Puede habilitar el xref:autenticacion/autenticacion.adoc[acceso anónimo] usted mismo en Grafana OSS. Para habilitar el acceso anónimo en una instancia de Grafana Cloud, comuníquese con Atención al cliente.
+
+Cuando comparte un panel o tablero como una instantánea, una instantánea (del panel o del tablero en ese momento) está disponible públicamente en la web. Cualquiera que tenga un enlace puede acceder a él. Dado que las instantáneas no necesitan autorización para verlas, Grafana elimina la información relacionada con la cuenta de la que provienen, así como cualquier dato confidencial de la instantánea.

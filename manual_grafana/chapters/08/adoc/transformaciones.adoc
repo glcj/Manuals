@@ -1,0 +1,32 @@
+= Transformaciones
+
+Las transformaciones procesan el conjunto de resultados de una consulta antes de pasarla para su visualización. Le permiten cambiar el nombre de los campos, unir series de tiempo separadas, hacer cálculos en las consultas y más. Para los usuarios, con numerosos tableros o con un gran volumen de consultas, la capacidad de reutilizar el resultado de la consulta de un panel en otro panel puede ser una gran ganancia de rendimiento.
+
+Se puede acceder a la función de transformaciones desde la pestaña *Transformar* del editor del panel de Grafana.
+
+[NOTE]
+====
+Transformaciones es una función beta de Grafana 7.0. Los temas de esta sección se actualizarán con frecuencia a medida que trabajemos en esta función.
+====
+
+A veces, las transformaciones dan como resultado datos que no se pueden representar gráficamente. Cuando eso sucede, Grafana muestra una sugerencia en la visualización en la que puede hacer clic para cambiar a visualización de tabla. A menudo, esto le ayuda a comprender mejor lo que la transformación le está haciendo a sus datos.
+
+== Orden de transformaciones
+
+En caso de que haya múltiples transformaciones, Grafana las aplica en la secuencia exacta en la que se enumeran. Cada transformación crea un nuevo conjunto de resultados que se pasa a la siguiente transformación en la canalización para su procesamiento.
+
+El orden en el que se aplican las transformaciones puede marcar una gran diferencia en el aspecto de sus resultados. Por ejemplo, si usa una transformación Reducir para condensar todos los resultados de una columna en un solo valor, entonces solo puede aplicar transformaciones a ese único valor.
+
+== Prerrequisitos
+
+Antes de poder configurar y aplicar transformaciones:
+
+* Debe haber ingresado una consulta y haber devuelto datos de una fuente de datos. Para obtener más información sobre consultas, lea xref:paneles/consultas.adoc[Consultas].
+* Debe haber elegido una visualización que respalde el resultado de su consulta y las transformaciones elegidas. Diferentes transformaciones pueden dar como resultado una estructura de datos que solo algunas visualizaciones pueden representar. Por ejemplo, la visualización de gráfico no puede mostrar datos reducidos (que resultan de la transformación Reducir). Si su visualización actual no le muestra lo que espera después de aplicar una transformación, cambie a la visualización de tabla para verificar el resultado. Para obtener más información sobre los diferentes tipos de visualizaciones, consulte:
+** xref:paneles/visualizaciones/panel-de-medidor-de-barra.adoc[Medidor de barra]
+** xref:paneles/visualizaciones/panel-de-medidor.adoc[Medidor]
+** xref:paneles/visualizaciones/panel-de-grafico.adoc[Grafico]
+** xref:paneles/visualizaciones/panel-de-mapa-de-calor.adoc[Mapa de calor]
+** xref:paneles/visualizaciones/panel-de-registros.adoc[Registro]
+** xref:paneles/visualizaciones/panel-de-estadisticas.adoc[Estadística]
+** xref:paneles/visualizaciones/panel-de-tabla.adoc[Tabla]

@@ -1,0 +1,96 @@
+= Comando de Mantenimiento
+
+== FLUSH
+
+Conserve todos los puntos de datos de la tabla de memoria del grupo de almacenamiento en el disco y selle el archivo de datos.
+
+[source]
+----
+IoTDB> FLUSH 
+IoTDB> FLUSH root.ln
+IoTDB> FLUSH root.sg1,root.sg2
+----
+
+== MERGE
+
+Fusionar datos secuenciados y no secuenciados. Actualmente, IoTDB admite los siguientes dos tipos de SQL para activar manualmente el proceso de combinación de archivos de datos:
+
+. `MERGE` Solo reescribe fragmentos superpuestos, la velocidad de fusión es rápida, mientras que eventualmente habrá datos redundantes en el disco.
+
+. `FULL MERGE` Reescribe todos los datos en archivos superpuestos, la velocidad de fusión es lenta, pero eventualmente no habrá datos redundantes en el disco.
+
+[source]
+----
+IoTDB> MERGE
+IoTDB> FULL MERGE
+----
+
+== CLEAR CACHÉ
+
+Borre la caché de fragmentos, metadatos de fragmentos y metadatos de series temporales para liberar la huella de memoria.
+
+[source]
+----
+IoTDB> CLEAR CACHE
+----
+
+== SCHEMA SNAPSHOT
+
+Para acelerar el reinicio de IoTDB, los usuarios pueden crear una instantánea del esquema y evitar recuperar el esquema del archivo mlog.
+
+[source]
+----
+IoTDB> CREATE SNAPSHOT FOR SCHEMA
+----
+
+== KILL QUERY
+
+Al usar IoTDB, puede encontrar las siguientes situaciones: ha ingresado una declaración de consulta, pero no puede obtener el resultado durante mucho tiempo, ya que esta consulta contiene demasiados datos o algunas otras razones, y tiene que esperar hasta que finalice la consulta. Desde la versión 0.12, IoTDB ha proporcionado dos soluciones para consultas con un tiempo de ejecución prolongado: query timeout y query abort.
+
+=== Query Timeout
+
+Para las consultas que tardan demasiado en ejecutarse, IoTDB interrumpirá por la fuerza la consulta y generará una excepción de tiempo de espera, como se muestra en la figura:
+
+[source]
+----
+IoTDB> select * from root;
+Msg: 701 Current query is time out, please check your statement or modify timeout parameter.
+----
+
+El tiempo de espera predeterminado del sistema es 60000 ms, que se puede personalizar en el archivo de configuración mediante el parámetro `query_timeout_threshold`.
+
+Si usa JDBC o Session, también admitimos establecer un tiempo de espera para una sola consulta （Unidad: ms） ：
+
+[source]
+----
+E.g. ((IoTDBStatement) statement).executeQuery(String sql, long timeoutInMS)
+E.g. session.executeQueryStatement(String sql, long timeout)
+----
+
+Si el parámetro de tiempo de espera no está configurado o tiene el valor 0, se utilizará el tiempo de espera predeterminado.
+
+=== Query Abort
+
+Además de esperar a que se agote el tiempo de espera de la consulta de forma pasiva, IoTDB también admite detener la consulta de forma activa:
+
+[source]
+----
+KILL QUERY <queryId>
+----
+
+Puede cancelar la consulta especificada especificando `queryId`. Si no se especifica `queryId`, se eliminarán todas las consultas en ejecución.
+
+Para obtener el `queryId` en ejecución, puede usar el comando `show query processlist,` que mostrará la lista de todas las consultas en ejecución, con el siguiente conjunto de resultados:
+
+[cols="1,1,1"]
+|===
+|Tiempo
+|queryId
+|Declaración
+
+|
+|
+|
+|===
+
+La longitud máxima de visualización de la declaración es de 64 caracteres. Para declaraciones con más de 64 caracteres, se mostrará la parte interceptada.

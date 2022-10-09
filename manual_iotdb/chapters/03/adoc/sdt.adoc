@@ -1,0 +1,84 @@
+SDT
+El algoritmo Swinging Door Trending (SDT) es un algoritmo de compresión con pérdida. SDT tiene una complejidad computacional baja y usa una tendencia lineal para representar una cantidad de datos.
+
+En IoTDB, SDT comprime y descarta datos al descargarlos en el disco.
+
+IoTDB le permite especificar las propiedades de SDT al crear una serie temporal y admite tres propiedades:
+
+== CompDev (Desviación de la Compresión)
+
+CompDev es el parámetro más importante en SDT que representa la diferencia máxima entre la muestra actual y la tendencia lineal actual. CompDev debe ser mayor que 0 para realizar la compresión.
+
+== CompMinTime (Intervalo de Tiempo Mínimo de Compresión)
+
+CompMinTime es un parámetro que mide la distancia de tiempo entre dos puntos de datos almacenados, que se utiliza para reducir el ruido. Si el intervalo de tiempo entre el punto actual y el último punto almacenado es menor o igual a su valor, el punto actual NO se almacenará independientemente de la desviación de la compresión. El valor predeterminado es 0 con unidad de tiempo ms.
+
+== CompMaxTime (Intervalo de Tiempo Máximo de Compresión)
+
+CompMaxTime es un parámetro que mide la distancia de tiempo entre dos puntos de datos almacenados. Si el intervalo de tiempo entre el punto actual y el último punto almacenado es mayor o igual a su valor, el punto actual se almacenará independientemente de la desviación de la compresión. El valor predeterminado es 9.223.372.036.854.775.807 con unidad de tiempo ms.
+
+La sintaxis especificada para SDT se detalla en [Crear Declaración de Serie Temporal].
+
+Tipos de datos admitidos:
+
+. INT32 (Entero)
+
+. INT64 (Entero Largo)
+
+. FLOAT (Punto Flotante de Precisión Simple)
+
+. DOUBLE (Punto Flotante de Precisión Doble)
+
+El siguiente es un ejemplo del uso de la compresión SDT.
+
+[source]
+----
+IoTDB> CREATE TIMESERIES root.sg1.d0.s0 WITH DATATYPE=INT32,ENCODING=PLAIN,LOSS=SDT,COMPDEV=2
+----
+
+Antes del lavado y la compresión SDT, los resultados se muestran a continuación:
+
+[source]
+----
+IoTDB> SELECT s0 FROM root.sg1.d0
++-----------------------------+--------------+
+|                         Time|root.sg1.d0.s0|
++-----------------------------+--------------+
+|2017-11-01T00:06:00.001+08:00|             1|
+|2017-11-01T00:06:00.002+08:00|             1|
+|2017-11-01T00:06:00.003+08:00|             1|
+|2017-11-01T00:06:00.004+08:00|             1|
+|2017-11-01T00:06:00.005+08:00|             1|
+|2017-11-01T00:06:00.006+08:00|             1|
+|2017-11-01T00:06:00.007+08:00|             1|
+|2017-11-01T00:06:00.015+08:00|            10|
+|2017-11-01T00:06:00.016+08:00|            20|
+|2017-11-01T00:06:00.017+08:00|             1|
+|2017-11-01T00:06:00.018+08:00|            30|
++-----------------------------+--------------+
+Total line number = 11
+It costs 0.008s
+----
+
+Después del descarte y la compresión SDT, los resultados se muestran a continuación:
+
+[source]
+----
+IoTDB> FLUSH
+IoTDB> SELECT s0 FROM root.sg1.d0
++-----------------------------+--------------+
+|                         Time|root.sg1.d0.s0|
++-----------------------------+--------------+
+|2017-11-01T00:06:00.001+08:00|             1|
+|2017-11-01T00:06:00.007+08:00|             1|
+|2017-11-01T00:06:00.015+08:00|            10|
+|2017-11-01T00:06:00.016+08:00|            20|
+|2017-11-01T00:06:00.017+08:00|             1|
++-----------------------------+--------------+
+Total line number = 5
+It costs 0.044s
+----
+
+SDT entra en vigor cuando se descarta en el disco. El algoritmo SDT siempre almacena el primer punto y no almacena el último punto.
+
+Los datos en [2017-11-01T00:06:00.001, 2017-11-01T00:06:00.007] están dentro de la desviación de compresión, por lo que se descartaron. El punto de datos en el momento 2017-11-01T00:06:00.007 se almacena porque el siguiente punto de datos en el momento 2017-11-01T00:06:00.015 excede la desviación de compresión. Cuando un punto de datos excede la desviación de compresión, SDT almacena el último punto leído y actualiza los límites superior e inferior. El último punto a la hora 2017-11-01T00:06:00.018 no se almacena.

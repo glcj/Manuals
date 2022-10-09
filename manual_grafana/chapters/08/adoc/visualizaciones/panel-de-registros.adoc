@@ -1,0 +1,28 @@
+= Panel de registros
+
+La visualización del panel de registros muestra líneas de registro de fuentes de datos que admiten registros, como Elastic, Influx y Loki. Normalmente, utilizaría este panel junto a un panel de gráficos para mostrar la salida del registro de un proceso relacionado.
+
+[NOTE]
+====
+El panel Registros solo está disponible en Grafana v6.4 +.
+====
+
+image::image71.png[https://grafana.com/static/img/docs/v64/logs-panel.png,width=624,height=208]
+
+El panel de registros muestra el resultado de las consultas que se ingresaron en la pestaña Consulta. Los resultados de varias consultas se combinan y ordenan por tiempo. Puede desplazarse dentro del panel si la fuente de datos devuelve más líneas de las que se pueden mostrar a la vez.
+
+Para limitar el número de líneas renderizadas, puede usar la configuración de *Puntos de datos máximos* en las *Opciones de consulta*. Si no se establece, la fuente de datos generalmente aplicará un límite predeterminado.
+
+== Nivel de registro
+
+Para los registros donde se especifica una etiqueta de *nivel*, usamos el valor de la etiqueta para determinar el nivel del registro y actualizar el color en consecuencia. Si el registro no tiene una etiqueta de nivel especificada, analizamos el registro para averiguar si su contenido coincide con alguna de las expresiones admitidas (consulte a continuación para obtener más información). El nivel de registro siempre está determinado por la primera coincidencia. En caso de que Grafana no pueda determinar un nivel de registro, se visualizará con un nivel de registro *desconocido*. Consulte los xref:explorar/explorar.adoc[niveles de registro admitidos y las asignaciones de abreviaturas y expresiones de nivel de registro].
+
+=== Opciones de pantalla
+
+Utilice esta configuración para refinar su visualización:
+
+* *Tiempo:* muestra u oculta la columna de tiempo. Esta es la marca de tiempo asociada con la línea de registro según lo informado desde la fuente de datos.
+* *Etiquetas únicas:* muestra u oculta la columna de etiquetas únicas, que muestra solo etiquetas no comunes.
+* *Ajustar líneas:* alternar el ajuste de líneas.
+* *Orden:* muestra los resultados en orden de tiempo descendente o ascendente. El valor predeterminado es *Descendente*, mostrando primero los registros más recientes. Configure en *Ascendente* para mostrar primero las líneas de registro más antiguas.
+

@@ -1,0 +1,39 @@
+= Cambiar la zona horaria predeterminada de Grafana
+
+De forma predeterminada, Grafana usa la zona horaria en su navegador web. Sin embargo, puede anular esta configuración a nivel de servidor, organización, equipo o usuario individual. Este tema proporciona instrucciones para cada tarea.
+
+Algunas tareas requieren ciertos permisos. Para obtener más información sobre los roles, consulte xref:permisos/permisos.adoc[Permisos].
+
+== Establecer zona horaria del servidor
+
+Los administradores del servidor de Grafana pueden elegir una zona horaria predeterminada para todos los usuarios del servidor configurando la opción xref:administracion/configuracion.adoc#_default_timezone[default_timezone] en el archivo de configuración de Grafana.
+
+== Establecer zona horaria de la organización
+
+Los administradores de la organización pueden elegir una zona horaria predeterminada para su organización.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje).
+. Haga clic en *Preferencias*.
+. Haga clic para seleccionar una opción en la lista *Zona horaria*. El valor *predeterminado* es la zona horaria local del navegador o la zona horaria seleccionada en un nivel superior. Consulte xref:tableros/controles-de-rango-de-tiempo.adoc[Controles de rango de tiempo] para obtener más información sobre la configuración de tiempo de Grafana.
+. Clic en *Guardar*.
+
+== Establecer zona horaria del equipo
+
+Los administradores de la organización y los administradores del equipo pueden elegir una zona horaria predeterminada para todos los usuarios de un equipo.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en el equipo para el que desea cambiar la zona horaria y luego navegue a la pestaña *Configuración*.
+. Haga clic para seleccionar una opción en la lista *Zona horaria*. El valor *predeterminado* es la zona horaria local del navegador o la zona horaria seleccionada en un nivel superior. Consulte xref:tableros/controles-de-rango-de-tiempo.adoc[Controles de rango de tiempo] para obtener más información sobre la configuración de tiempo de Grafana.
+. Clic en *Guardar*.
+
+== Establece tu zona horaria personal
+
+Puede cambiar la zona horaria de su cuenta de usuario. Esta configuración anula la configuración de la zona horaria en los niveles más altos.
+
+[arabic]
+. En el menú de la izquierda, coloca el cursor sobre tu avatar y luego haz clic en *Preferencias*.
+. Haga clic para seleccionar una opción en la lista *Zona horaria*. El valor *predeterminado* es la zona horaria local del navegador o la zona horaria seleccionada en un nivel superior. Consulte xref:tableros/controles-de-rango-de-tiempo.adoc[Controles de rango de tiempo] para obtener más información sobre la configuración de tiempo de Grafana.
+. Clic en *Guardar*.

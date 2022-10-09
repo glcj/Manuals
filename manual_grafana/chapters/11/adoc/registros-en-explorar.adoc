@@ -1,0 +1,123 @@
+= Registros en Explorar
+
+Junto con las métricas, Explorar le permite investigar sus registros en las siguientes fuentes de datos:
+
+* xref:fuentes-de-datos/elasticsearch.adoc[Elasticsearch]
+* xref:fuentes-de-datos/influxdb.adoc[InfluxDB]
+* xref:fuentes-de-datos/loki.adoc[Loki]
+
+Durante el monitoreo de la infraestructura y la respuesta a incidentes, puede profundizar en las métricas y los registros para encontrar la causa. Explore también le permite correlacionar métricas y registros al verlos uno al lado del otro. Esto crea un nuevo flujo de trabajo de depuración:
+
+[arabic]
+. Reciba una alerta.
+. Profundice y examine las métricas.
+. Vuelva a profundizar y busque registros relacionados con la métrica y el intervalo de tiempo (y, en el futuro, seguimientos distribuidos).
+
+== Visualización de registros
+
+Los resultados de las consultas de registros se muestran como histogramas en el gráfico y los registros individuales se muestran a continuación. Si la fuente de datos no envía datos de histograma para el rango de tiempo solicitado, el modelo de registros calcula una serie de tiempo basada en los recuentos de filas de registros agrupados por un intervalo de tiempo calculado automáticamente y el inicio del histograma está anclado por la marca de tiempo de la primera fila de registros. del resultado. El final de la serie temporal está anclado al rango *Hasta* del selector de tiempo.
+
+=== Nivel de registro
+
+Para los registros donde se especifica una etiqueta de *nivel*, usamos el valor de la etiqueta para determinar el nivel del registro y actualizar el color en consecuencia. Si el registro no tiene una etiqueta de nivel especificada, analizamos el registro para averiguar si su contenido coincide con alguna de las expresiones admitidas (consulte a continuación para obtener más información). El nivel de registro siempre está determinado por la primera coincidencia. En caso de que Grafana no pueda determinar un nivel de registro, se visualizará con un nivel de registro *desconocido*.
+
+*Niveles de registro admitidos y mapeo de abreviaturas y expresiones de nivel de registro:*
+
+[cols=",,",options="header",]
+|===
+|Expresiones admitidas |Nivel de registro |Color
+|emerg |crítico |púrpura
+|fatal |crítico |púrpura
+|alert |crítica |púrpura
+|crit |crítico |púrpura
+|critical |crítico |púrpura
+|err |error |rojo
+|eror |error |rojo
+|error |error |rojo
+|warn |advertencia |amarillo
+|warning |advertencia |amarillo
+|info |info |verde
+|information |información |verde
+|notice |información |verde
+|dbug |depuración |azul
+|debug |depurar |azul
+|trace |traza |azul claro
+|* |gris |desconocido
+|===
+
+== Opciones de visualización
+
+Puede personalizar cómo se muestran los registros y seleccionar qué columnas se muestran.
+
+=== Hora
+
+Muestra u oculta la columna de tiempo. Esta es la marca de tiempo asociada con la línea de registro según lo informado desde la fuente de datos.
+
+=== Etiquetas únicas
+
+Muestra u oculta la columna de etiquetas únicas que incluye solo etiquetas no comunes. Todas las etiquetas comunes se muestran arriba.
+
+=== Envolver líneas
+
+Establezca esto en True si desea que la pantalla utilice el ajuste de línea. Si se establece en `False`, resultará en un desplazamiento horizontal.
+
+=== Deduplicación
+
+Los datos de registro pueden ser muy repetitivos y Explorar puede ayudar al ocultar líneas de registro duplicadas. Hay algunos algoritmos de deduplicación diferentes que puede utilizar:
+
+* *Exacto:* las coincidencias exactas se realizan en toda la línea, excepto en los campos de fecha.
+* *Números:* coincidencias en la línea después de eliminar números, como duraciones, direcciones IP, etc.
+* *Firma:* la deduplicación más agresiva, elimina todas las letras y números y coincide con el espacio en blanco y la puntuación restante.
+
+=== Voltear el orden de los resultados
+
+Puede cambiar el orden de los registros recibidos del orden descendente predeterminado (el más reciente primero) al orden ascendente (el más antiguo primero).
+
+== Etiquetas y campos detectados
+
+Cada fila de registro tiene un área extensible con sus etiquetas y campos detectados, para una interacción más robusta. Para todas las etiquetas, hemos agregado la capacidad de filtrar (filtro positivo) y filtrar (filtro negativo) las etiquetas seleccionadas. Cada campo o etiqueta también tiene un icono de estadísticas para mostrar estadísticas ad-hoc en relación con todos los registros mostrados.
+
+=== Vínculos de campos derivados
+
+Al utilizar los campos derivados, puede convertir cualquier parte de un mensaje de registro en un enlace interno o externo. El enlace creado es visible como un botón junto al campo Detectado en la vista Detalles del registro.
+
+image::image27.png[Detected fields link in Explore,width=624,height=239]
+
+=== Alternar campos detectados
+
+[NOTE]
+====
+Disponible en Grafana 7.2 y versiones posteriores.
+====
+
+Si sus registros están estructurados en `json` o `logfmt`, puede mostrar u ocultar los campos detectados. Expanda una línea de registro y luego haga clic en el icono del ojo para mostrar u ocultar campos.
+
+image::image177.gif[Toggling detected fields in Explore,width=624,height=351]
+
+== Funciones específicas de Loki
+
+Como se mencionó, una de las integraciones de registros es para el nuevo sistema de agregación de registros de código abierto de Grafana Labs - https://github.com/grafana/loki[Loki]. Loki está diseñado para ser muy rentable, ya que no indexa el contenido de los registros, sino un conjunto de etiquetas para cada flujo de registros. Los registros de Loki se consultan de forma similar a la consulta con selectores de etiquetas en Prometheus. Utiliza etiquetas para agrupar los flujos de registros que se pueden hacer para que coincidan con sus etiquetas de Prometheus. Para obtener más información sobre Grafana Loki, consulte https://github.com/grafana/loki[Grafana Loki] o la variante alojada de Grafana Labs: https://grafana.com/loki[Grafana Cloud Logs].
+
+Para obtener más información, consulte la documentación de la fuente de datos de Loki sobre cómo consultar datos de registro.
+
+=== Cambiar de métricas a registros
+
+Si cambia de una consulta de Prometheus a una consulta de registros (puede hacer una división primero para tener sus métricas y registros uno al lado del otro), entonces mantendrá las etiquetas de su consulta que existen en los registros y las utilizará para consultar los flujos de registro. Por ejemplo, la siguiente consulta de Prometheus:
+
+`grafana_alerting_active_alerts\{job="grafana"}`
+
+después de cambiar a la fuente de datos de Registros, la consulta cambia a:
+
+`{job="grafana"}`
+
+Esto devolverá una parte de los registros en el rango de tiempo seleccionado que se pueden buscar por texto.
+
+=== Seguimiento en vivo
+
+Utilice la función de seguimiento en vivo para ver registros en tiempo real en fuentes de datos compatibles.
+
+Haga clic en el botón *En vivo* en la barra de herramientas Explorar para cambiar a la vista de seguimiento en vivo.
+
+Mientras esté en la vista Seguimiento en vivo, los nuevos registros vendrán desde la parte inferior de la pantalla y tendrán un fondo de contraste que se desvanecerá para que pueda realizar un seguimiento de las novedades. Haga clic en el botón *Pausa* o desplácese por la vista de registros para pausar el seguimiento en vivo y explorar registros anteriores sin interrupción. Haga clic en el botón *Reanudar* para reanudar el seguimiento en vivo o haga clic en el botón *Detener* para salir del seguimiento en vivo y volver a la vista de exploración estándar.
+
+image::image178.gif[Explore Live tailing in action,width=624,height=436]

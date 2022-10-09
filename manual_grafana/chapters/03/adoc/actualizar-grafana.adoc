@@ -1,0 +1,57 @@
+= Actualizar Grafana
+
+Le recomendamos que actualice Grafana con frecuencia para mantenerse al día con las últimas correcciones y mejoras. Para que esto sea una realidad, las actualizaciones de Grafana son compatibles con versiones anteriores y el proceso de actualización es simple y rápido.
+
+La actualización es generalmente segura (entre muchas versiones menores y una principal) y los tableros y los gráficos tendrán el mismo aspecto. Puede haber pequeños cambios importantes en algunos casos extremos, que se describen en las https://community.grafana.com/c/releases[Notas de la versión] y el https://github.com/grafana/grafana/blob/master/CHANGELOG.md[Registro de cambios].
+
+== Respaldo
+
+Le recomendamos que haga una copia de seguridad de algunas cosas en caso de que tenga que revertir la actualización.
+
+* Complementos instalados: realice una copia de seguridad de ellos antes de actualizarlos en caso de que desee revertir la versión de Grafana y desee obtener exactamente las mismas versiones que estaba ejecutando antes de la actualización.
+* No es necesario hacer una copia de seguridad de los archivos de configuración. Sin embargo, es posible que desee hacerlo en caso de que agregue nuevas opciones de configuración después de la actualización y luego retroceda.
+
+=== Copia de seguridad de la base de datos
+
+Antes de actualizar, puede ser una buena idea hacer una copia de seguridad de su base de datos de Grafana. Esto asegurará que siempre pueda volver a su versión anterior. Durante el inicio, Grafana migrará automáticamente el esquema de la base de datos (si hay cambios o tablas nuevas). A veces, esto puede causar problemas si luego desea cambiar a una versión anterior.
+
+==== sqlite
+
+Si usa sqlite, solo necesita hacer una copia de seguridad de su archivo `grafana.db`. Normalmente se encuentra en `/var/lib/grafana/grafana.db` en sistemas Unix. Si no está seguro de qué base de datos utiliza y dónde está almacenada, consulte el archivo de configuración de grafana. Si instaló grafana en una ubicación personalizada utilizando un tar/zip binario, generalmente se encuentra en `<grafana_install_dir>/data`.
+
+==== mysql
+
+[source,Bash]
+----
+backup:
+> mysqldump -u root -p[root_password] [grafana] > grafana_backup.sql
+
+restore:
+> mysql -u root -p grafana < grafana_backup.sql
+----
+
+==== postgres
+
+[source,Bash]
+----
+backup:
+> pg_dump grafana > grafana_backup
+
+restore:
+> psql grafana < grafana_backup
+----
+
+=== Windows
+
+Si descargó el paquete binario de Windows, puede descargar un paquete más nuevo y extraerlo en la misma ubicación (y sobrescribir los archivos existentes). Esto podría sobrescribir los cambios de configuración. Le recomendamos que guarde sus cambios de configuración en un archivo llamado `<grafana_install_dir> /conf/custom.ini` ya que esto facilitará las actualizaciones sin correr el riesgo de perder sus cambios de configuración.
+
+== Actualizar complementos
+
+Una vez que haya actualizado, le recomendamos encarecidamente que actualice todos sus complementos, ya que una nueva versión de Grafana puede hacer que los complementos más antiguos dejen de funcionar correctamente.
+
+Puede actualizar todos los complementos usando
+
+[source,Bash]
+----
+grafana-cli plugins update-all
+----

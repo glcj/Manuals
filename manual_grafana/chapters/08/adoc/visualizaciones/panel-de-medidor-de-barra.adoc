@@ -1,0 +1,33 @@
+= Panel de medidor de barra
+
+El medidor de barra simplifica sus datos al reducir cada campo a un solo valor. Usted elige cómo Grafana calcula la reducción.
+
+Este panel puede mostrar uno o más medidores de barra dependiendo de cuántas series, filas o columnas devuelva su consulta.
+
+image::image67.png[Stat panel,width=624,height=218]
+
+== Opciones de campo y datos
+
+Las visualizaciones de barras le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Opciones de pantalla
+
+Utilice las siguientes opciones para refinar su visualización:
+
+* *Mostrar:* elija cómo Grafana muestra sus datos.
+** *Calcular:* muestra un valor calculado basado en todas las filas. Para obtener una lista de los cálculos disponibles, consulte xref:paneles/lista-de-calculos.adoc[Lista de cálculos].
+** *Todos los valores:* muestra una estadística separada para cada fila. Si selecciona esta opción, también puede seleccionar un *Límite* o el número máximo de filas para mostrar.
+* *Valor:* seleccione una función de reducción que Grafana utilizará para reducir muchos campos a un solo valor. Haga clic en la lista *Valor* para ver las funciones y descripciones breves.
+* *Orientación:* elija una dirección de apilamiento.
+** *Auto:* Grafana selecciona lo que cree que es la mejor orientación.
+** *Horizontal:* las barras se estiran horizontalmente, de izquierda a derecha.
+** *Vertical:* las barras se estiran verticalmente, de arriba hacia abajo.
+* *Modo de visualización:* elija un modo de visualización.
+** *Gradiente:* los niveles de umbral definen un gradiente.
+** *LCD retro:* el medidor se divide en pequeñas celdas que están encendidas o apagadas.
+** *Básico:* color único basado en el umbral de coincidencia.
+* *Mostrar área sin relleno:* seleccione esta opción si desea representar la región sin relleno de las barras en gris oscuro. No se aplica al modo de pantalla LCD retro.

@@ -1,0 +1,42 @@
+= Graficar series de tiempo como puntos
+
+[NOTE]
+====
+Esta es una función beta. El panel de series de tiempo reemplazará al panel de gráficos en las versiones futuras.
+====
+
+Esta sección explica cómo utilizar las Opciones del campo Serie temporal para visualizar datos de series temporales como puntos e ilustra lo que hacen las opciones.
+
+== Crear el panel
+
+[arabic]
+. xref:paneles/agregar-un-panel.adoc[Agregue un panel]. Seleccione la xref:paneles/visualizaciones/panel-de-serie-de-tiempo.adoc[Visualización de serie de tiempo].
+. En el xref:paneles/editor-de-paneles.adoc[Editor de paneles], haga clic en la pestaña *Campo*.
+. En Estilo, haga clic en *Puntos*.
+
+== Estilizar los puntos
+
+Utilice la siguiente configuración de campo para refinar su visualización.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+Algunas opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+=== Tamaño de punto
+
+Establezca el tamaño de los puntos, de 1 a 40 píxeles de diámetro.
+
+Tamaño de punto establecido en 6:
+
+image::image137.png[Show points point size 6 example,width=624,height=169]
+
+Tamaño de punto establecido en 20:
+
+image::image138.png[Show points point size 20 example,width=624,height=170]
+
+Tamaño de punto establecido en 35:
+
+image::image139.png[Show points point size 35 example,width=624,height=174]

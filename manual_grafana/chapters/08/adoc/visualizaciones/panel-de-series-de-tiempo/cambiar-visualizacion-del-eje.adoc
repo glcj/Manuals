@@ -1,0 +1,79 @@
+= Cambiar visualización del eje
+
+[NOTE]
+====
+Esta es una función beta. El panel de series de tiempo reemplazará al panel de gráficos en las versiones futuras.
+====
+
+Esta sección explica cómo utilizar las Opciones del campo Serie temporal para controlar la visualización de los ejes en la visualización e ilustra lo que hacen las opciones de los ejes.
+
+Utilice la siguiente configuración de campo para refinar cómo se muestran sus ejes.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+Algunas opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+== Ubicación
+
+Seleccione la ubicación del eje Y.
+
+=== Auto
+
+Grafana asigna automáticamente el eje Y a la serie. Cuando hay dos o más series con diferentes unidades, Grafana asigna el eje izquierdo a la primera unidad y el derecho a las siguientes unidades.
+
+=== Izquierda
+
+Muestra todos los ejes Y en el lado izquierdo.
+
+image::image140.png[Left Y-axis example,width=624,height=193]
+
+=== Derecha
+
+Muestre todos los ejes Y en el lado derecho.
+
+image::image141.png[Right Y-axis example,width=624,height=200]
+
+=== Oculto
+
+Ocultar los ejes Y
+
+image::image142.png[Hidden Y-axis example,width=624,height=177]
+
+== Etiqueta
+
+Establece una etiqueta de texto en el eje Y.
+
+image::image143.png[Label example,width=624,height=212]
+
+Si tiene más de un eje Y, puede asignar etiquetas diferentes en la pestaña Anular.
+
+== Ancho
+
+Establezca un ancho fijo del eje. De forma predeterminada, Grafana calcula dinámicamente el ancho de un eje.
+
+Al establecer el ancho del eje, los datos cuyos tipos de ejes son diferentes pueden compartir las mismas proporciones de visualización. Esto hace que sea más fácil comparar los datos de más de un gráfico porque los ejes no se desplazan ni se estiran en una proximidad visual entre sí.
+
+== Mínimo suave y máximo suave
+
+Configure una opción *mínimo suave* o *máximo suave* para un mejor control de los límites del eje Y. De forma predeterminada, Grafana establece el rango para el eje Y automáticamente según el conjunto de datos.
+
+Los ajustes *mínimos suaves* y *máximos suaves* pueden evitar que los puntos se conviertan en montañas cuando los datos son en su mayoría planos, y los valores mínimos o máximos estrictos derivados de las opciones de campo mínimo y máximo estándar pueden evitar que los picos intermitentes aplanen los detalles útiles recortando los picos más allá de un punto definido.
+
+Puede establecer opciones estándar min/max para definir límites estrictos del eje Y. Para obtener más información, consulte xref:paneles/opciones-de-campo/opciones-de-campo-estandar.adoc[Opciones de campo estándar].
+
+image::image144.png[Label example,width=624,height=210]
+
+== Escala
+
+Establezca la escala que se utilizará para los valores del eje Y.
+
+=== Lineal
+
+Utilice una escala dividida en partes iguales.
+
+=== Logarítmico
+
+Utilice una escala logarítmica. Cuando se elige esta opción, aparece una lista donde puede elegir escala logarítmica binaria (base 2) o común (base 10).

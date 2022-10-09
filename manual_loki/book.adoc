@@ -1,0 +1,53 @@
+= Grafana - Loki
+Author Name
+:doctype: book
+:encoding: utf-8
+:lang: en
+:toc: left
+:toclevels: 2
+:numbered:
+:showtitle: Manual Grafana Loki
+
+
+////
+Change Book Name, Author's Name and Language for your need.
+
+This is a comment block, you can remove it.
+////
+
+////
+Organize your book chapter by chapter
+////
+
+image::loki.png[]
+
+
+include::preface.adoc[]
+
+include::colophon.adoc[]
+
+include::dedication.adoc[]
+
+include::glossary.adoc[]
+
+include::chapters/01/adoc/chapter-01.adoc[]
+
+include::chapters/02/adoc/chapter-02.adoc[]
+
+include::chapters/03/adoc/chapter-03.adoc[]
+
+include::chapters/04/adoc/chapter-04.adoc[]
+
+include::chapters/05/adoc/chapter-05.adoc[]
+
+include::chapters/06/adoc/chapter-06.adoc[]
+
+include::chapters/07/adoc/chapter-07.adoc[]
+
+include::chapters/08/adoc/chapter-08.adoc[]
+
+include::chapters/09/adoc/chapter-08.adoc[]
+
+include::bibliography.adoc[]
+
+include::index.adoc[]

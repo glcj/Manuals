@@ -1,0 +1,8 @@
+= Permisos de fuente de datos
+
+Los permisos de fuente de datos le permiten restringir el acceso de los usuarios para consultar una fuente de datos. Para cada fuente de datos hay una página de permisos que le permite habilitar permisos y restringir los permisos de consulta a usuarios y equipos específicos.
+
+[NOTE]
+====
+Los permisos de la fuente de datos solo están disponibles en Grafana Enterprise. Para obtener más información, consulte xref:grafana-enterprise/permisos-de-fuentes-de-datos.adoc[Permisos de fuentes de datos] en xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].
+====

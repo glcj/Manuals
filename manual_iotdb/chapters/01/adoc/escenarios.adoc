@@ -1,0 +1,62 @@
+= Escenarios
+
+* Escenario 1
+
+Una empresa utiliza tecnología de montaje en superficie (SMT) para producir chips: primero es necesario imprimir pasta de soldadura en las juntas del chip, luego colocar los componentes en la pasta de soldadura y luego fundir la pasta de soldadura calentándola y enfriándola. Finalmente, los componentes se sueldan al chip.
+
+El proceso anterior utiliza una línea de producción automatizada. Para garantizar la calidad del producto, después de imprimir la pasta de soldadura, la calidad de la impresión de la pasta de soldadura debe ser evaluada por un equipo óptico. El volumen (v), la altura (h), el área (a), el desplazamiento horizontal (px) y el desplazamiento vertical (py) de la pasta de soldadura en cada unión se miden mediante un dispositivo de impresión de pasta de soldadura tridimensional (SPI).
+
+Con el fin de mejorar la calidad de la impresión, es necesario que la empresa almacene las métricas de las juntas de soldadura en cada chip para su posterior análisis en base a estos datos.
+
+En este punto, los datos se pueden almacenar usando el componente TsFile, la herramienta TsFileSync y el componente de integración Hadoop/Spark en la suite IoTDB, es decir, cada vez que se imprime un nuevo chip, se escribe un dato en el dispositivo SPI usando el SDK, que finalmente forma un TsFile. A través de la herramienta TsFileSync, el TsFile generado se sincronizará con el centro de datos de acuerdo con ciertas reglas (como diariamente) y será analizado por herramientas de analistas de datos.
+
+.{blank}
+image::imagen-02.png[]
+
+En este escenario, solo se requiere que TsFile y TsFileSync se implementen en una PC, y se requiere un clúster Hadoop/Spark. La figura siguiente muestra la arquitectura en este momento.
+
+.{blank}
+image::imagen-03.png[]
+
+* Escenario 2
+
+Una empresa tiene varias turbinas eólicas en las que se instalan cientos de sensores en cada generador para recopilar información como el estado de funcionamiento del generador y la velocidad del viento en el entorno de trabajo.
+
+Para garantizar el funcionamiento normal de las turbinas y el monitoreo y análisis oportunos de las turbinas, la empresa necesita recopilar estos datos de sensores, realizar cálculos y análisis parciales en el entorno de trabajo de las turbinas y cargar los datos originales recopilados en el centro de datos.
+
+.{blank}
+image::imagen-04.png[]
+
+En esta situación, se pueden utilizar las herramientas IoTDB, TsFileSync y los componentes de integración de Hadoop/Spark en la suite IoTDB. Es necesario implementar una PC con las herramientas IoTDB y TsFileSync instaladas para admitir la lectura y escritura de datos, la computación y el análisis local y la carga de datos al centro de datos. Además, los clústeres de Hadoop/Spark deben implementarse para el almacenamiento y análisis de datos en el lado del centro de datos. La figura siguiente muestra la arquitectura en este momento.
+
+.{blank}
+image::imagen-05.png[]
+
+* Escenario 3
+
+Una fábrica tiene una variedad de equipos robóticos dentro del área de la planta. Estos equipos robóticos tienen hardware limitado y es difícil que realicen aplicaciones complejas.
+
+Se instala una variedad de sensores en cada dispositivo robótico para monitorear el estado operativo del robot, la temperatura y otra información. Debido al entorno de red de la fábrica, los robots dentro de la fábrica están todos dentro de la LAN de la fábrica y no pueden conectarse a la red externa. Pero habrá varios servidores en la fábrica que se pueden conectar directamente a la red pública externa.
+
+Para garantizar que los datos del robot se puedan monitorear y analizar a tiempo, la empresa necesita recopilar la información de estos sensores de robot, enviarlos al servidor que puede conectarse a la red externa y luego cargar la información de datos original al centro de datos para realizar cálculos y análisis complejos.
+
+.{blank}
+image::imagen-06.png[]
+
+En este punto, se pueden utilizar IoTDB, las herramientas IoTDB-Client, las herramientas TsFileSync y los componentes de integración de Hadoop/Spark en la suite IoTDB. La herramienta IoTDB-Client está instalada en el robot y cada uno de ellos está conectado a la LAN de la fábrica. Cuando los sensores generan datos en tiempo real, los datos se cargarán en el servidor en la fábrica. El servidor IoTDB y TsFileSync se instalan en el servidor conectado a la red externa. Una vez activado, los datos del servidor se cargarán en el centro de datos. Además, los clústeres de Hadoop/Spark deben implementarse para el almacenamiento y análisis de datos en el lado del centro de datos. La siguiente figura muestra la arquitectura en este momento.
+
+.{blank}
+image::imagen-07.png[]
+
+* Escenario 4
+
+Una empresa de automóviles instaló sensores en sus automóviles para recopilar información de monitoreo, como el estado de conducción del vehículo. Estos dispositivos automotrices tienen configuraciones de hardware limitadas y son difíciles de llevar a cabo aplicaciones complejas. Los automóviles con sensores se pueden conectar entre sí o enviar datos a través de IoT de banda estrecha.
+
+Para recibir los datos de IoT recopilados por el sensor del automóvil en tiempo real, la empresa debe enviar los datos del sensor al centro de datos en tiempo real a través del IoT de banda estrecha mientras el vehículo está en marcha. Por lo tanto, pueden realizar cálculos y análisis complejos en el servidor del centro de datos.
+
+En este punto, se pueden utilizar los componentes de integración IoTDB, IoTDB-Client y Hadoop/Spark en la suite IoTDB. La herramienta IoTDB-Client se instala en cada automóvil y utiliza la herramienta IoTDB-JDBC para enviar datos directamente al servidor en el centro de datos.
+
+Además, los clústeres de Hadoop/Spark deben implementarse para el almacenamiento y análisis de datos en el lado del centro de datos. Como se muestra en la Figura siguiente.
+
+.{blank}
+image::imagen-08.png[]

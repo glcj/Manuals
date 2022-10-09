@@ -1,0 +1,96 @@
+== Solución de problemas de Loki
+
+== “Loki: Bad Gateway. 502”
+
+Este error puede aparecer en Grafana cuando se agrega Loki como fuente de datos, lo que indica que Grafana no puede conectarse a Loki. Puede haber una de las muchas causas fundamentales:
+
+* Si Loki se implementa con Docker, y Grafana y Loki no se ejecutan en el mismo nodo, verifique su firewall para asegurarse de que los nodos puedan conectarse.
+* Si Loki se implementa con Kubernetes:
+** Si Grafana y Loki están en el mismo espacio de nombres, configure la URL de Loki como `http://$LOKI_SERVICE_NAME:$LOKI_PORT`
+** De lo contrario, configure la URL de Loki como `http://$LOKI_SERVICE_NAME.$LOKI_NAMESPACE:$LOKI_PORT`
+
+== “Data source connected, but no labels received. Verify that Loki and Promtail is configured properly.”
+
+Este error puede aparecer en Grafana cuando se agrega Loki como fuente de datos, lo que indica que, aunque Grafana se ha conectado a Loki, Loki aún no ha recibido ningún registro de Promtail. Puede haber una de las muchas causas fundamentales:
+
+* Promtail se está ejecutando y recopilando registros, pero no puede conectarse a Loki para enviar los registros. Compruebe la salida de Promtail.
+* Promtail comenzó a enviar registros a Loki antes de que Loki estuviera listo. Esto puede suceder en un entorno de prueba donde Promtail ya ha leído todos los registros y los ha enviado. Esto es lo que puede hacer:
+** Inicie Promtail después de Loki, por ejemplo, 60 segundos después.
+** Para obligar a Promtail a reenviar mensajes de registro, elimine el archivo de posiciones (ubicación predeterminada `/tmp/positions.yaml`).
+* Promtail ignora los objetivos y no lee ningún registro debido a un problema de configuración.
+** Esto se puede detectar activando el registro de depuración en Promtail y buscando los mensajes `dropping target`, `no labels` o `ignoring target`.
+* Promtail no puede encontrar la ubicación de sus archivos de registro. Verifique que `scrape_configs` contenga configuraciones de ruta válidas para encontrar los registros en sus nodos trabajadores.
+* Sus cápsulas se ejecutan con etiquetas diferentes a las que Promtail está configurado para leer. Compruebe `scrape_configs` para validar.
+
+== Solución de problemas de objetivos
+
+Promtail expone dos páginas web que se pueden utilizar para comprender cómo funciona el descubrimiento de servicios.
+
+La página de descubrimiento de servicios (`/service-discovery`) muestra todos los objetivos descubiertos con sus etiquetas antes y después del reetiquetado, así como el motivo por el que se ha descartado el objetivo.
+
+La página de objetivos (`/targets`) muestra solo los objetivos que se están raspando activamente y sus respectivas etiquetas, archivos y posiciones.
+
+En Kubernetes, puede acceder a esas dos páginas reenviando el puerto Promtail (`9080` o `3101` si usa Helm) localmente:
+
+[source,Bash]
+----
+$ kubectl port-forward loki-promtail-jrfg7 9080
+# Luego, en un navegador web, visite http://localhost:9080/service-discovery
+----
+
+== Salida de depuración
+Tanto `loki` como `promtail` admiten un indicador de nivel de registro en la línea de comandos:
+
+[source,Bash]
+----
+$ loki -log.level=debug
+$ promtail -log.level=debug
+----
+
+== Failed to create target, `ioutil.ReadDir: readdirent: not a directory`
+
+La configuración de Promtail contiene una entrada `\\__path__` a un directorio que Promtail no puede encontrar.
+
+== Conexión a una cápsula Promtail para solucionar problemas
+
+Primero, consulte la sección de <<Solución de problemas de objetivos>> anterior. Si eso no ayuda a responder sus preguntas, puede conectarse a la cápsula de Promtail para investigar más a fondo.
+
+Si está ejecutando Promtail como un DaemonSet en su grupo, tendrá una cápsula Promtail en cada nodo, así que averigüe qué Promtail necesita depurar primero:
+
+[source,Bash]
+----
+$ kubectl get pods --all-namespaces -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE   IP             NODE        NOMINATED NODE
+...
+nginx-7b6fb56fb8-cw2cm                 1/1     Running   0          41d   10.56.4.12     node-ckgc   <none>
+...
+promtail-bth9q                         1/1     Running   0          3h    10.56.4.217    node-ckgc   <none>
+----
+
+Esa salida se trunca para resaltar solo las dos cápsulas que nos interesan, puede ver con la marca `-o wide` el NODE en el que se están ejecutando.
+
+Querrá hacer coincidir el nodo de la cápsula que le interesa, en este ejemplo NGINX, con el Promtail que se ejecuta en el mismo nodo.
+
+Para depurar, puede conectarse a la cápsula Promtail:
+
+[source,Bash]
+----
+kubectl exec -it promtail-bth9q -- /bin/sh
+----
+
+Una vez conectado, verifique que la configuración en `/etc/promtail/promtail.yml` tenga el contenido que espera.
+
+También verifique `/var/log/positions.yaml` (`/run/promtail/positions.yaml` cuando lo implementa Helm o cualquier valor que se especifique para `positions.file`) y asegúrese de que Promtail esté siguiendo los registros que esperaría.
+
+Puede consultar el registro de Promtail mirando en `/var/log/containers` en el registro de contenedores de Promtail.
+
+== Habilitar el seguimiento de Loki
+
+Se puede seguir a Loki usando https://www.jaegertracing.io/[Jaeger] configurando la variable de entorno `JAEGER_AGENT_HOST` en el nombre de host y el puerto donde se ejecuta Loki.
+
+Si implementa con Helm, use el siguiente comando:
+
+[source,Bash]
+----
+$ helm upgrade --install loki loki/loki --set "loki.tracing.jaegerAgentHost=YOUR_JAEGER_AGENT_HOST"
+----

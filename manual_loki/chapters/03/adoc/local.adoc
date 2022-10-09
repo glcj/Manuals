@@ -1,0 +1,52 @@
+= Instalar y ejecutar Loki localmente
+
+Para registrar eventos con Loki, debe descargar e instalar Promtail y Loki.
+
+* Loki es el motor de registro.
+* Promtail envía registros a Loki.
+
+== Instalar y ejecutar
+
+. Navega a la https://github.com/grafana/loki/releases/[página de lanzamiento].
+. Desplácese hacia abajo hasta la sección Activos debajo de la versión que desea instalar.
+. Descargue los archivos .zip de Loki y Promtail que correspondan a su sistema. *Nota:* No descargue LogCLI o Loki Canary en este momento. xref:comenzando/logcli.adoc[LogCLI] le permite ejecutar consultas de Loki en una interfaz de línea de comandos. xref:operaciones/loki-canary.adoc[Loki Canary] es una herramienta para auditar el desempeño de Loki.
+. Descomprima el contenido del paquete en el mismo directorio. Aquí es donde se ejecutarán los dos programas.
+. En la línea de comandos, cambie el directorio (`cd` en la mayoría de los sistemas) al directorio con Loki y Promtail. Copie y pegue los siguientes comandos en su línea de comandos para descargar archivos de configuración genéricos:
++
+----
+wget https://raw.githubusercontent.com/grafana/loki/master/cmd/loki/loki-local-config.yaml
+wget https://raw.githubusercontent.com/grafana/loki/main/clients/cmd/promtail/promtail-local-config.yaml
+----
+
+. Ingrese el siguiente comando para iniciar Loki:
++
+*Windows*
++
+----
+.\loki-windows-amd64.exe --config.file=loki-local-config.yaml
+----
++
+*Linux*
++
+----
+./loki-linux-amd64 -config.file=loki-local-config.yaml
+----
+
+Loki ejecuta y muestra los registros de Loki en su línea de comando y en http://localhost:3100/metrics.
+
+¡Felicitaciones, Loki está instalado y funcionando! A continuación, es posible que desee editar el archivo de configuración de Promtail para xref:comenzando/introducir-registros-en-loki.adoc[introducir registros en Loki].
+
+== Lanzamiento de binarios: solo openSUSE Linux
+
+Cada lanzamiento incluye binarios para Loki que se pueden encontrar en la https://github.com/grafana/loki/releases/[Página de lanzamientos].
+
+== Paquetes comunitarios de openSUSE Linux
+
+La comunidad proporciona paquetes de Loki para openSUSE Linux. Para instalar:
+
+. Agregue el repositorio `https://download.opensuse.org/repositories/security:/logging/` a su sistema. Por ejemplo, si está utilizando Leap 15.1, ejecute `sudo zypper ar https://download.opensuse.org/repositories/security:/logging/openSUSE_Leap_15.1/security:logging.repo; sudo zypper ref`
+. Instale el paquete Loki con `zypper in loki`
+. Habilite los servicios de Loki y Promtail:
+** `systemd start loki && systemd enable loki`
+** `systemd start promtail && systemd enable promtail`
+. Modifique los archivos de configuración según sea necesario: `/etc/loki/promtail.yaml` y `/etc/loki/loki.yaml`.

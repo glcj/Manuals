@@ -1,0 +1,8 @@
+= Pausar una regla de alerta
+
+A veces, puede resultar útil detener la evaluación de una regla de alerta. Por ejemplo, durante una ventana de mantenimiento, la pausa de las reglas de alerta puede evitar la activación de una avalancha de alertas.
+
+[arabic]
+. En la barra lateral de Grafana, pase el cursor sobre el icono de Alerta (campana) y luego haga clic en *Reglas de Alerta*. Se enumeran todas las reglas de alerta configuradas, junto con su estado actual.
+. Busque su alerta en la lista y haga clic en el icono de *Pausa* a la derecha. El icono de *Pausa* se convierte en un icono de *Reproducción*.
+. Haga clic en el icono *Reproducir* para reanudar la evaluación de su alerta.

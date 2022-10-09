@@ -1,0 +1,247 @@
+= CLI de Grafana
+
+Grafana CLI es un pequeño ejecutable que se incluye con el servidor Grafana. Se puede ejecutar en la misma máquina en la que se ejecuta el servidor Grafana. Grafana CLI tiene comandos plugins y admin, así como opciones globales.
+
+Para enumerar todos los comandos y opciones:
+
+----
+grafana-cli –h
+----
+
+== Invocar la CLI de Grafana
+
+Para invocar la CLI de Grafana, agregue la ruta a los binarios de grafana en su variable de entorno `PATH`. Alternativamente, si su directorio actual es el directorio `bin`, use `./grafana-cli.` De lo contrario, puede especificar la ruta completa a la CLI. Por ejemplo, en Linux `/usr/share/grafana/bin/grafana-cli` y en Windows `C:\ProgramFiles\GrafanaLabs\grafana\bin\grafana-cli.exe`.
+
+[NOTE]
+====
+Algunos comandos, como instalar o eliminar complementos, requieren `sudo` en Linux. Si está en Windows, ejecute Windows PowerShell como administrador.
+====
+
+== Sintaxis del comando de la CLI de Grafana
+
+La sintaxis general de los comandos en la CLI Grafana es:
+
+[source,Bash]
+----
+grafana-cli [global options] command [command options] [arguments...]
+----
+
+== Opciones globales
+
+Grafana CLI le permite anular temporalmente ciertas configuraciones predeterminadas de Grafana. A excepción de `--help` y `--version`, la mayoría de las opciones globales solo las utilizan los desarrolladores.
+
+Cada opción global se aplica solo al comando en el que se usa. Por ejemplo, `--pluginsDir value` no cambia permanentemente donde Grafana guarda los complementos. Solo lo cambia para el comando en el que aplica la opción.
+
+=== Mostrar la ayuda de la CLI de Grafana
+
+`--help` o `-h` muestra la ayuda, incluidas las rutas predeterminadas y la información de configuración de Docker.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli –h
+----
+
+=== Mostrar la versión de la CLI de Grafana
+
+`--version` o `-v` imprime la versión de Grafana CLI que se está ejecutando actualmente.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli –v
+----
+
+=== Anular el directorio de complementos predeterminado
+
+`--pluginsDir value` anula la ruta a donde su instancia local de Grafana almacena complementos. Utilice esta opción si desea instalar, actualizar o eliminar un complemento en algún lugar que no sea el directorio predeterminado ("/var/lib/grafana/plugins") [$GF_PLUGIN_DIR].
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --pluginsDir "/var/lib/grafana/devplugins" plugins install <plugin-id>
+----
+
+=== Anular la URL del repositorio del complemento predeterminado
+
+`--repo value` le permite descargar e instalar o actualizar complementos desde un repositorio que no sea el repositorio predeterminado de Grafana.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --repo "https://example.com/plugins" plugins install <plugin-id>
+----
+
+=== Anular la URL .zip del complemento predeterminado
+
+`--pluginUrl value` le permite descargar un archivo .zip que contiene un complemento desde una URL local en lugar de descargarlo desde la fuente predeterminada de Grafana.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --pluginUrl https://company.com/grafana/plugins/<plugin-id>-<plugin-version>.zip plugins install <plugin-id>
+----
+
+=== Anular la seguridad de la capa de transporte
+
+*Advertencia:* Desactivar la TLS es un riesgo de seguridad significativo. No recomendamos utilizar esta opción.
+
+`--insecure` le permite desactivar la verificación de Seguridad de la capa de transporte (TLS) (inseguro). Es posible que desee hacer esto si está descargando un complemento de una fuente no predeterminada.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --insecure –pluginUrl https://company.com/grafana/plugins/<plugin-id>-<plugin-version>.zip plugins install <plugin-id>
+----
+
+=== Habilitar el registro de depuración
+
+`--debug` o `-d` habilita el registro de depuración. La salida de depuración se devuelve y se muestra en la terminal.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --debug plugins install <plugin-id>
+----
+
+=== Anular un ajuste de configuración
+
+`--configOverrides` es un argumento de línea de comando que actúa como una anulación de variable de entorno.
+
+Por ejemplo, puede usarlo para redirigir el registro a otro archivo (tal vez para registrar instalaciones de complementos en Grafana Cloud) o al restablecer la contraseña de administrador y tiene valores no predeterminados para algún valor de configuración importante (como dónde se encuentra la base de datos).
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --configOverrides cfg:default.paths.log=/dev/null plugins install <plugin-id>
+----
+
+=== Anular el valor de la ruta de inicio
+
+Establece la ruta para la ruta de instalación / inicio de Grafana, por defecto es el directorio de trabajo. No es necesario que lo utilice si se encuentra en el directorio de instalación de Grafana cuando utiliza la CLI.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password <new password>
+----
+
+=== Anular archivo de configuración
+
+`--config value` anula la ubicación predeterminada donde Grafana espera el archivo de configuración. Consulte xref:administracion/configuracion.adoc[Configuración] para obtener más información sobre cómo configurar Grafana y las ubicaciones predeterminadas de los archivos de configuración.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli --config "/etc/configuration/" admin reset-admin-password mynewpassword
+----
+
+== Comandos de complementos
+
+Grafana CLI le permite instalar, actualizar y administrar sus complementos de Grafana. Para obtener más información sobre la instalación de complementos, consulte la xref:complementos/instalacion.adoc[página de complementos].
+
+Todos los comandos enumerados se aplican a los repositorios y directorios predeterminados de Grafana. Puede anular los valores predeterminados con <<Opciones globales>>.
+
+=== Lista de complementos disponibles
+
+[source,Bash]
+----
+grafana-cli plugins list-remote
+----
+
+=== Instale la última versión de un complemento
+
+[source,Bash]
+----
+grafana-cli plugins install <plugin-id>
+----
+
+=== Instalar una versión específica de un complemento
+
+[source,Bash]
+----
+grafana-cli plugins install <plugin-id> <version>
+----
+
+=== Lista de complementos instalados
+
+[source,Bash]
+----
+grafana-cli plugins ls
+----
+
+=== Actualizar todos los complementos instalados
+
+[source,Bash]
+----
+grafana-cli plugins update-all
+----
+
+=== Actualizar un complemento
+
+[source,Bash]
+----
+grafana-cli plugins update <plugin-id>
+----
+
+=== Quitar un complemento
+
+[source,Bash]
+----
+grafana-cli plugins remove <plugin-id>
+----
+
+== Comandos de administrador
+
+Los comandos de administrador solo están disponibles en Grafana 4.1 y versiones posteriores.
+
+=== Mostrar todos los comandos de administrador
+
+[source,Bash]
+----
+grafana-cli admin
+----
+
+=== Restablecer contraseña de administrador
+
+`grafana-cli admin reset-admin-password <new password>` restablece la contraseña del usuario administrador mediante la CLI. Es posible que deba hacer esto si pierde la contraseña de administrador.
+
+Si se utilizan dos indicadores para establecer la ruta de inicio y la ruta del archivo de configuración, la ejecución del comando devuelve este error:
+
+====
+No se pudieron encontrar los valores predeterminados de configuración, asegúrese de que el parámetro de línea de comando homepath esté configurado o que el directorio de trabajo sea homepath
+====
+
+Para corregir esto, use la opción global `--homepath` para especificar la ruta de inicio predeterminada de Grafana para este comando:
+
+[source,Bash]
+----
+grafana-cli --homepath "/usr/share/grafana" admin reset-admin-password <new password>
+----
+
+Si no ha perdido la contraseña de administrador, le recomendamos que cambie la contraseña de usuario en las Preferencias de usuario o en la pestaña Administrador del servidor > Usuario.
+
+Si necesita establecer la contraseña en un script, puede usar la xref:api-http/usuario.adoc#_cambiar_contraseña[API de usuario de Grafana].
+
+=== Migrar datos y cifrar contraseñas
+
+`data-migration` ejecuta un script que migra o limpia datos en su base de datos.
+
+`encrypt-datasource-passwords` migra contraseñas de campos no seguros al campo secure_json_data. Devuelve `ok` a menos que haya un error. Seguro de ejecutar varias veces.
+
+*Ejemplo:*
+
+[source,Bash]
+----
+grafana-cli admin data-migration encrypt-datasource-passwords
+----

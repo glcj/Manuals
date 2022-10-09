@@ -1,0 +1,18 @@
+= Plantillas de notificaciones de alertas
+
+Puede proporcionar información detallada para alertar a los destinatarios de las notificaciones inyectando datos de consulta de alerta en una notificación de alerta. Este tema explica cómo puede utilizar etiquetas de consulta de alerta en notificaciones de alerta.
+
+Las etiquetas que existen a partir de la evaluación de la consulta de alerta se pueden utilizar en el nombre de la regla de alerta y en los campos del mensaje de notificación de alerta. Los datos de la etiqueta de alerta se inyectan en los campos de notificación cuando la alerta está en estado de alerta. Cuando hay varios valores únicos para la misma etiqueta, los valores están separados por comas.
+
+Este tema explica cómo puede utilizar etiquetas de consulta de alerta en notificaciones de alerta.
+
+== Agregar datos de etiquetas de alerta a su notificación de alerta
+
+[arabic]
+. Navegue hasta el panel para el que desea agregar o editar una regla de alerta.
+. Haga clic en el título del panel y luego en *Editar*.
+. En la pestaña Alerta, haga clic en *Crear alerta*. Si ya existe una alerta para este panel, puede editar la alerta directamente.
+. Consulte las etiquetas de consulta de alerta en el nombre de la regla de alerta y/o en el campo del mensaje de notificación de alerta utilizando la sintaxis `${Label}`.
+. Haga clic en *Guardar* en la esquina superior derecha para guardar la regla de alerta y el tablero.
+
+image::image185.png[Alerting notification template,width=624,height=539]

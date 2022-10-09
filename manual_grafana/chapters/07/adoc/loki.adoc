@@ -1,0 +1,228 @@
+= Usando Loki en Grafana
+
+Grafana se envía con soporte integrado para Loki, un sistema de agregación de registros de código abierto de Grafana Labs. Este tema explica opciones, variables, consultas y otras opciones específicas de esta fuente de datos.
+
+Agréguelo como fuente de datos y estará listo para crear tableros o consultar sus datos de registro en xref:explorar/explorar.adoc[Explorar]. Consulte xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[Agregar una fuente de datos] para obtener instrucciones sobre cómo agregar una fuente de datos a Grafana. Solo los usuarios con el rol de administrador de la organización pueden agregar fuentes de datos.
+
+[NOTE]
+====
+Para solucionar problemas de configuración y otros problemas, consulte el archivo de registro ubicado en /var/log/grafana/grafana.log en sistemas Unix o en <grafana_install_dir>/data/log en otras plataformas e instalaciones manuales.
+====
+
+== Configuración de Loki
+
+Para acceder a la configuración de Loki, haga clic en el icono de *Configuración* (engranaje), luego haga clic en *Fuentes de datos* y luego haga clic en la fuente de datos de Loki.
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`Name` |El nombre de la fuente de datos. Es así como se hace referencia a la fuente de datos en paneles, consultas y Explorar.
+|`Default` |La fuente de datos predeterminada significa que se preseleccionará para nuevos paneles.
+|`URL` |La URL de la instancia de Loki, p. Ej. `http://localhost:3100`
+|`Whitelisted Cookies` |Grafana Proxy elimina las cookies reenviadas de forma predeterminada. Especifique las cookies por nombre que deben enviarse a la fuente de datos.
+|`Maximum lines` |Límite superior para el número de líneas de registro devueltas por Loki (el valor predeterminado es 1000). Reduzca este límite si su navegador es lento al mostrar registros en Explorar.
+|===
+
+=== Campos derivados
+
+La configuración de Campos Derivados le permite:
+
+[arabic]
+. Agregar campos analizados del mensaje de registro.
+. Agregar un enlace que use el valor del campo.
+
+Puede usar esta funcionalidad para vincular a su backend de seguimiento directamente desde sus registros, o vincular a una página de perfil de usuario si hay un userId presente en la línea de registro. Estos enlaces aparecen en los xref:explorar/integracion-de-registros.adoc#_etiquetas_y_campos_destacados[detalles del registro].
+
+Cada campo derivado consta de:
+
+[arabic]
+. *Nombre:* se muestra en los detalles del registro como una etiqueta.
+. *Regex:* un patrón Regex que se ejecuta en el mensaje de registro y captura parte de él como el valor del nuevo campo. Solo puede contener un único grupo de captura.
+. *URL / consulta:* si el enlace es externo, introduzca la URL completa del enlace. Si el enlace es un enlace interno, esta entrada sirve como consulta para la fuente de datos de destino. En ambos casos, puede interpolar el valor del campo con el macro `$\{__value.raw}`.
+. *Enlace interno:* seleccione si el enlace es interno o externo. En caso de un enlace interno, un selector de fuente de datos le permite seleccionar la fuente de datos de destino. Solo se admiten las fuentes de datos de seguimiento.
+
+Puede usar una sección de depuración para ver qué extraen sus campos y cómo se interpola la URL. Haga clic en *Mostrar mensaje de registro de ejemplo* para mostrar el área de texto donde puede ingresar un mensaje de registro.
+
+image::image26.png[Screenshot of the derived fields debugging,width=624,height=262]
+
+El nuevo campo con el enlace que se muestra en los detalles del registro:
+
+image::image27.png[Detected fields link in Explore,width=624,height=239]
+
+== Editor de consultas de Loki
+
+Puede utilizar el editor de consultas de Loki para crear consultas de registro y métricas.
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`Query expression` |Expresión de consulta Loki, consulte la [documentación de LogQL] para obtener más información.
+|`Query type` |Elija el tipo de consulta a ejecutar. El tipo instantáneo realiza consultas en un solo punto en el tiempo. Estamos usando el tiempo "Hasta" del rango de tiempo. El tipo de rango consulta sobre el rango de tiempo seleccionado.
+|`Line limit` |Límite superior para el número de líneas de registro devueltas por consulta. El valor predeterminado es el límite máximo de líneas establecido en la configuración de Loki.
+|`Legend` |Disponible solo en Tablero. Controla el nombre de la serie temporal, mediante el nombre o el patrón. Por ejemplo, `{{hostname}}` se reemplaza con el valor de la etiqueta para la etiqueta `hostname`.
+|===
+
+=== Explorador de registros
+
+Con el navegador de registros de Loki, puede navegar fácilmente a través de su lista de etiquetas y valores además construir la consulta de su elección. El navegador de registros tiene una selección de varios pasos:
+
+[arabic]
+. Elija las etiquetas que le gustaría considerar para su búsqueda.
+. Elija los valores para las etiquetas seleccionadas. El navegador de registros admite la creación de facetas y, por lo tanto, solo muestra posibles combinaciones de etiquetas.
+. Elija el tipo de consulta: consulta de registros o consulta de métricas de tasa. Además, también puede validar selector.
+
+image::image28.png[Screenshot of the derived fields debugging,width=624,height=524]
+
+== Consultando con Loki
+
+Hay dos tipos de consultas LogQL:
+
+[arabic]
+. Consultas de registro: devuelven el contenido de las líneas de registro.
+. Consultas de métricas: amplían las consultas de registros y calculan valores de muestra en función del contenido de los registros de una consulta de registros.
+
+=== Consultas de registro
+
+La consulta y visualización de datos de registro de Loki está disponible a través de xref:explorar/explorar.adoc[Explorar] y con el xref:paneles/visualizaciones/panel-de-registros.adoc[panel de registros] en los tableros. Seleccione la fuente de datos de Loki y luego ingrese una consulta [LogQL] para mostrar sus registros.
+
+Una consulta de registro consta de dos partes: selector de flujo de registros y una canalización de registros. Por razones de rendimiento, comience eligiendo un flujo de registro seleccionando una etiqueta de registro.
+
+=== Contexto de registro
+
+Cuando utilice una expresión de búsqueda como se detalla anteriormente, puede recuperar el contexto que rodea los resultados filtrados. Al hacer clic en el enlace `Show Context` en las filas filtradas, podrá investigar los mensajes de registro que vinieron antes y después del mensaje de registro que le interesa.
+
+=== Seguimiento en vivo
+
+Loki admite el Seguimiento en vivo, que muestra registros en tiempo real. Esta función es compatible con xref:explorar/explorar.adoc[Explorar].
+
+Tenga en cuenta que Seguimiento en Vivo se basa en dos conexiones Websocket: una entre navegador y el servidor Grafana, y otro entre el servidor Grafana y el servidor Loki. Si ejecuta proxies inversos, configúrelos en consecuencia. El siguiente ejemplo de Apache2 se puede utilizar para el proxy entre el navegador y el servidor Grafana:
+
+----
+ProxyPassMatch "^/(api/datasources/proxy/\d+/loki/api/v1/tail)" "ws://127.0.0.1:3000/$1"
+----
+
+El siguiente ejemplo muestra la configuración básica del proxy NGINX. Se asume que el servidor Grafana está disponible en `http://localhost:3000/`, el servidor Loki se ejecuta localmente sin proxy y su sitio externo usa HTTPS. Si también aloja a Loki detrás del proxy NGINX, es posible que también desee repetir la siguiente configuración para Loki.
+
+En la sección `http` de la configuración de NGINX, agregue la siguiente definición de mapa:
+
+----
+  map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+  }
+----
+
+En su sección `server`, agregue la siguiente configuración:
+
+----
+  location ~ /(api/datasources/proxy/\d+/loki/api/v1/tail) {
+      proxy_pass          http://localhost:3000$request_uri;
+      proxy_set_header    Host              $host;
+      proxy_set_header    X-Real-IP         $remote_addr;
+      proxy_set_header    X-Forwarded-for   $proxy_add_x_forwarded_for;
+      proxy_set_header    X-Forwarded-Proto "https";
+      proxy_set_header    Connection        $connection_upgrade;
+      proxy_set_header    Upgrade           $http_upgrade;
+  }
+
+  location / {
+      proxy_pass          http://localhost:3000/;
+      proxy_set_header    Host              $host;
+      proxy_set_header    X-Real-IP         $remote_addr;
+      proxy_set_header    X-Forwarded-for   $proxy_add_x_forwarded_for;
+      proxy_set_header    X-Forwarded-Proto "https";
+  }
+----
+
+[NOTE]
+====
+Esta función solo está disponible en Grafana v6.3 +.
+====
+
+== Consultas métricas
+
+LogQL admite el empaquetado de una consulta de registro con funciones que permiten crear métricas a partir de los registros. Consulte la documentación de [LogQL] sobre cómo crear y utilizar consultas de métricas.
+
+== Plantillas
+
+En lugar de codificar cosas como el servidor, la aplicación y el nombre del sensor en sus consultas de métricas, puede usar variables en su lugar. Las variables se muestran como cuadros de selección desplegables en la parte superior del tablero. Estos cuadros desplegables facilitan el cambio de los datos que se muestran en su tablero.
+
+Consulte la documentación de creación de xref:plantillas-y-variables/plantillas-y-variables.adoc[Plantillas] para obtener una introducción a la función de creación de plantillas y los diferentes tipos de variables de plantilla.
+
+== Variable de consulta
+
+La variable del tipo _Consulta_ le permite consultar a Loki para obtener etiquetas de lista o valores de etiqueta. El complemento de fuente de datos de Loki proporciona las siguientes funciones que puede utilizar en el campo de entrada `Query`.
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`label_names()` |Devuelve una lista de nombres de etiquetas.
+|`label_values(label)` |Devuelve una lista de valores de etiqueta para `label` en cada métrica.
+|===
+
+== Anotaciones
+
+Puede utilizar cualquier consulta Loki no métrica como fuente de xref:tableros/anotaciones.adoc[anotaciones]. El contenido del registro se utilizará como texto de anotación y las etiquetas de su flujo de registro como etiquetas, por lo que no es necesario un mapeo adicional.
+
+== Configurar la fuente de datos con aprovisionamiento
+
+Puede configurar la fuente de datos a través de archivos de configuración con el sistema de aprovisionamiento de Grafana. Puede leer más sobre cómo funciona y todas las configuraciones que puede establecer para las fuentes de datos en la xref:administracion/aprovisionamiento.adoc#_fuentes_de_datos[página de documentos de aprovisionamiento].
+
+Aquí hay un ejemplo:
+
+[source,YAML]
+----
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://localhost:3100
+    jsonData:
+      maxLines: 1000
+----
+
+Aquí hay otro con autenticación básica y campo derivado. Tenga en cuenta que el carácter `$` debe escaparse en los valores YAML, ya que se usa para interpolar variables de entorno:
+
+[source,YAML]
+----
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://localhost:3100
+    basicAuth: true
+    basicAuthUser: my_user
+    basicAuthPassword: test_password
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        # Field with internal link pointing to data source in Grafana.
+        # Right now, Grafana supports only Jaeger and Zipkin data sources as link targets.
+        # datasourceUid value can be anything, but it should be unique across all defined data source uids.
+        - datasourceUid: my_jaeger_uid
+          matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          # url will be interpreted as query for the datasource
+          url: '$${__value.raw}'
+
+        # Field with external link.
+        - matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          url: 'http://localhost:16686/trace/$${__value.raw}'
+----
+
+A continuación, se muestra un ejemplo de una fuente de datos de Jaeger que se corresponde con el ejemplo anterior. Tenga en cuenta que el valor de `uid` de Jaeger coincide con el valor de `datasourceUid` de Loki.
+
+----
+datasources:
+    - name: Jaeger
+      type: jaeger
+      url: http://jaeger-tracing-query:16686/
+      access: proxy
+      # UID should match the datasourceUid in dervidedFields.
+      uid: my_jaeger_uid
+----

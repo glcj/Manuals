@@ -1,0 +1,142 @@
+= Preguntas Frecuentes
+
+== ¿Cómo puedo identificar mi versión de IoTDB?
+
+Hay varias formas de identificar la versión de IoTDB que está utilizando:
+
+* Inicie la interfaz de línea de comandos de IoTDB:
+
+[source]
+----
+> ./start-cli.sh -p 6667 -pw root -u root -h localhost
+ _____       _________  ______   ______    
+|_   _|     |  _   _  ||_   _ `.|_   _ \   
+  | |   .--.|_/ | | \_|  | | `. \ | |_) |  
+  | | / .'`\ \  | |      | |  | | |  __'.  
+ _| |_| \__. | _| |_    _| |_.' /_| |__) | 
+|_____|'.__.' |_____|  |______.'|_______/  version x.x.x
+----
+
+* Verifique el archivo pom.xml:
+
+[source]
+----
+<version>x.x.x</version>
+----
+
+* Utilice la API de JDBC:
+
+[source]
+----
+String iotdbVersion = tsfileDatabaseMetadata.getDatabaseProductVersion();
+----
+
+* Utilice la interfaz de línea de comandos:
+
+[source]
+----
+IoTDB> show version
+show version
++---------------+
+|version        |
++---------------+
+|x.x.x          |
++---------------+
+Total line number = 1
+It costs 0.241s
+----
+
+== ¿Dónde puedo encontrar registros de IoTDB?
+
+Suponga que su directorio raíz es:
+
+[source]
+----
+$ pwd
+/workspace/iotdb
+
+$ ls -l
+server/
+cli/
+pom.xml
+Readme.md
+...
+----
+
+Deje que `$IOTDB_HOME = /workspace/iotdb/server/target/iotdb-server-{project.version}`
+
+Deje que `$IOTDB_CLI_HOME = /workspace/iotdb/cli/target/iotdb-cli-{project.version}`
+
+De forma predeterminada, los registros se almacenan en `IOTDB_HOME/logs`. Puede cambiar el nivel de registro y la ruta de almacenamiento configurando `logback.xml` en `IOTDB_HOME/conf`.
+
+== ¿Dónde puedo encontrar archivos de datos de IoTDB?
+
+De forma predeterminada, los archivos de datos (incluidos TsFile, metadatos y archivos WAL) se almacenan en `IOTDB_HOME/data`.
+
+== ¿Cómo sé cuántas series de tiempo se almacenan en IoTDB?
+
+Utilice la interfaz de línea de comandos de IoTDB:
+
+[source]
+----
+IoTDB> show timeseries root
+----
+
+En el resultado, hay una declaración que muestra el `Total timeseries number`, este número es el número de series de tiempo en IoTDB.
+
+En la versión actual, IoTDB admite la consulta del número de series de tiempo. Utilice la interfaz de línea de comandos de IoTDB:
+
+[source]
+----
+IoTDB> count timeseries root
+----
+
+Si está utilizando Linux, puede utilizar el siguiente comando de shell:
+
+[source,Shell]
+----
+> grep "0,root" $IOTDB_HOME/data/system/schema/mlog.txt |  wc -l
+>   6
+----
+
+== ¿Puedo usar Hadoop y Spark para leer TsFile en IoTDB?
+
+Sí. IoTDB tiene una intensa integración con el ecosistema de código abierto. IoTDB es compatible con [Hadoop], [Spark] y [Grafana]herramienta de visualización.
+
+== ¿Cómo maneja IoTDB los puntos duplicados?
+
+Un punto de datos se identifica de forma única mediante una ruta de serie de tiempo completo (por ejemplo, `root.vehicle.d0.s0`) y una marca de tiempo. Si envía un nuevo punto con la misma ruta y marca de tiempo que un punto existente, IoTDB actualiza el valor de este punto en lugar de insertar un nuevo punto.
+
+== ¿Cómo puedo saber qué tipo de serie temporal específica?
+
+Utilice `SHOW TIMESERIES <timeseries path>` SQL en la interfaz de línea de comandos de IoTDB:
+
+Por ejemplo, si desea saber el tipo de todas las series temporales, la <ruta de la serie temporal> debe ser `root`. La declaración será:
+
+[source]
+----
+IoTDB> show timeseries root
+----
+
+Si desea consultar un sensor específico, puede reemplazar la <ruta de la serie temporal> con el nombre del sensor. Por ejemplo:
+
+[source]
+----
+IoTDB> show timeseries root.fit.d1.s1
+----
+
+De lo contrario, también puede usar comodines en la ruta de la serie temporal:
+
+[source]
+----
+IoTDB> show timeseries root.fit.d1.s1
+----
+
+== ¿Cómo puedo cambiar el formato de visualización de la hora Cli de IoTDB?
+
+El formato de visualización de la hora Cli predeterminado de IoTDB es legible (por ejemplo, `1970-01-01T08:00:00.001`), si desea mostrar la hora en el tipo de marca de tiempo u otro formato legible, agregue el parámetro `-disableISO8601` en el comando de inicio:
+
+[source]
+----
+> $IOTDB_CLI_HOME/sbin/start-cli.sh -h 127.0.0.1 -p 6667 -u root -pw root -disableISO8601
+----

@@ -1,0 +1,3 @@
+= Qué es IoTDB
+
+IoTDB (Base de Datos de Internet de las Cosas) es un motor de gestión de datos integrado diseñado para datos de series temporales, que puede proporcionar a los usuarios servicios específicos para la recopilación, el almacenamiento y el análisis de datos. Debido a su estructura liviana, alto rendimiento y características utilizables junto con su intensa integración con la ecología de Hadoop y Spark, IoTDB cumple con los requisitos de almacenamiento masivo de conjuntos de datos, entrada de datos de alta velocidad y análisis de datos complejos en el campo industrial de IoT.

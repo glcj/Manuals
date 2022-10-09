@@ -1,0 +1,251 @@
+= Otros Lenguajes
+
+== Dependencias Nativas de Python
+
+=== Dependencias
+
+Se prefiere python3.7 o posterior.
+
+Tiene que instalar Thrift (0.11.0 o posterior) para compilar nuestro archivo thrift en código Python. A continuación se muestra el tutorial oficial de instalación:
+
+[source]
+----
+http://thrift.apache.org/docs/install/
+----
+
+=== Instalación
+
+* Opción 1: pip install
+
+Puede encontrar el paquete de API de Cliente Python de Apache IoTDB en https://pypi.org/project/apache-iotdb/.
+
+El comando de descarga es:
+
+[source]
+----
+pip install apache-iotdb
+----
+
+* Opción 2: uso básico de thrift
+
+Opcionalmente, si conoce el uso básico de thrift, puede descargar el archivo fuente de thrift en `thrift\src\main\thrift\rpc.thrift`, y simplemente ejecute `thrift -gen py -out ./target/iotdb rpc.thrift` para generar la biblioteca de Python.
+
+=== Ejemplo de Codificación
+
+Proporcionamos un ejemplo de cómo usar la biblioteca de ahorro para conectarse a IoTDB en `client-py/src /SessionExample.py`, léalo detenidamente antes de escribir su propio código.
+
+== Interfaces Nativas de C++
+
+=== Dependencias
+
+. Java 8+
+. Maven 3.5+
+. Flexionar
+. Bison 2.7+
+. Aumentar
+. OpenSSL 1.0+
+
+=== Instalación
+
+La compilación del cliente CPP requiere que se construya primero el módulo "compile-tools". "compile-tools" es el principal responsable de la creación de bibliotecas Thrift localmente.
+
+==== Compilar Thrift en MacOS
+
+* Bison
+
+Bison 2.3 está preinstalado en OSX, pero esta versión es demasiado baja. Al compilar Thrift con Bison 2.3, aparecería el siguiente error:
+
+[source]
+----
+invalid directive: '%code'
+----
+
+Para tal caso, actualice `Bison`:
+
+[source]
+----
+brew install bison		
+brew link bison --force		
+----
+
+Luego, debe decirle al sistema operativo dónde está el nuevo Bison.
+
+Para usuarios de Bash:
+
+[source]
+----
+echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile	
+----
+
+Para usuarios de zsh:
+
+[source]
+----
+echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.zshrc
+----
+
+* Boost
+
+Asegúrese de que haya una versión relativamente nueva de Boost lista en su máquina. Si no hay Boost disponible, instale la última versión de Boost:
+
+[source]
+----
+brew install boost
+brew link boost
+----
+
+* OpenSSL
+
+Asegúrese de que las bibliotecas de Openssl se hayan instalado en su Mac. La ruta predeterminada de búsqueda de archivos de inclusión de Openssl es "/usr/local/opt/openssl/include". Si los archivos de encabezado de Openssl no se pueden encontrar al compilar Thrift, agregue la opción
+
+`-Dopenssl.include.dir=""`
+
+para especificar el directorio de instalación de OpenSSL en su Mac.
+
+==== Compilar Thrift en Linux
+
+Para instalar todas las dependencias, ejecute:
+
+Debian/Ubuntu:
+
+[source]
+----
+sudo apt-get install gcc g++ bison flex libboost-all-dev
+----
+
+CentOS:
+
+[source]
+----
+yum install gcc g++ bison flex boost-devel
+----
+
+==== Compilar Thrift en Windows
+
+Asegúrese de que un entorno de construcción de Windows C++ completo esté preparado en su máquina. MSVC, MinGW... son compatibles.
+
+Si está utilizando MS Visual Studio, recuerde instalar Visual Studio C/C++ IDE y el compilador (compatible con CMake, Clang, MinGW).
+
+* Flex y Bison Windows Flex y Bison se pueden descargar de SourceForge: https://sourceforge.net/projects/winflexbison/
+
+Después de la descarga, cambie el nombre de los ejecutables a flex.exe y bison.exe y agréguelos a las variables de entorno "PATH".
+
+* Boost For Boost, descárguelo del sitio web oficial: https://www.boost.org/users/download/
+
+Luego, compile Boost ejecutando bootstrap.bat y b2.exe.
+
+[source]
+----
+bootstrap.bat
+.\b2.exe
+----
+
+Para ayudar a CMake a encontrar sus bibliotecas Boost en Windows, debe configurar `-Dboost.include.dir=${your boost header folder} -Dboost.library.dir=${your boost lib (stage) folder}` en su comando de compilación mvn.
+
+==== Generador de Cmake en Windows
+
+Existe una larga lista de generadores Cmake compatibles en el entorno Windows.
+
+[source]
+----
+  Visual Studio 16 2019        = Generates Visual Studio 2019 project files.
+                                 Use -A option to specify architecture.
+  Visual Studio 15 2017 [arch] = Generates Visual Studio 2017 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 14 2015 [arch] = Generates Visual Studio 2015 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 12 2013 [arch] = Generates Visual Studio 2013 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 11 2012 [arch] = Generates Visual Studio 2012 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 10 2010 [arch] = Generates Visual Studio 2010 project files.
+                                 Optional [arch] can be "Win64" or "IA64".
+  Visual Studio 9 2008 [arch]  = Generates Visual Studio 2008 project files.
+                                 Optional [arch] can be "Win64" or "IA64".
+  Borland Makefiles            = Generates Borland makefiles.
+* NMake Makefiles              = Generates NMake makefiles.
+  NMake Makefiles JOM          = Generates JOM makefiles.
+  MSYS Makefiles               = Generates MSYS makefiles.
+  MinGW Makefiles              = Generates a make file for use with
+                                 mingw32-make.
+  Unix Makefiles               = Generates standard UNIX makefiles.
+  Green Hills MULTI            = Generates Green Hills MULTI files
+                                 (experimental, work-in-progress).
+  Ninja                        = Generates build.ninja files.
+  Ninja Multi-Config           = Generates build-<Config>.ninja files.
+  Watcom WMake                 = Generates Watcom WMake makefiles.
+  CodeBlocks - MinGW Makefiles = Generates CodeBlocks project files.
+  CodeBlocks - NMake Makefiles = Generates CodeBlocks project files.
+  CodeBlocks - NMake Makefiles = Generates CodeBlocks project fi
+----
+
+la lista está disponible mediante el comando: `cmake --help`
+
+Al compilar un proyecto de cliente-cpp, use la opción -Dcmake.generator="" para especificar un generador de Cmake. Por ejemplo, `mvn package -Dcmake.generator="Visual Studio 15 2017 [arch]"`
+
+==== Compilación del Cliente C++
+
+Para compilar el cliente cpp, agregue la opción "-P compile-cpp" al comando de compilación de maven.
+
+La compilación requiere que se construya primero el módulo "compile-tools".
+
+==== Compilar y Probar:
+
+`mvn package -P compile-cpp -pl example/client-cpp-example -am -DskipTest`
+
+Para compilar en Windows, primero instale Boost y agregue las siguientes configuraciones de Maven:
+
+[source]
+----
+-Dboost.include.dir=${your boost header folder} -Dboost.library.dir=${your boost lib (stage) folder}`
+----
+
+P.ej.
+
+[source]
+----
+mvn package -P compile-cpp -pl client-cpp,server,example/client-cpp-example -am 
+-D"boost.include.dir"="D:\boost_1_75_0" -D"boost.library.dir"="D:\boost_1_75_0\stage\lib" -DskipTests
+----
+
+Si la compilación finaliza correctamente, el archivo zip empaquetado se colocará en "client-cpp/target/client-cpp-${project.version}-cpp-${os}.zip".
+
+En máquinas Mac, la jerarquía del paquete debería verse así:
+
+[source]
+----
+.
++-- client
+|   +-- include
+|       +-- Session.h
+|       +-- TSIService.h
+|       +-- rpc_types.h
+|       +-- rpc_constants.h
+|       +-- thrift
+|           +-- thrift_headers...
+|   +-- lib
+|       +-- libiotdb_session.dylib
+----
+
+=== Preguntas y Respuestas
+
+==== En Mac
+
+Si se producen errores al compilar el código fuente de Thrift, intente degradar su línea de comandos xcode de 12 a 11.5
+
+Vea https://stackoverflow.com/questions/63592445/ld-unsupported-tapi-file-type-tapi-tbd-in-yaml-file/65518087#65518087
+#
+==== En Windows
+
+Al compilar Thrift y descargar paquetes a través de "wget", puede ocurrir un posible problema molesto con un mensaje de error similar a:
+
+[source]
+----
+Failed to delete cached file C:\Users\Administrator\.m2\repository\.cache\download-maven-plugin\index.ser
+----
+
+Posibles correcciones:
+
+* Intente eliminar el directorio ".m2\repository\.cache" y vuelva a intentarlo.
+
+* Agregue la configuración "<skipCache>true</skipCache>" a la fase de descarga maven-plugin maven que se queja de este error.

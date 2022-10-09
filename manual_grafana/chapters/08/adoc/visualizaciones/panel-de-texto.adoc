@@ -1,0 +1,5 @@
+= Panel de texto
+
+El panel de texto le permite crear paneles de información y descripción para sus tableros.
+
+En el *Modo*, seleccione si desea utilizar Markdown o HTML para darle estilo a su texto, luego ingrese el contenido en el cuadro a continuación. Grafana incluye un título y un párrafo para ayudarlo a comenzar, o puede pegar contenido de otro editor.

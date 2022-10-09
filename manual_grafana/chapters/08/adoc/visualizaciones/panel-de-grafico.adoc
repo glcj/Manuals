@@ -1,0 +1,161 @@
+= Panel de gráfico
+
+Esta visualización es la más utilizada en el ecosistema Grafana. Se puede representar como una línea, una ruta de puntos o una serie de barras. Este tipo de gráfico es lo suficientemente versátil como para mostrar casi cualquier dato de series de tiempo.
+
+== Opciones de campo y datos
+
+Las visualizaciones de gráficos le permiten aplicar:
+
+* xref:alertas/alertas.adoc[Alertas]: este es el único tipo de visualización que le permite configurar alertas.
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Opciones de pantalla
+
+Utilice esta configuración para refinar su visualización.
+
+* *Barras:* muestra los valores como un gráfico de barras.
+* *Líneas:* muestra los valores como un gráfico de líneas.
+* *Ancho de línea:* el ancho de la línea de una serie. (predeterminado 1).
+* *Escalera:* dibuja puntos adyacentes como escalera.
+* *Relleno de área:* cantidad de relleno de color para una serie. (predeterminado 1, 0 es ninguno)
+* *Rellenar degradado:* grado de degradado en el relleno del área. (0 es sin gradiente, 10 es un gradiente pronunciado. El valor predeterminado es 0).
+* *Puntos:* muestra puntos para valores.
+* *Radio de punto:* controla el tamaño de los puntos.
+* *Umbrales de alerta:* muestra los umbrales de alerta y las regiones en el panel.
+
+=== Apilamiento y valor nulo
+
+* *Pila:* cada serie se apila una encima de otra.
+* *Porcentaje:* disponible cuando se selecciona *Pila*. Cada serie se extrae como un porcentaje del total de todas las series.
+* *Valor nulo:* cómo se muestran los valores nulos. _Este es un escenario muy importante_. Vea la nota abajo.
+** *conectado:* si hay un espacio en la serie, es decir, un valor o valores nulos, la línea saltará el espacio y se conectará al siguiente valor no nulo.
+** *nulo:* (predeterminado) si hay un espacio en la serie, es decir, un valor nulo, la línea del gráfico se romperá y mostrará el espacio.
+** *nulo como cero:* si hay un espacio en la serie, es decir, un valor nulo, se mostrará como un valor cero en el panel de gráficos.
+
+[NOTE]
+====
+Si está monitoreando la carga de la CPU de un servidor y la carga alcanza el 100%, entonces el servidor se bloqueará y el agente que envía las estadísticas no podrá recopilar la estadística de carga. Esto conduce a una brecha en las métricas y tener el valor predeterminado como nulo significa que Grafana mostrará las brechas e indicará que algo está mal. Si está configurado como conectado, sería fácil perder esta señal.
+====
+
+=== Información sobre herramientas flotante
+
+Utilice esta configuración para cambiar la apariencia de la información sobre herramientas que aparece cuando pasa el cursor sobre la visualización del gráfico.
+
+* *Modo*
+** *Todas las series:* la información sobre herramientas flotante muestra todas las series en el gráfico. Grafana destaca la serie sobre la que se desplaza en negrita en la lista de series en la información sobre herramientas.
+** *Único:* la información sobre herramientas flotante muestra solo una serie única, la que está sobre la que se desplaza en el gráfico.
+* *Orden de clasificación:* ordena el orden de las series en la información sobre herramientas flotante si ha seleccionado el modo *Todas las series*. Cuando coloca el cursor sobre un gráfico, Grafana muestra los valores asociados con las líneas. Generalmente, los usuarios están más interesados ​​en los valores más altos o más bajos. Ordenar estos valores puede hacer que sea mucho más fácil encontrar los datos de interés.
+** *Ninguno:* el orden de las series en la información sobre herramientas está determinado por el orden de clasificación de la consulta. Por ejemplo, podrían ordenarse alfabéticamente por nombre de serie.
+** *Creciente:* las series en la información sobre herramientas flotantes se ordenan por valor y en orden creciente, con el valor más bajo en la parte superior de la lista.
+** *Decreciente:* las series en la información sobre herramientas flotantes se ordenan por valor y en orden decreciente, con el valor más alto en la parte superior de la lista.
+
+== Anulaciones de series
+
+Las anulaciones de series permiten que una serie en un panel de gráficos se represente de manera diferente a las demás. Puede personalizar las opciones de visualización en una base por serie o mediante el uso de reglas de expresiones regulares. Por ejemplo, una serie puede tener un ancho de línea más grueso para que se destaque o se mueva al eje Y derecho.
+
+Puede agregar varias modificaciones de series.
+
+*Agregar una anulación de serie*
+
+[arabic]
+. Haga clic en *Agregar anulación de serie*.
+. En *Alias ​​o regex*, escriba o seleccione una serie. Haga clic en el campo para ver una lista de las series disponibles.
++
+*Ejemplo:* `/Network.*/` coincidiría con dos series denominadas `Network out` y `Network in`.
+. Haga clic en *+* y luego seleccione un estilo para aplicarlo a la serie. Puede agregar varios estilos a cada entrada.
+* *Barras:* muestra la serie como un gráfico de barras.
+* *Líneas:* muestra la serie como gráfico lineal.
+* *Relleno de línea:* muestra un gráfico de líneas con relleno de área.
+* *Gradiente de relleno:* cantidad de gradiente de relleno del área.
+* *Ancho de línea:* establezca el ancho de línea.
+* *Modo de punto nulo:* opción para ignorar los valores nulos o reemplazarlos por cero. Importante si desea ignorar las lagunas en sus datos.
+* *Rellenar a continuación para:* rellenar el área entre dos series.
+* *Línea de escalera:* muestra la serie como una línea de escalera.
+* *Guiones:* muestra la línea con guiones.
+* *Serie oculta:* oculta la serie.
+* *Longitud del guión:* longitud de la línea discontinua.
+* *Espacio de guión:* espacio entre líneas discontinuas.
+* *Puntos:* muestra las series como puntos separados.
+* *Radio de punto:* radio para el renderizado de puntos.
+* *Pila:* establece el grupo de pila para la serie.
+* *Color:* establece el color de la serie.
+* *Eje Y:* establece el eje Y de la serie.
+* *Índice Z:* establece el índice Z de la serie (orden de representación). Importante al superponer diferentes estilos (gráficos de barras, gráficos de áreas).
+* *Transformar:* transforma el valor en negativo para renderizar debajo del eje y.
+* *Leyenda:* controla si una serie se muestra en la leyenda.
+* *Ocultar en la información sobre herramientas:* controle si se muestra una serie en la información sobre herramientas del gráfico.
+
+== Ejes
+
+Utilice estas opciones para controlar la pantalla de ejes en la visualización.
+
+=== Y izquierdo/Y derecho
+
+Las opciones son idénticas para ambos ejes Y.
+
+* *Mostrar:* haga clic para mostrar u ocultar el eje.
+* *Unidad:* la unidad de visualización del valor Y.
+* *Escala:* la escala que se utilizará para el valor Y, lineal o logarítmico. (lineal predeterminado)
+* *Y-Min:* el valor Y mínimo. (auto predeterminado)
+* *Y-Max:* el valor Y máximo. (autopredeterminado)
+* *Decimales:* define cuántos decimales se muestran para el valor Y. (auto predeterminado)
+* *Etiqueta:* la etiqueta del eje Y. (defecto "")
+
+=== Ejes Y
+
+* *Alinear:* seleccione esta opción para alinear los ejes Y izquierdo y derecho por valor. (predeterminado sin marcar/falso)
+* *Nivel:* disponible cuando se selecciona *Alinear*. Valor que se utilizará para la alineación de los ejes Y izquierdo y derecho, comenzando desde Y=0. (predeterminado 0)
+
+=== Eje X
+
+* *Mostrar:* haga clic para mostrar u ocultar el eje.
+* *Modo:* el modo de visualización cambia completamente la visualización del panel de gráficos. Es como tres paneles en uno. El modo principal es el modo de serie temporal con el tiempo en el eje X. Los otros dos modos son un modo de gráfico de barras básico con series en el eje X en lugar de tiempo y un modo de histograma.
+** *Tiempo:* (predeterminado) El eje X representa el tiempo y los datos están agrupados por tiempo (por ejemplo, por hora o por minuto).
+** *Serie:* los datos se agrupan por series y no por tiempo. El eje Y todavía representa el valor.
+*** *Valor:* el tipo de agregación que se utilizará para los valores. El valor predeterminado es total (sumando los valores).
+** *Histograma:* convierte el gráfico en un histograma. Un histograma es una especie de gráfico de barras que agrupa números en rangos, a menudo llamados cubos o contenedores. Las barras más altas muestran que más datos caen en ese rango.
++
+Para obtener más información sobre histogramas, consulte Introducción a los histogramas y mapas de calor.
+
+*** *Cubos*: la cantidad de cubos por los que agrupar los valores. Si se deja vacío, Grafana intenta calcular una cantidad adecuada de cubos.
+*** *X-Min:* filtra los valores del histograma que están por debajo de este límite mínimo.
+*** *X-Max:* filtra los valores que superan este límite máximo.
+
+== Leyenda
+
+Utilice esta configuración para refinar cómo aparece la leyenda en su visualización.
+
+=== Opciones
+
+* *Mostrar:* desmarque para ocultar la leyenda. (por defecto marcado/verdadero)
+* *Como tabla:* marque para mostrar la leyenda en la tabla. (por defecto marcado/verdadero)
+* *A la derecha:* marque para mostrar la leyenda a la derecha.
+* *Ancho:* disponible cuando se selecciona *A la derecha*. Introduzca el ancho mínimo de la leyenda en píxeles.
+
+=== Valores
+
+Se pueden mostrar valores adicionales junto a los nombres de las leyendas:
+
+* *Min:* mínimo de todos los valores devueltos por la consulta de métricas.
+* *Max:* máximo de todos los valores devueltos por la consulta de métricas.
+* *Promedio:* promedio de todos los valores devueltos por la consulta de métricas.
+* *Actual:* último valor devuelto por la consulta de métricas.
+* *Total:* suma de todos los valores devueltos por la consulta de métricas.
+* *Decimales:* controla cuántos decimales se muestran para los valores de leyenda y la información sobre herramientas flotante del gráfico.
+
+Grafana calcula los valores de la leyenda en el lado del cliente y dependen del tipo de agregación o consolidación de puntos que utilice su consulta de métricas. Todos los valores de leyenda anteriores no pueden ser correctos al mismo tiempo.
+
+Por ejemplo, si traza una tasa como solicitudes/segundo, probablemente esté usando el promedio como un agregador, entonces el Total en la leyenda no representará el número total de solicitudes. Es solo la suma de todos los puntos de datos recibidos por Grafana.
+
+=== Ocultar serie
+
+Ocultar series cuando todos los valores de una serie de una consulta de métricas tienen un valor específico.
+
+* *Con solo nulos:* Valor nulo (predeterminado sin marcar)
+* *Con solo ceros:* Valo =cero (predeterminado sin marcar)
+
+=== Regiones de tiempo
+
+Las regiones de tiempo le permiten resaltar ciertas regiones de tiempo del gráfico para que sea más fácil ver, por ejemplo, los fines de semana, el horario comercial y / o las horas libres. Todas las regiones horarias configuradas se refieren a la hora UTC.

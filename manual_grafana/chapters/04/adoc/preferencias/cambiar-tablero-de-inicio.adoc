@@ -1,0 +1,73 @@
+= Cambiar el tablero de inicio predeterminado
+
+El tablero de inicio que configura es el que todos los usuarios verán de forma predeterminada cuando inicien sesión. Puede configurar el tablero de inicio para el servidor, una organización, un equipo o su cuenta de usuario personal. Este tema proporciona instrucciones para cada tarea.
+
+Algunas tareas requieren ciertos permisos. Para obtener más información sobre los roles, consulte xref:permisos/permisos.adoc[Permisos].
+
+== Navegue hasta el tablero de inicio
+
+El tablero de inicio es el primer tablero que ve un usuario cuando inicia sesión en Grafana. También puede navegar al tablero de inicio de forma manual.
+
+[arabic]
+. Coloque el cursor sobre el ícono *Tableros* (cuatro cuadrados).
+. Haga clic en *Inicio*.
+
+== Configurar el tablero de inicio para el servidor
+
+Los usuarios con la marca de administrador de servidor de Grafana en su cuenta o acceso al archivo de configuración pueden definir un archivo JSON para usar como tablero de inicio para todos los usuarios en el servidor.
+
+=== [Opcional] Convierta un tablero existente en un archivo JSON
+
+[arabic]
+. Navegue a la página del tablero que desea utilizar como tablero de inicio.
+. Haga clic en el icono *Compartir tablero* junto al título del tablero.
+. En la pestaña Exportar, haga clic en *Guardar en archivo*. Grafana convierte el tablero en un archivo JSON y lo guarda localmente.
+
+=== Utilice un archivo JSON como tablero de inicio
+
+[arabic]
+. Guarde su archivo JSON en algún lugar al que Grafana pueda acceder. Por ejemplo, en la carpeta data de Grafana.
+. Actualice su archivo de configuración para establecer la ruta al archivo JSON. Consulte xref:administracion/configuracion.adoc[default_home_dashboard_path] para obtener más información sobre cómo modificar los archivos de configuración de Grafana.
+
+[source,Ini]
+----
+[dashboards]
+# Path to the default home dashboard. If this value is empty, then Grafana uses StaticRootPath + "dashboards/home.json"
+default_home_dashboard_path = data/main-dashboard.json
+----
+
+== Configure el tablero de inicio de su organización
+
+Los administradores de la organización pueden elegir un tablero de inicio para su organización.
+
+[arabic]
+. Navegue hasta el tablero que desea establecer como tablero de inicio.
+. Haga clic en la estrella junto al título del tablero para marcar el tablero como favorito si aún no lo está.
+. Pase el cursor sobre el icono de *Configuración* (engranaje).
+. Haga clic en *Preferencias*.
+. En el campo *Tablero de inicio*, seleccione el tablero que desea utilizar para su tablero de inicio. Las opciones incluyen todos los tableros marcados con estrellas.
+. Clic en *Guardar*.
+
+== Configure el tablero de inicio para su equipo
+
+Los administradores de la organización y los administradores del equipo pueden elegir un tablero de inicio para un equipo.
+
+[arabic]
+. Navegue hasta el tablero que desea establecer como tablero de inicio.
+. Haga clic en la estrella junto al título del tablero para marcar el tablero como favorito si aún no lo está.
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en el equipo para el que desea cambiar el tablero de inicio y luego navegue hasta la pestaña *Configuración*.
+. En el campo *Tablero de inicio*, seleccione el tablero que desea utilizar para su tablero de inicio. Las opciones incluyen todos los tablero marcados con estrellas.
+. Clic en *Guardar*.
+
+== Configure su tablero de inicio personal
+
+Puede elegir su propio tablero de inicio personal. Esta configuración anula todos los tableros de inicio establecidos en niveles superiores.
+
+[arabic]
+. Navegue hasta el tablero que desea establecer como tablero de inicio.
+. Haga clic en la estrella junto al título del tablero para marcar el tablero como favorito si aún no lo está.
+. En el menú de la izquierda, coloque el cursor sobre su avatar y luego haga clic en *Preferencias*.
+. En el campo *Tablero de inicio*, seleccione el tablero que desea utilizar para su tablero de inicio. Las opciones incluyen todos los tableros marcados con estrellas.
+. Clic en *Guardar*.

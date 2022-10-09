@@ -1,0 +1,43 @@
+= Compartir un tablero
+
+Puede compartir un tablero como enlace directo o como instantánea. También puede exportar un tablero. Si ha realizado cambios en el tablero, verifique que esos cambios se guarden antes de compartirlos.
+
+Para compartir un tablero:
+
+[arabic]
+. Vaya a la página de inicio de su instancia de Grafana.
+. Haga clic en el icono de compartir en la navegación superior. Se abre el cuadro de diálogo para compartir y muestra la pestaña Vínculo.
+
+image::image164.png[Dashboard share direct link,width=624,height=318]
+
+== Usar enlace directo
+
+La pestaña Enlace tiene el rango de tiempo actual, las variables de plantilla y el tema seleccionado de forma predeterminada. Opcionalmente, puede seleccionar una URL abreviada para compartir.
+
+Para compartir un enlace directo:
+
+[arabic]
+. Haga clic en *Copiar*. Esto copia la URL predeterminada o abreviada en el portapapeles.
+. Envíe la URL copiada a un usuario de Grafana con autorización para ver el enlace.
+
+== Publica una instantánea
+
+Una instantánea del tablero comparte públicamente un tablero interactivo. Grafana elimina los datos confidenciales como consultas (métricas, plantillas y anotaciones) y enlaces de paneles, dejando solo los datos de métricas visibles y los nombres de las series incrustados en su tablero. Cualquiera que tenga el enlace puede acceder a las instantáneas del tablero.
+
+Puede publicar instantáneas en su instancia local o en http://snapshot.raintank.io/[snapshot.raintank.io]. Este último es un servicio gratuito proporcionado por Grafana Labs que le permite publicar instantáneas del tablero en una instancia externa de Grafana. Se siguen aplicando las mismas reglas: cualquiera que tenga el enlace puede verlo. Puede establecer un tiempo de vencimiento si desea que se elimine la instantánea después de un cierto período de tiempo.
+
+image::image165.png[Dashboard share snapshot,width=624,height=487]
+
+Para publicar una instantánea:
+
+[arabic]
+. Haga clic en *Instantánea local* o *Publicar en snapshot.raintank.io*. Esto genera el enlace de la instantánea.
+. Copie el enlace de la instantánea y compártalo dentro de su organización o públicamente en la web.
+
+En caso de que haya creado una instantánea por error, haga clic en *eliminar instantánea* para eliminar la instantánea de su instancia de Grafana.
+
+== Exportación de tablero
+
+Los trableros de Grafana se pueden exportar e importar fácilmente. Para obtener más información, consulte xref:tableros/exportar-e-importar.adoc[Exportar e importar tablero].
+
+image::image166.png[Export,width=624,height=166]

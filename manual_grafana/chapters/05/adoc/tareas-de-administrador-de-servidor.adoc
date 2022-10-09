@@ -1,0 +1,9 @@
+= Tareas de administrador del servidor
+
+Los administradores del servidor Grafana utilizan el menú *Administrador del Dervidor* para administrar las cuentas de usuario y las organizaciones configuradas en el servidor Grafana.
+
+Realizan las tareas descritas en las siguientes páginas:
+
+* xref:administrar-usuarios/tareas-de-administrador-de-servidor/administrar-usuarios.adoc[Gestionar usuarios como administrador de servidor]: describe las tareas de gestión de usuarios que pueden realizar los administradores de servidor de Grafana.
+* xref:administrar-usuarios/tareas-de-administrador-de-servidor/administrar-organizacion.adoc[Gestionar organizaciones como administrador de servidor]: describe las tareas de gestión de la organización que pueden realizar los administradores de servidor de Grafana.
+* xref:api-http/usuario.adoc[API de usuario]: administre usuarios o cambie las contraseñas mediante programación.

@@ -1,0 +1,60 @@
+= Descripción general del tablero
+
+Un _tablero_ es un conjunto de uno o más paneles organizados y dispuestos en una o más filas. Grafana se envía con una variedad de paneles. Grafana facilita la construcción de las consultas correctas y personaliza las propiedades de visualización para que puedas crear el tablero perfecto para tus necesidades. Cada panel puede interactuar con datos de cualquier fuente de datos de Grafana configurada (actualmente Graphite, Prometheus, Elasticsearch, InfluxDB, OpenTSDB, MySQL, PostgreSQL, Microsoft SQL Server y AWS Cloudwatch).
+
+== Interfaz de usuario del tablero
+
+image::image145.png[https://grafana.com/static/img/docs/v50/dashboard_annotated.png,width=624,height=265]
+
+[arabic]
+. Alejar rango de tiempo
+. Menú desplegable del selector de tiempo. Aquí puede acceder a opciones de rango de tiempo relativo, opciones de actualización automática y establecer rangos de tiempo absolutos personalizados.
+. Botón de actualización manual. Hará que todos los paneles se actualicen (obtengan nuevos datos).
+. Panel del tablero. Haga clic en el título del panel para editar paneles.
+. Leyenda del gráfico. Puede cambiar los colores de la serie, el eje Y y la visibilidad de la serie directamente desde la leyenda.
+
+== Encabezado del tablero
+
+Haga clic en el enlace nuevo Tablero en el lado derecho del selector de Tablero. Ahora tiene un Tablero en blanco.
+
+image::image146.png[https://grafana.com/static/img/docs/v50/top_nav_annotated.png,width=624,height=99]
+
+La imagen de arriba muestra el encabezado superior de un Tablero.
+
+[arabic]
+. Alternar barra de menú lateral: esto alterna el menú lateral, lo que le permite concentrarse en los datos presentados en el tablero. El menú lateral proporciona acceso a funciones no relacionadas con un Tablero, como Usuarios, Organizaciones y Fuentes de datos.
+. Menú desplegable del tablero: este menú desplegable le muestra qué Tablero está viendo actualmente y le permite cambiar fácilmente a un nuevo Tablero. Desde aquí también puede crear un nuevo Tablero o carpeta, importar Tableros existentes y administrar listas de reproducción del Tablero.
+. Agregar Panel: agrega un nuevo panel al Tablero actual.
+. Destacar Tablero: Destaca (o desmarca) el Tablero actual. Los Tableros destacados aparecerán en su propio Tablero de inicio de forma predeterminada y son una forma conveniente de marcar los Tableros que le interesan.
+. Compartir Tablero: Comparta el tablero actual creando un enlace o una instantánea estática del mismo. Asegúrese de que el Tablero esté guardado antes de compartir.
+. Guardar tablero: el Tablero actual se guardará con el nombre del Tablero actual.
+. Configuración: administre la configuración y las funciones del Tablero, como Plantillas y Anotaciones.
+
+== Administrar tableros
+
+El período de tiempo para el tablero se puede controlar mediante los xref:tableros/controles-de-rango-de-tiempo.adoc[controles de rango de tiempo] en la parte superior derecha del tablero.
+
+Los tableros pueden usar xref:plantillas-y-variables/plantillas-y-variables.adoc[plantillas] para hacerlos más dinámicos e interactivos.
+
+Los tableros pueden usar xref:tableros/anotaciones.adoc[anotaciones] para mostrar datos de eventos en todos los paneles. Esto puede ayudar a correlacionar los datos de la serie temporal en el panel con otros eventos.
+
+Puede xref:compartir/compartir-tablero.adoc[compartir tableros] de diversas formas.
+
+Los paneles se pueden etiquetar y el selector de paneles proporciona acceso rápido y de búsqueda a todos los paneles de una organización en particular.
+
+== Filas
+
+Una fila es un divisor lógico dentro de un tablero. Se utiliza para agrupar paneles.
+
+Las filas siempre tienen 12 "unidades" de ancho. Estas unidades se escalan automáticamente dependiendo de la resolución horizontal de su navegador. Puede controlar el ancho relativo de los paneles dentro de una fila estableciendo su ancho específico.
+
+Usamos una abstracción de unidades para que Grafana se vea genial en todos los tamaños de pantalla.
+
+[NOTE]
+====
+Con la funcionalidad MaxDataPoint, Grafana puede mostrarle el número perfecto de puntos de datos, independientemente de la resolución o el rango de tiempo.
+====
+
+Contraiga una fila haciendo clic en el título de la fila. Si guarda un tablero con una fila contraída, se guarda en ese estado y no carga esos gráficos hasta que expande la fila.
+
+Utilice la función de xref:plantillas-y-variables/plantillas-y-variables.adoc#_filas_repetidas[filas repetidas] para crear o eliminar dinámicamente filas enteras, que se pueden rellenar con paneles, según las variables de plantilla seleccionadas.

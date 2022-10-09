@@ -1,0 +1,65 @@
+= Cargar Herramienta TsFile Externa
+
+== Introducción
+
+La herramienta load external TsFile permite a los usuarios cargar TsFiles, eliminar un TsFile o mover un TsFile al directorio de destino desde la instancia de Apache IoTDB en ejecución.
+
+== Uso
+
+El usuario envía comandos específicos al sistema Apache IoTDB a través de la herramienta Cli o JDBC para usar la herramienta.
+
+=== Cargar TsFile
+
+El comando para cargar TsFiles es `load "<path/dir>" [true/false] [storage group level]`.
+
+Este comando tiene dos usos:
+
+. Cargar un solo TsFile especificando una ruta de archivo (ruta absoluta).
+
+El segundo parámetro indica la ruta del TsFile a cargar y el nombre del TsFile debe ajustarse a la convención de nomenclatura del TsFile, es decir, `{systemTime}-{versionNum}-{mergeNum} .tsfile`. Los parámetros tercero y cuarto son opcionales. Si los metadatos corresponden a la serie temporal en el TsFile que se va a cargar no existe, puede elegir si desea crear el esquema automáticamente. Si el tercer parámetro es verdadero, el esquema se crea automáticamente. Si el tercer parámetro es falso, no se creará el esquema. De forma predeterminada, se creará el esquema. Si el grupo de almacenamiento que corresponde al TsFile no existe, el usuario puede establecer el nivel del grupo de almacenamiento a través del cuarto parámetro. De forma predeterminada, utiliza el nivel de grupo de almacenamiento que se establece en `iotdb-engine.properties`. Si existe el archivo `.resource` correspondiente al archivo, se cargará en el directorio de datos y el motor de Apache IoTDB. De lo contrario, el archivo `.resource` correspondiente se volverá a generar a partir del archivo TsFile.
+
+Ejemplos:
+
+* `load "/Users/Desktop/data/1575028885956-101-0.tsfile"`
+
+* `load "/Users/Desktop/data/1575028885956-101-0.tsfile" false`
+
+* `load "/Users/Desktop/data/1575028885956-101-0.tsfile" true`
+
+* `load "/Users/Desktop/data/1575028885956-101-0.tsfile" true 1`
+
+. Cargar un conjunto de archivos especificando la ruta de carpeta (ruta absoluta)
+
+El segundo parámetro indica la ruta del TsFile a cargar y el nombre de los TsFiles debe ajustarse a la convención de nomenclatura de TsFile, es decir, `{systemTime}-{versionNum}-{mergeNum} .tsfile`. Los parámetros tercero y cuarto son opcionales. Cuando los metadatos correspondientes a la serie temporal en el TsFile a cargar no existen, puede elegir si desea crear el esquema automáticamente. Si el tercer parámetro es verdadero, el esquema se creará automáticamente. Si el tercer parámetro es falso, no se creará el esquema. De forma predeterminada, se creará el esquema. Cuando el grupo de almacenamiento correspondiente a TsFile no existe, el usuario puede establecer el nivel del grupo de almacenamiento a través del cuarto parámetro. De forma predeterminada, utilizará el nivel de grupo de almacenamiento que se establece en `iotdb-engine.properties`. Si el archivo `.resource` correspondiente al archivo existe, se cargarán en el directorio de datos y el motor de Apache IoTDB. De lo contrario, los archivos `.resource` correspondientes se volverán a generar a partir del archivo TsFile.
+
+Ejemplos:
+
+* `load "/Users/Desktop/data"`
+
+* `load "/Users/Desktop/data" false`
+
+* `load "/Users/Desktop/data" true`
+
+* `load "/Users/Desktop/data" true 1`
+
+=== Eliminar un TsFile
+
+El comando para eliminar un TsFile es: `remove "<path>"`.
+
+Este comando elimina un TsFile especificando la ruta del archivo. La implementación específica es eliminar el TsFile y sus correspondientes archivos `.resource` y `.modification`.
+
+Ejemplos:
+
+* `remove "root.vehicle/1575028885956-101-0.tsfile"`
+* `remove "1575028885956-101-0.tsfile"`
+
+=== Mover un TsFile a un Directorio de Destino
+
+El comando para mover un TsFile al directorio de destino es: `move "<path>" "<dir>"`.
+
+Este comando mueve un TsFile a un directorio de destino especificando la ruta del TsFile y el directorio de destino (ruta absoluta). La implementación específica es eliminar el archivo TsFile del motor y mover el archivo TsFile y su archivo `.resource` correspondiente al directorio de destino.
+
+Ejemplos:
+
+* `move "root.vehicle/1575029224130-101-0.tsfile" "/data/data/tmp"`
+* `move "1575029224130-101-0.tsfile" "/data/data/tmp"`

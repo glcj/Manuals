@@ -1,0 +1,94 @@
+= Métricas Internas de Grafana
+
+Grafana recopila algunas métricas sobre sí mismo internamente. Admite enviar métricas a Graphite o exponerlas para que Prometheus las extraiga.
+
+Para obtener más información sobre las opciones de configuración relacionadas con las métricas de Grafana, consulte xref:administracion/configuracion.adoc#_metrics[metrics] y xref:administracion/configuracion.adoc#_metrics.graphite[metrics.graphite] en xref:administracion/configuracion.adoc[Configuración].
+
+== Métricas disponibles
+
+Cuando está habilitado, Grafana expone una serie de métricas, que incluyen:
+
+* Instancias activas de Grafana
+* Número de tableros, usuarios y listas de reproducción
+* Códigos de estado HTTP
+* Solicitudes por grupo de enrutamiento
+* Alertas activas de Grafana
+* Rendimiento de Grafana
+
+== Extraiga métricas de Grafana a Prometheus
+
+Estas instrucciones asumen que ya ha agregado Prometheus como fuente de datos en Grafana.
+
+[arabic]
+. Habilite Prometheus para extraer métricas de Grafana. En su archivo de configuración (`grafana.ini` o `custom.ini` según su sistema operativo) elimine el punto y coma para habilitar las siguientes opciones de configuración:
++
+----
+# Metrics available at HTTP API Url /metrics
+[metrics]
+# Disable / Enable internal metrics
+enabled           = true
+
+# Disable total stats (stat_totals_*) metrics to be generated
+disable_total_stats = false
+----
+
+[arabic, start=2]
+. (opcional) Si desea solicitar autorización para ver el punto final de métricas, descomente y configure las siguientes opciones:
++
+----
+basic_auth_username =
+basic_auth_password =
+----
+
+[arabic, start=3]
+. Reinicie Grafana. Grafana ahora expone métricas en http://localhost:3000/metrics.
+. Agregue la tarea a su archivo prometheus.yml. Ejemplo:
++
+----
+- job_name: 'grafana_metrics'
+
+  scrape_interval: 15s
+  scrape_timeout: 5s
+
+  static_configs:
+    - targets: ['localhost:3000']
+----
+
+[arabic, start=5]
+. Reinicie Prometheus. Su nueva tarea debería aparecer en la pestaña Objetivos.
+. En Grafana, pase el mouse sobre el ícono de *Configuración* (engranaje) en la barra lateral izquierda y luego haga clic en *Fuentes de datos*.
+. Seleccione la fuente de datos de *Prometheus*.
+. En la pestaña Tableros, *Importe* el tablero de métricas de Grafana. Todas las métricas raspadas de Grafana están disponibles en el tablero.
+
+== Ver métricas de Grafana en Graphite
+
+Estas instrucciones asumen que ya ha agregado Graphite como fuente de datos en Grafana.
+
+[arabic]
+. Habilite el envío de métricas a Graphite. En su archivo de configuración (`grafana.ini` o `custom.ini` según su sistema operativo) elimine el punto y coma para habilitar las siguientes opciones de configuración:
++
+----
+# Metrics available at HTTP API Url /metrics
+[metrics]
+# Disable / Enable internal metrics
+enabled           = true
+
+# Disable total stats (stat_totals_*) metrics to be generated
+disable_total_stats = false
+----
+
+[arabic, start=2]
+. Habilite las opciones de [metrics.graphite]:
++
+----
+# Metrics available at HTTP API Url /metrics
+[metrics]
+# Disable / Enable internal metrics
+enabled           = true
+
+# Disable total stats (stat_totals_*) metrics to be generated
+disable_total_stats = false
+----
+
+[arabic, start=3]
+. Reinicie Grafana. Grafana ahora expone métricas en http:/localhost:3000/metrics y las envía a la ubicación de Graphite que especificó.

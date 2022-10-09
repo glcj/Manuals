@@ -1,0 +1,6 @@
+= Cambiar la organización en la que inició sesión
+
+Cuando inicia sesión en Grafana, siempre está registrado con una organización en particular. Si está asignado a varias organizaciones, es posible que deba cambiar la organización en la que inició sesión. Por ejemplo, si necesita ver un tablero asociado con una organización diferente, puede cambiar de organización.
+
+. Coloque el cursor sobre el ícono de usuario en la esquina inferior izquierda de la pantalla y luego haga clic en *Cambiar*.
+. Junto a la organización en la que desea iniciar sesión, haga clic en *Cambiar a*.

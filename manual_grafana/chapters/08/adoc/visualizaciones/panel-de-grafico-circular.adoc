@@ -1,0 +1,93 @@
+= Panel de gráfico circular v2
+
+[NOTE]
+====
+Esta documentación se refiere a una función beta.
+====
+
+El gráfico circular muestra series reducidas, o valores en una serie, de una o más consultas, según se relacionan entre sí, en forma de porciones de un pastel. La longitud del arco, el área y el ángulo central de un corte son proporcionales al valor de los cortes, ya que se relaciona con la suma de todos los valores. Este tipo de gráfico se utiliza mejor cuando desea una comparación rápida de un pequeño conjunto de valores en una forma estéticamente agradable.
+
+image::image74.png[Pie chart panel,width=624,height=277]
+
+== Opciones de campo y datos
+
+Las visualizaciones de gráficos circulares le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Opciones de pantalla
+
+Utilice las siguientes opciones para refinar su visualización:
+
+=== Mostrar
+
+Elija cuánta información mostrar.
+
+* *Calcular:* reduce cada valor a un solo valor por serie.
+* *Todos los valores:* muestra todos los valores de una única serie.
+
+=== Cálculo
+
+Seleccione un cálculo para reducir cada serie cuando se haya seleccionado Calcular. Para obtener información sobre los cálculos disponibles, consulte la Lista de cálculos.
+
+=== Límite
+
+Cuando se muestran todos los valores de una sola serie, esto limita el número de valores mostrados.
+
+=== Campos
+
+Seleccione qué campo o campos mostrar en la visualización. Cada nombre de campo está disponible en la lista, o puede seleccionar una de las siguientes opciones:
+
+* *Campos numéricos:* todos los campos con valores numéricos.
+* *Todos los campos:* todos los campos que no se eliminan mediante transformaciones.
+* *Tiempo:* todos los campos con valores de tiempo.
+
+=== Tipo de gráfico circular
+
+Seleccione el estilo de visualización del gráfico circular.
+
+==== Tarta
+
+image::image75.png[Pie type chart,width=396,height=396]
+
+==== Rosquilla
+
+image::image76.png[Donut type chart,width=395,height=394]
+
+==== Etiquetas
+
+Seleccione etiquetas para mostrar en el gráfico circular. Puede seleccionar más de una.
+
+* *Nombre:* el nombre de la serie o del campo.
+* *Porcentaje:* el porcentaje del total.
+* *Valor:* el valor numérico sin procesar.
+
+Las etiquetas se muestran en blanco sobre el cuerpo del gráfico. Es posible que deba seleccionar colores de gráfico más oscuros para hacerlos más visibles. Los nombres o números largos pueden aparecer recortados.
+
+El siguiente ejemplo muestra un gráfico circular con las etiquetas de *Nombre* y *Porcentaje*.
+
+image::image77.png[Pie chart labels,width=400,height=398]
+
+=== Modo de la leyenda
+
+Utilice esta configuración para refinar cómo aparece la leyenda en su visualización.
+
+* *Lista:* muestra la leyenda como una lista. Este es un modo de visualización predeterminado de la leyenda.
+* *Tabla:* muestra la leyenda como una tabla.
+* *Oculto:* oculta la leyenda.
+
+=== Colocación de la leyenda
+
+Elija dónde mostrar la leyenda.
+
+* *Abajo:* debajo del gráfico.
+* *Derecha:* a la derecha del gráfico.
+
+=== Valores de leyenda
+
+Seleccione valores para mostrar en la leyenda. Puede seleccionar más de uno.
+
+* *Porcentaje:* el porcentaje del total.
+* *Valor:* el valor numérico sin procesar.

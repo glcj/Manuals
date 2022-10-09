@@ -1,0 +1,259 @@
+= Apéndice 3: Códigos de Estado
+
+El *Código de Estado* se introduce en la última versión. Una solución de muestra como IoTDB requiere registrar primero la serie temporal antes de escribir datos:
+
+[source,SQL]
+----
+try {
+    writeData();
+} catch (SQLException e) {
+  // the most case is that the time series does not exist
+  if (e.getMessage().contains("exist")) {
+      //However, using the content of the error message is not so efficient
+      registerTimeSeries();
+      //write data once again
+      writeData();
+  }
+}
+----
+
+Con Status Code, en lugar de escribir códigos como `if (e.getErrorMessage().contains("exist"))`, podemos simplemente usar `e.getErrorCode() == TSStatusCode.TIME_SERIES_NOT_EXIST_ERROR.getStatusCode()`.
+
+Aquí hay una lista de Códigos de Estado y mensajes relacionados:
+
+[cols="1,1,1"]
+|===
+|Código de Estado 
+|Tipo de Estado 
+|Significado
+
+|200 
+|SUCCESS_STATUS
+|
+
+|201 
+|STILL_EXECUTING_STATUS
+|
+
+|202 
+|INVALID_HANDLE_STATUS
+|
+
+|203 
+|INCOMPATIBLE_VERSION 
+|Versión incompatible
+
+|298 
+|NODE_DELETE_FAILED_ERROR 
+|Error al eliminar el nodo
+
+|299 
+|ALIAS_ALREADY_EXIST_ERROR 
+|El alias ya existe
+
+|300 
+|PATH_ALREADY_EXIST_ERROR 
+|La ruta ya existe
+
+|301 
+|PATH_NOT_EXIST_ERROR 
+|La ruta no existe
+
+|302 
+|UNSUPPORTED_FETCH_METADATA_OPERATION_ERROR 
+|Operación de recuperación de metadatos no admitida
+
+|303 
+|METADATA_ERROR 
+|Error al tratar con metadatos
+
+|305 
+|OUT_OF_TTL_ERROR 
+|El tiempo de inserción es menor que el límite de tiempo TTL
+
+|306 
+|CONFIG_ADJUSTER 
+|La carga del sistema IoTDB es demasiado grande
+
+|307 
+|MERGE_ERROR 
+|Error de Meet al fusionar
+
+|308 
+|SYSTEM_CHECK_ERROR 
+|Error mientras se verifica el sistema
+
+|309 
+|SYNC_DEVICE_OWNER_CONFLICT_ERROR 
+|Conflicto de propietarios de dispositivos de sincronización
+
+|310 
+|SYNC_CONNECTION_EXCEPTION 
+|Error al sincronizar la conexión
+
+|311 
+|STORAGE_GROUP_PROCESSOR_ERROR 
+|Error relacionado con el procesador del grupo de almacenamiento
+
+|312 
+|STORAGE_GROUP_ERROR 
+|Error relacionado con el grupo de almacenamiento
+
+|313 
+|STORAGE_ENGINE_ERROR 
+|Error relacionado con el motor de almacenamiento
+
+|314 
+|TSFILE_PROCESSOR_ERROR 
+|Error relacionado con el procesador TsFile
+
+|315 
+|PATH_ILLEGAL 
+|Ruta ilegal
+
+|316 
+|LOAD_FILE_ERROR 
+|Error al cargar el archivo
+
+|317 
+|STORAGE_GROUP_NOT_READY 
+|El grupo de almacenamiento está en modo de recuperación, no listo para aceptar la operación de lectura/escritura
+
+|400 
+|EXECUTE_STATEMENT_ERROR 
+|Error de instrucción de ejecución
+
+|401 
+|SQL_PARSE_ERROR 
+|Error al analizar SQL
+
+|402 
+|GENERATE_TIME_ZONE_ERROR 
+|Se encuentra el error al generar la zona horaria
+
+|403 
+|SET_TIME_ZONE_ERROR 
+|Error al configurar la zona horaria
+
+|404 
+|NOT_STORAGE_GROUP_ERROR 
+|El objeto operativo no es un grupo de almacenamiento
+
+|405 
+|QUERY_NOT_ALLOWED 
+|Las declaraciones de consulta no están permitidas
+
+|406 
+|AST_FORMAT_ERROR 
+|Error relacionado con el formato AST
+
+|407 
+|LOGICAL_OPERATOR_ERROR 
+|Error relacionado con el operador lógico
+
+|408 
+|LOGICAL_OPTIMIZE_ERROR 
+|Error relacionado con optimización lógica
+
+|409 
+|UNSUPPORTED_FILL_TYPE_ERROR 
+|Error relacionado con el tipo de relleno no admitido
+
+|410 
+|PATH_ERROR 
+|Error relacionado con la ruta
+
+|411 
+|QUERY_PROCESS_ERROR 
+|Error relacionado con el proceso de consulta
+
+|412 
+|WRITE_PROCESS_ERROR 
+|Error relacionado con la escritura de datos
+
+|413 
+|WRITE_PROCESS_REJECT 
+|Error al escribir datos rechazados
+
+|414 
+|QUERY_ID_NOT_EXIST 
+|Eliminar consulta con queryId inexistente
+
+|500 
+|INTERNAL_SERVER_ERROR 
+|Error interno del servidor
+
+|501 
+|CLOSE_OPERATION_ERROR 
+|Error de encuentro en operación cercana
+
+|502 
+|READ_ONLY_SYSTEM_ERROR 
+|El sistema operativo es de solo lectura
+
+|503 
+|DISK_SPACE_INSUFFICIENT_ERROR 
+|El espacio en disco es insuficiente
+
+|504 
+|START_UP_ERROR 
+|Error al iniciar
+
+|505 
+|SHUT_DOWN_ERROR 
+|Error durante el apagado
+
+|506 
+|MULTIPLE_ERROR 
+|Error al ejecutar varias sentencias
+
+|600 
+|WRONG_LOGIN_PASSWORD_ERROR 
+|El nombre de usuario o la contraseña son incorrectos
+
+|601 
+|NOT_LOGIN_ERROR 
+|No ha iniciado sesión
+
+|602 
+|NO_PERMISSION_ERROR 
+|No hay permisos para esta operación
+
+|603 
+|UNINITIALIZED_AUTH_ERROR 
+|Autorizador no inicializado
+
+|700 
+|PARTITION_NOT_READY 
+|La tabla de particiones no está lista
+
+|701 
+|TIME_OUT 
+|Tiempo de espera de la operación
+
+|702 
+|NO_LEADER 
+|Sin líder
+
+|703 
+|UNSUPPORTED_OPERATION 
+|Operación no admitida
+
+|704 
+|NODE_READ_ONLY 
+|Nodo de solo lectura
+
+|705 
+|CONSISTENCY_FAILURE 
+|Fallo en la comprobación de coherencia
+
+|706 
+|NO_CONNECTION 
+|No se puede obtener el error de conexión
+
+|707 
+|NEED_REDIRECTION 
+|Necesita dirección
+|===
+
+    Todas las excepciones se refactorizan en la última versión extrayendo el mensaje uniforme en clases de excepción. Se agregan diferentes códigos de error a todas las excepciones. Cuando se detecta una excepción y se lanza una excepción de nivel superior, el código de error se mantendrá y pasará para que los usuarios conozcan el motivo detallado del error. También se agrega una clase de excepción base `ProcessException` para ser extendida por todas las excepciones.

@@ -1,0 +1,140 @@
+= Graficar series de tiempo como barras
+
+[NOTE]
+====
+Esta es una función beta. El panel de series de tiempo reemplazará al panel de gráficos en las versiones futuras.
+====
+
+Esta sección explica cómo usar las opciones del campo Serie temporal para visualizar datos de series temporales como barras e ilustra lo que hacen las opciones.
+
+== Crear el panel
+
+[arabic]
+. xref:paneles/agregar-un-panel.adoc[Agregue un panel]. Seleccione la xref:paneles/visualizaciones/panel-de-series-de-tiempo.adoc[Visualización de serie de tiempo].
+. En el xref:paneles/editor-de-paneles.adoc[Editor de panel], haga clic en la pestaña *Campo*.
+. En Estilo, haga clic en *Barras*.
+
+== Estilizar las barras
+
+Utilice la siguiente configuración de campo para refinar su visualización.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+Algunas opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+=== Alineación de barras
+
+Establece la posición de la barra relativa a un punto de datos. En los ejemplos siguientes, *Mostrar puntos* se establece en *Siempre* para que sea más fácil ver la diferencia que hace esta configuración. Los puntos no cambian; las barras cambian en relación a los puntos.
+
+==== Antes
+
+image::image120.png[Bar alignment before icon,width=114,height=67]
+
+La barra se dibuja antes del punto. El punto se coloca en la esquina posterior de la barra.
+
+image::image121.png[Bar alignment before example,width=624,height=182]
+
+==== Centrar
+
+image::image122.png[Bar alignment center icon,width=114,height=68]
+
+La barra se dibuja alrededor del punto. El punto se coloca en el centro de la barra. Este es el predeterminado.
+
+image::image123.png[Bar alignment center,width=624,height=183]
+
+==== Después
+
+image::image124.png[Bar alignment after icon,width=115,height=66]
+
+La barra se dibuja después del punto. El punto se coloca en la esquina principal de la barra.
+
+image::image125.png[Bar alignment after,width=624,height=184]
+
+=== Ancho de línea
+
+Establezca el grosor de los contornos de la barra de líneas, de 0 a 10 píxeles. La *Opacidad de relleno* se establece en 10 en los ejemplos siguientes.
+
+Grosor de línea establecido en 1:
+
+image::image126.png[Line thickness 1 example,width=624,height=192]
+
+Grosor de línea establecido en 7:
+
+image::image127.png[Line thickness 7 example,width=624,height=188]
+
+=== Opacidad de relleno
+
+Establezca la opacidad del relleno de la barra, de 0 a 100 por ciento. En los ejemplos siguientes, el *Ancho de línea* se establece en 1.
+
+Opacidad de relleno establecida en 20:
+
+image::image128.png[Fill opacity 20 example,width=624,height=188]
+
+Opacidad de relleno establecida en 95:
+
+image::image129.png[Fill opacity 95 example,width=624,height=190]
+
+=== Modo de gradiente
+
+Establece el modo del relleno degradado. El degradado de relleno se basa en el color de la línea. Para cambiar el color, use la opción estándar de campo de xref:paneles/opciones-de-campo/opciones-de-campo-estandar.adoc#_esquema_de_color[esquema de color].
+
+La apariencia del degradado está influenciada por la configuración de b. En las capturas de pantalla a continuación, la *Opacidad de relleno* se establece en 50.
+
+==== Ninguno
+
+Sin relleno degradado. Ésta es la configuración predeterminada.
+
+image::image130.png[Gradient mode none example,width=624,height=184]
+
+==== Opacidad
+
+La transparencia del gradiente se calcula en función de los valores del eje y. La opacidad del relleno aumenta con los valores del eje Y.
+
+image::image131.png[Gradient mode opacity example,width=624,height=187]
+
+===== Tono
+
+El color degradado se genera en función del tono del color de la línea.
+
+image::image132.png[Gradient mode hue example,width=624,height=186]
+
+=== Mostrar puntos
+
+Elija cuándo deben mostrarse los puntos en el gráfico
+
+==== Auto
+
+Grafana decide automáticamente si muestra o no los puntos en función de la densidad de los datos. Si la densidad es baja, se muestran los puntos.
+
+==== Siempre
+
+Muestre los puntos sin importar cuán denso sea el conjunto de datos. Este ejemplo usa un *Ancho de línea* de 1. Si el ancho de línea es más grueso que el tamaño del punto, entonces la línea oscurece los puntos.
+
+===== Tamaño de punto
+
+Establezca el tamaño de los puntos, de 1 a 40 píxeles de diámetro.
+
+Tamaño de punto establecido en 6:
+
+image::image133.png[Show points point size 6 example,width=624,height=184]
+
+Tamaño de punto establecido en 20:
+
+image::image134.png[Show points point size 20 example,width=624,height=186]
+
+==== Nunca
+
+Nunca muestre los puntos.
+
+image::image135.png[Show points point never example,width=624,height=182]
+
+== Ejemplos de gráficos de barras
+
+A continuación se muestran algunos ejemplos de gráficos de barras para darle ideas.
+
+=== Gradiente de tono
+
+image::image136.png[Bars with hue gradient example,width=403,height=303]

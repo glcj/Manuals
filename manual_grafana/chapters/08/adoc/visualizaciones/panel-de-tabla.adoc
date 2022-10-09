@@ -1,0 +1,32 @@
+= Panel de tabla
+
+El panel de la tabla es muy flexible y admite múltiples modos para series de tiempo y para tablas, anotaciones y datos JSON sin procesar. Este panel también proporciona opciones de formato de fecha, formato de valor y coloración.
+
+image::image80.png[Table visualization,width=624,height=213]
+
+== Opciones de campo y datos
+
+Las visualizaciones de tablas le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Opciones de pantalla
+
+[NOTE]
+====
+Si está utilizando una visualización de tabla creada antes de Grafana 7.0, debe migrar a la nueva versión de tabla para ver estas opciones. Para migrar, en la pestaña Panel, haga clic en Visualización de *tabla*. Grafana actualiza la versión de la tabla y luego puede acceder a todas las opciones de la tabla.
+====
+
+* *Mostrar encabezado:* muestra u oculta los nombres de las columnas importadas de su fuente de datos.
+* *Orden ascendente / descendente:* haga clic en el título de una columna para cambiar el orden de clasificación de predeterminado a descendente a ascendente. Cada vez que hace clic, el orden de clasificación cambia a la siguiente opción del ciclo. Solo puede ordenar por una columna a la vez.
++
+image::image81.png[Sort descending,width=400,height=147]
+
+* Las xref:paneles/visualizaciones/panel-de-tabla/opciones-de-campo-de-tabla.adoc[opciones de campo de tabla] le permiten cambiar las xref:paneles/opciones-de-campo-y-anulaciones.adoc[opciones de campo], como el ancho de columna, la alineación y el modo de visualización de celda.
+* xref:paneles/visualizaciones/panel-de-tabla/filtrar-columnas-de-la-tabla.adoc[Filtrar columnas de la tabla]: puede cambiar temporalmente cómo se muestran los datos de las columnas. Por ejemplo, puede ordenar los valores de mayor a menor u ocultar valores específicos.
+
+== Soporte de anotaciones
+
+Actualmente, las anotaciones no son compatibles con el nuevo panel de la tabla. Esto podría volver a agregarse en una versión futura.

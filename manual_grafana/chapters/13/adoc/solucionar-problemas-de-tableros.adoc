@@ -1,0 +1,36 @@
+= Solucionar problemas de tableros
+
+Esta página proporciona información para resolver problemas comunes del tablero.
+
+== El tablero está lento
+
+* ¿Está tratando de representar docenas (o cientos o miles) de series de tiempo en un gráfico? Esto puede hacer que el navegador se retrase y se sienta lento. Intente usar funciones como `highestMax` (en Graphite) para reducir la serie devuelta.
+* A veces, los nombres de las series pueden ser muy grandes. Esto provoca tamaños de respuesta más grandes. Intente utilizar un `alias` para reducir el tamaño de los nombres de las series devueltas.
+* ¿Está consultando muchas series de tiempo o durante un largo período de tiempo? Ambos pueden hacer que Grafana o su fuente de datos extraigan una gran cantidad de datos, lo que puede ralentizarlos.
+* Podría ser una gran carga en su infraestructura de red. Si la lentitud no es constante, este puede ser el problema.
+
+== Problemas con la frecuencia de actualización del tablero
+
+De forma predeterminada, Grafana consulta su fuente de datos cada 30 segundos. Establecer una frecuencia de actualización baja en sus tableros ejerce una tensión innecesaria en el backend. En muchos casos, consultar esto con frecuencia no tiene sentido, porque los datos no se envían al sistema de manera que se puedan ver cambios.
+
+Recomendamos lo siguiente:
+
+* No habilite la actualización automática en tableros, paneles o variables a menos que lo necesite. Los usuarios pueden actualizar su navegador manualmente o puede establecer la frecuencia de actualización para un período de tiempo que tenga sentido (cada diez minutos, cada hora, etc.).
+* Si es necesario, configure la frecuencia de actualización en una vez por minuto. Nuevamente, los usuarios siempre pueden actualizar el tablero manualmente.
+* Si su tablero tiene un período de tiempo más largo (como una semana), entonces realmente no necesita una actualización automática.
+
+== El manejo o la representación de datos nulos es incorrecto/confuso/extraño
+
+Algunas aplicaciones publican datos de forma intermitente; por ejemplo, solo publican una métrica cuando ocurre un evento. De forma predeterminada, los gráficos de Grafana conectan líneas entre los puntos de datos. Esto puede resultar muy engañoso.
+
+En la imagen de abajo hemos habilitado:
+
+Puntos y radio de 3 puntos para resaltar dónde están realmente presentes los puntos de datos.
+
+El *valor Nulo* se establece en *conectado*.
+
+image:media\image190.png[https://grafana.com/static/img/docs/troubleshooting/grafana_null_connected.png,width=624,height=252]
+
+En este gráfico, configuramos el gráfico para mostrar barras en lugar de líneas y establecemos el *valor Nulo* para graficar *nulo como cero*. Hay una gran diferencia en las imágenes.
+
+image:media\image191.png[https://grafana.com/static/img/docs/troubleshooting/grafana_null_zero.png,width=624,height=250]

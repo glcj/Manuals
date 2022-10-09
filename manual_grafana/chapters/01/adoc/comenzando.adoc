@@ -1,0 +1,83 @@
+= Comenzando
+
+Esta sección proporciona una mirada de alto nivel a Grafana, su proceso y sus caracteristicas. Por ende, es un buen lugar para aprender a usar el software Grafana.
+
+== ¿Qué es Grafana?
+
+Grafana es un software de análisis y visualización de código abierto. Le permite consultar, visualizar, alertar y explorar sus métricas sin importar dónde estén almacenadas. En un lenguaje sencillo, proporciona las herramientas para convertir los datos de su base de datos de series de tiempo (TSDB) en hermosos gráficos y visualizaciones.
+
+Después de crear un tablero como lo hace en xref:comenzando/con-grafana.adoc[Comenzando con Grafana], hay muchas cosas posibles que puede hacer a continuación. Todo depende de sus necesidades y su caso de uso.
+
+Por ejemplo, si desea ver datos meteorológicos y estadísticas sobre su hogar inteligente, puede crear una lista de reproducción. Si es el administrador de una corporación y administra Grafana para varios equipos, es posible que deba configurar el aprovisionamiento y la autenticación.
+
+Las siguientes secciones proporcionan una descripción general de las cosas que podría querer hacer con su base de datos y enlaces de Grafana para que pueda obtener más información. Para obtener más orientación e ideas, consulte los https://community.grafana.com/[foros de la Comunidad de Grafana].
+
+== Explore métricas y registros
+
+Explore sus datos a través de consultas ad-hoc y desglose dinámico. Visualice y compare diferentes rangos de tiempo, consultas y fuentes de datos en paralelo.
+
+Consulte xref:explorar/explorar.adoc[Explorar] para obtener más información.
+
+== Alertas
+
+Si está utilizando las alertas de Grafana, puede hacer que se envíen alertas a través de varios xref:alertas/notificaciones.adoc[notificadores de alertas] diferentes, incluidos PagerDuty, SMS, correo electrónico, VictorOps, OpsGenie o Slack.
+
+Los ganchos de alerta le permiten crear diferentes notificadores con un poco de código si prefiere otros canales de comunicación. Defina visualmente las xref:alertas/alertas.adoc[reglas de alerta] para sus métricas más importantes.
+
+== Anotaciones
+
+Anote gráficos con eventos enriquecidos de diferentes fuentes de datos. Desplácese sobre los eventos para ver toda la metadata del evento y las etiquetas.
+
+Esta función, que se muestra como un marcador de gráfico en Grafana, es útil para correlacionar datos en caso de que algo salga mal. Puede crear las anotaciones manualmente, simplemente presione la tecla Control y haga clic en un gráfico e ingrese algo de texto, o puede obtener datos de cualquier fuente de datos.
+
+Consulte xref:tableros/anotaciones.adoc[Anotaciones] para obtener más información.
+
+== Variables del tablero
+
+Las xref:plantillas-y-variables/plantillas-y-variables.adoc[variables de plantilla] le permiten crear tableros que se pueden reutilizar para muchos casos de diferentes usos. Los valores no están codificados con estas plantillas, por lo que, por ejemplo, si tiene un servidor de producción y un servidor de prueba, puede usar el mismo tablero para ambos.
+
+La creación de plantillas le permite profundizar en sus datos, por ejemplo, desde todos los datos hasta los datos de América del Norte, hasta los datos de Texas y más. También puede compartir estos tableros entre equipos dentro de su organización, o si crea una excelente plantilla de tablero para una fuente de datos popular, puede contribuir a que toda la comunidad la personalice y use.
+
+== Configurar Grafana
+
+Si es administrador de Grafana, querrá familiarizarse a fondo con las xref:administracion/configuracion.adoc[opciones de configuración de Grafana] y la xref:administracion/cli.adoc[CLI de Grafana].
+
+La configuración cubre tanto los archivos de configuración como las variables de entorno. Puede configurar puertos predeterminados, niveles de registro, direcciones IP de correo electrónico, seguridad y más.
+
+== Importar paneles y complementos
+
+Descubra cientos de xref:tableros/tableros.adoc[tableros] y xref:complementos/complementos.adoc[complementos] en la biblioteca oficial. Gracias a la pasión y el impulso de los miembros de la comunidad, se agregan nuevos cada semana.
+
+== Autenticación
+
+Grafana admite diferentes métodos de autenticación, como LDAP y OAuth, y le permite asignar usuarios a organizaciones. Consulte la xref:autenticacion/descripcion-general.adoc[descripción general de la autenticación de usuario] para obtener más información.
+
+En Grafana Enterprise, también puede asignar usuarios a equipos: si su empresa tiene su propio sistema de autenticación, Grafana le permite asignar los equipos de sus sistemas internos a los equipos de Grafana. De esa manera, puede otorgar automáticamente acceso a las personas a los tableros designados para sus equipos.
+
+Consulte xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise] para obtener más información.
+
+== Aprovisionamiento
+
+Si bien es fácil hacer clic, arrastrar y soltar para crear un solo tablero, los usuarios avanzados que necesitan muchos tableros querrán automatizar la configuración con un script. Se puede programar cualquier cosa en Grafana.
+
+Por ejemplo, si está creando un nuevo clúster de Kubernetes, también puede activar un Grafana automáticamente con un script que tendría el servidor, la dirección IP y las fuentes de datos correctos preestablecidos y bloqueados para que los usuarios no puedan cambiarlos. También es una forma de controlar muchos tableros.
+
+Consulte xref:administracion/aprovisionamiento.adoc[Aprovisionamiento] para obtener más información.
+
+== Permisos
+
+Cuando las organizaciones tienen un Grafana y varios equipos, a menudo quieren tener la capacidad de mantener las cosas separadas y compartir tableros. Puede crear un equipo de usuarios y luego establecer xref:permisos/permisos.adoc[permisos] en carpetas, tableros y hasta el xref:grafana-enterprise/permisos-de-fuente-de-datos.adoc[nivel de fuente de datos] si está utilizando xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise]
+
+== Grafana Cloud
+
+Grafana Cloud es una plataforma de registro y métricas OpenSaaS de alta disponibilidad, rápida y totalmente administrada. Todo lo que amas de Grafana, pero Grafana Labs lo aloja para ti y se encarga de todos los dolores de cabeza.
+
+https://grafana.com/cloud/[Obtenga más información sobre Grafana Cloud] o pruebe la xref:grafana-cloud/guia-de-inicio-rapido.adoc[guía de inicio rápido del host de Grafana Cloud Linux].
+
+== Grafana Enterprise
+
+Grafana Enterprise es una edición comercial de Grafana que incluye funciones adicionales que no se encuentran en la versión de código abierto.
+
+Sobre la base de todo lo que ya sabe y ama sobre Grafana, Grafana Enterprise agrega fuentes de datos empresariales, opciones de autenticación avanzadas, más controles de permisos, soporte 24x7x365 y capacitación del equipo central de Grafana.
+
+xref:grafana-enterprise/grafana-enterprise.adoc[Obtenga más información sobre Grafana Enterprise]. Para comprar Enterprise u obtener una licencia de prueba, comuníquese con el xref:grafana-enterprise/grafana-enterprise.adoc[Equipo de Ventas] de Grafana Labs.

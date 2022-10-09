@@ -1,0 +1,100 @@
+= Rastreo en Explorar
+
+Explore le permite visualizar los rastros de las fuentes de datos de rastreo. Está disponible en Grafana v7.0 +.
+
+Las fuentes de datos admitidas son:
+
+* xref:fuentes-de-datos/jaeger.adoc[Jaeger]
+* xref:fuentes-de-datos/tempo.adoc[Tempo]
+* xref:fuentes-de-datos/fuente-de-datos-de-rayox-x.adoc[Rayos X]
+* xref:fuentes-de-datos/zipkin.adoc[Zipkin]
+
+Para obtener información sobre cómo configurar consultas para las fuentes de datos enumeradas anteriormente, consulte la documentación de la fuente de datos específica.
+
+image::image179.png[Screenshot of the trace view,width=624,height=192]
+
+*Encabezado*
+
+image::image180.png[Screenshot of the trace view header,width=624,height=66]
+
+* Título del encabezado: muestra el nombre del intervalo raíz y el ID de seguimiento.
+* Buscar: resalta los intervalos que contienen el texto buscado.
+* Metadatos: varios metadatos sobre el seguimiento.
+
+*Minimapa*
+
+image::image181.png[Screenshot of the trace view minimap,width=624,height=69]
+
+Muestra la vista condensada o la línea de tiempo de seguimiento. Arrastre el mouse sobre el minimapa para hacer zoom en un rango de tiempo más pequeño. El zoom también actualizará la línea de tiempo principal, por lo que es fácil ver intervalos más cortos. Al pasar el cursor sobre el minimapa, cuando se hace zoom, se mostrará el botón Restablecer selección que restablece el zoom.
+
+*Linea de tiempo*
+
+image::image182.png[Screenshot of the trace view timeline,width=624,height=149]
+
+Muestra la lista de tramos dentro del seguimiento. Cada fila de tramo consta de estos componentes:
+
+* Botón Expandir hijos: expande o contrae todos los intervalos secundarios del intervalo seleccionado.
+* Nombre del servicio: nombre del servicio que registró el intervalo.
+* Nombre de la operación: nombre de la operación que representa este intervalo.
+* Barra de duración del intervalo: representación visual de la duración de la operación dentro del seguimiento.
+
+Al hacer clic en cualquier parte de la fila del intervalo, se muestran los detalles del intervalo.
+
+*Detalles del tramo*
+
+image::image183.png[Screenshot of the trace view span details,width=624,height=311]
+
+* Nombre de la operación
+* Metadatos de extensión
+* Etiquetas: cualquier etiqueta asociada con este intervalo.
+* Metadatos del proceso: metadatos sobre el proceso que registró este intervalo.
+* Registros: lista de registros registrados por este intervalo y valores clave asociados. En el caso de la sección de registros de Zipkin, se muestran las anotaciones de Zipkin.
+
+*Seguimiento de registros*
+
+[NOTE]
+====
+Disponible en Grafana 7.4 y versiones posteriores.
+====
+
+Puede navegar desde un tramo en una vista de seguimiento directamente a los registros relevantes para ese tramo. Esto está disponible para las fuentes de datos Tempo, Jaeger y Zipkin en este momento. su documentación relevante para obtener instrucciones sobre cómo configurar esta función.
+
+image::image184.png[Screenshot of the trace view in Explore with icon next to the spans,width=624,height=385]
+
+Haga clic en el icono del documento para abrir una vista dividida en Explorar con la fuente de datos configurada y consultar los registros relevantes para el intervalo.
+
+== API de datos
+
+Esta visualización necesita una forma específica de los datos que se devolverán desde la fuente de datos para mostrarlos correctamente.
+
+La fuente de datos debe devolver el marco de datos y establecer `frame.meta.preferredVisualisationType = 'trace'`.
+
+=== Estructura del marco de datos
+
+Campos requeridos:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|traceID |cadena |Identificador del seguimiento completo. Debe haber solo un rastro en el marco de datos.
+|spanID |cadena |Identificador del intervalo actual. Los SpanID deben ser únicos por seguimiento.
+|parentSpanID |cadena |SpanID del intervalo principal para crear una relación principal secundaria en la vista de seguimiento. Puede ser indefinido para el intervalo raíz sin padre.
+|serviceName |cadena |Nombre del servicio del que forma parte este intervalo.
+|serviceTags |TraceKeyValuePair [] |Lista de etiquetas relevantes para el servicio.
+|startTime |número |Hora de inicio del intervalo en milisegundos de tiempo de época.
+|duration |número |Duración del intervalo en milisegundos.
+|===
+
+Campos opcionales:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|logs |TraceLog [] |Lista de registros asociados con el intervalo actual.
+|tags |TraceKeyValuePair [] |Lista de etiquetas asociadas con el intervalo actual.
+|warnings |cadena[] |Lista de advertencias asociadas con el intervalo actual.
+|stackTraces |cadena[] |Lista de seguimientos de pila asociados con el intervalo actual.
+|errorIconColor |cadena |Color del icono de error en caso de que el intervalo esté etiquetado con error: true.
+|===
+
+Para obtener detalles sobre los tipos, consulte xref:referencia-de-api/grafana-datos/tracespanrow.adoc[TraceSpanRow], xref:referencia-de-api/grafana-datos/tracekeyvaluepair.adoc[TraceKeyValuePair] y xref:referencia-de-api/grafana-datos/tracelog.adoc[TraceLog]

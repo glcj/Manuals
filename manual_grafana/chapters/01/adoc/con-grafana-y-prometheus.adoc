@@ -1,0 +1,69 @@
+= Comenzando con Grafana y Prometheus
+
+Prometheus es un sistema de monitoreo de sistemas de código abierto para el cual Grafana brinda soporte listo para usar. Este tema lo guía a través de los pasos para crear una serie de tableros en Grafana para mostrar métricas del sistema para un servidor monitoreado por Prometheus.
+
+También puede configurar una instancia de xref:grafana-cloud/grafana-cloud.adoc[Grafana Cloud] para mostrar las métricas del sistema sin tener que alojar Grafana usted mismo.
+
+== Paso 1. Instale Grafana y cree su primer tablero
+
+Utilice las instrucciones de xref:comenzando/con-grafana.adoc[Comenzando con Grafana] para:
+
+* Instalar Grafana.
+* Iniciar sesión en Grafana.
+* Crear su primer tablero.
+
+También puede configurar una instancia de xref:grafana-cloud/grafana-cloud.adoc[Grafana Cloud] para mostrar las métricas del sistema sin tener que alojar Grafana usted mismo.
+
+== Paso 2. Descargue Prometheus y node_exporter
+
+Prometheus, como Grafana, se puede instalar en muchos sistemas operativos diferentes. Consulte la https://prometheus.io/download/[página de descarga de Prometheus], que enumera todas las versiones estables de los componentes de Prometheus. Descargue los siguientes componentes:
+
+* https://prometheus.io/download/#prometheus[Prometheus]
+* https://prometheus.io/download/#node_exporter[node_exporter]
+
+== Paso 3. Instale Prometheus node_exporter
+
+Prometheus node_exporter es una herramienta ampliamente utilizada que expone las métricas del sistema. Instale node_exporter en todos los hosts que desee supervisar. Para obtener instrucciones sobre cómo instalar node_exporter, consulte la sección https://prometheus.io/docs/guides/node-exporter/#installing-and-running-the-node-exporter[Instalación y ejecución de node_exporter] en la documentación de Prometheus.
+
+[NOTE] 
+====
+Las instrucciones del tema al que se hace referencia están destinadas a usuarios de Linux. Puede que tenga que modificar ligeramente las instrucciones en función de su sistema operativo. Por ejemplo, si está en Windows, use windows_exporter en su lugar.
+====
+
+== Paso 4. Instalar y configurar Prometheus
+
+[arabic]
+. Instale Prometheus siguiendo las instrucciones del tema https://prometheus.io/docs/prometheus/latest/installation/[Instalación] en la documentación de Prometheus.
+. Configure Prometheus para monitorear los hosts donde instaló node_exporter. Para hacer esto, modifique el archivo de configuración de Prometheus. Por defecto, Prometheus busca el archivo `prometheus.yml` en el directorio de trabajo actual. Este comportamiento se puede cambiar mediante la marca de línea de comando `--config.file` . Por ejemplo, algunos instaladores de Prometheus lo utilizan para establecer el archivo de configuración en `/etc/prometheus/prometheus.yml` . A continuación, se muestra un ejemplo del código que deberá agregar.
+
+----
+# A scrape configuration containing exactly one endpoint to scrape from node_exporter running on a host:
+scrape_configs:
+    # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+    - job_name: 'node'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['<hostname>:9100']
+----
+
+[arabic, start=3]
+. Inicie el servicio Prometheus:
+
+----
+./prometheus --config.file=./prometheus.yml
+----
+
+== Paso 5. Verifique las métricas de Prometheus en la vista Explorar de Grafana
+
+En su instancia de Grafana, vaya a la vista xref:explorar/explorar.adoc[Explorar] y cree consultas para experimentar con las métricas que desea monitorear. Aquí también puede depurar problemas relacionados con la recopilación de métricas de Prometheus. Preste especial atención a las xref:explorar/explorar.adoc/#_funciones_especificas_de_prometheus[funciones específicas de Prometheus] para aprovechar la experiencia de consulta personalizada para Prometheus.
+
+== Paso 6. Empiece a crear tableros
+
+Ahora que tiene una lista seleccionada de consultas, cree xref:tabletos/tableros.adoc[tableros] para representar las métricas del sistema monitoreado por Prometheus. Cuando instale Prometheus y node_exporter o windows_exporter, encontrará tableros recomendados para su uso.
+
+La siguiente imagen muestra un tablero con tres paneles que muestran algunas métricas del sistema.
+
+image::image1.png[https://grafana.com/static/img/docs/getting-started/simple_grafana_prom_dashboard.png,width=624,height=319]

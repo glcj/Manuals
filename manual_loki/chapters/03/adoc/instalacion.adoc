@@ -1,0 +1,18 @@
+= Instalar Loki
+
+== Métodos de instalación
+
+Instrucciones para diferentes métodos de instalación de Loki y Promtail.
+
+* xref:construir-desde-la-fuente.adoc[Instalar desde la fuente]
+* xref:local.adoc[Instalar y ejecutar localmente]
+
+== Proceso general
+
+Para ejecutar Loki, debe:
+
+. Descargue e instale tanto Loki como Promtail.
+. Descargue los archivos de configuración para ambos programas.
+. Inicie Loki.
+. Actualice el archivo de configuración de Promtail para obtener sus registros en Loki.
+. Inicie Promtail.

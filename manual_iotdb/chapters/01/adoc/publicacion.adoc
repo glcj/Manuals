@@ -1,0 +1,22 @@
+= Trabajos de investigación
+
+Apache IoTDB comienza en la Escuela de Software de la Universidad de Tsinghua. IoTDB es una base de datos para administrar una gran cantidad de datos de series de tiempo con almacenamiento en columnas, codificación de datos, cálculo previo y técnicas de índice. Tiene una interfaz similar a SQL para escribir millones de puntos de datos por segundo por nodo y está optimizado para obtener resultados de consultas en pocos segundos sobre billones de puntos de datos. También se puede integrar fácilmente con Apache Hadoop MapReduce y Apache Spark para análisis.
+
+Los trabajos de investigación relacionados son los siguientes:
+
+* http://www.vldb.org/pvldb/vol13/p2901-wang.pdf[Apache IoTDB: time-series database for internet of things], Chen Wang, Xiangdong Huang, Jialin Qiao, Tian Jiang, Lei Rui, Jinrui Zhang, Rong Kang, Julian Feinauer, Kevin A. McGrail, Peng Wang, Jun Yuan, Jianmin Wang, Jiaguang Sun. VLDB 2020
+
+* https://dl.acm.org/citation.cfm?id=2983775&dl=ACM&coll=DL[PISA: An Index for Aggregating Big Time Series Data], Xiangdong Huang y Jianmin Wang y Raymond K. Wong y Jinrui Zhang y Chen Wang. CIKM 2016.
+
+* https://link.springer.com/chapter/10.1007/978-3-319-96893-3_8[Matching Consecutive Subpatterns over Streaming Time Series], Rong Kang y Chen Wang y Peng Wang y Yuting Ding y Jianmin Wang. APWeb/WAIM 2018.
+
+* https://www.semanticscholar.org/paper/KV-match%3A-A-Subsequence-Matching-Approach-and-Time-Wu-Wang/9ed84cb15b7e5052028fc5b4d667248713ac8592[KV-match: A Subsequence Matching Approach Supporting Normalization and Time Warping], Jiaye Wu y Peng Wang y Chen Wang y Wei Wang y Jianmin Wang. ICDE 2019.
+
+* http://ndbc2019.sdu.edu.cn/info/1002/1044.htm[The Design of Apache IoTDB distributed framework], Tianan Li, Jianmin Wang, Xiangdong Huang, Yi Xu, Dongfang Mao, Jun Yuan. NDBC 2019
+
+* https://www.sciencedirect.com/science/article/pii/S0306437918305489[Dual-PISA: An index for aggregation operations on time series data], Jialin Qiao, Xiangdong Huang, Jianmin Wang, Raymond K Wong. IS 2020
+
+== Herramientas de referencia
+También desarrollamos herramientas de Referencia para bases de datos de series temporales.
+
+https://github.com/thulab/iotdb-benchmark

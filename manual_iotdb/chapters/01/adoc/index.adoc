@@ -1,0 +1,5 @@
+= Apache IoTDB
+
+== Base de Datos para Internet de las Cosas
+
+Apache IoTDB (Base de Datos para Internet de las Cosas) es una base de datos nativa de IoT con alto rendimiento para la gestión y el análisis de datos, que se puede implementar en el borde y en la nube. Debido a su arquitectura liviana, alto rendimiento y rico conjunto de características junto con su profunda integración con Apache Hadoop, Spark y Flink, Apache IoTDB puede cumplir con los requisitos de almacenamiento masivo de datos, ingesta de datos de alta velocidad y análisis de datos complejos en los campos industriales de IoT.

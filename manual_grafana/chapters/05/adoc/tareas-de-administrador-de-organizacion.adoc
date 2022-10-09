@@ -1,0 +1,101 @@
+= Administrar usuarios como Administrador de Organización
+
+Una _organización_ es un grupo de usuarios en un servidor de Grafana. Cada usuario puede pertenecer a más de una organización. Cada miembro de la organización tiene un papel en esa organización que les otorga un cierto nivel de permisos. Para obtener más información, consulte los xref:permisos/roles-de-la-organizacion.adoc[roles de la organización].
+
+Los Administradores de Organización, también llamados Org Admins, pueden administrar usuarios en su organización. Algunas de sus tareas se superponen con las xref:administrar-usuarios/tareas-de-administrador-de-servidor.adoc[tareas de Administrador de Servidor].
+
+[NOTE]
+====
+Debe tener permisos de administrador en una organización para realizar las tareas descritas en esta página.
+====
+
+== Ver lista de cuentas de usuario de la organización
+
+Consulte una lista completa de usuarios con cuentas en su organización en Grafana. Si es necesario, puede usar el campo de búsqueda para filtrar la lista.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Usuarios*.
+
+Grafana muestra todas las cuentas de usuario en el servidor, enumeradas en orden alfabético por nombre de usuario. La siguiente información esta siendo mostrada:
+
+* *Iniciar sesión:* el valor en el campo *Nombre de usuario* de la cuenta.
+* *Correo electrónico:* El correo electrónico asociado con la cuenta de usuario.
+* *Nombre:* el valor en el campo *Nombre* de la cuenta.
+* *Visto:* Hace cuánto tiempo el usuario ha iniciado sesión. Si nunca se han iniciado sesión, entonces se muestra el tiempo más largo predeterminado (10 años).
+* *Rol:* el rol de la organización actualmente asignado al usuario.
+
+image::image13.png[Org Admin user list,width=624,height=294]
+
+== Gestionar invitaciones de la organización
+
+Los administradores de la organización pueden invitar a los usuarios a sus organizaciones de Grafana y administrar invitaciones. Cuando un usuario invitado entra en Grafana, se crea una cuenta de usuario para ellos si no existe ya.
+
+=== Invitar al usuario a la organización
+
+Invite o agregue una cuenta de usuario existente a su organización.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Usuarios*.
+. Haga clic en *Invitar*.
+. Ingrese la siguiente informacion:
+* *Correo electrónico o nombre de usuario*: el correo electrónico o el nombre de usuario que el usuario usará para iniciar sesión en Grafana.
+* *Nombre* - (opcional) El valor en el campo *Nombre* de la cuenta.
+* *Rol:* Haga clic en el rol de la organización para asignar a este usuario. Para obtener más información, consulte los xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización].
+* *Enviar invitación por correo electrónico*
+** *Sí:* si su organización ha configurado SMTP, Grafana envía un correo electrónico a los usuarios que los invita a iniciar sesión en Grafana y unirse a su organización.
+** *No:* al usuario no se envía una invitación, pero pueden iniciar sesión en el servidor Grafana con el correo electrónico o el nombre de usuario que ingresó.
+. Haga clic en *Enviar*.
+
+image:media\image14.png[Invite User,width=624,height=384]
+
+=== Ver invitaciones pendientes
+
+Revise las invitaciones de usuarios que fueron invitados, pero no han iniciado sesión.
+
+image:media\image15.png[Pending Invites button,width=624,height=62]
+
+[NOTE]
+====
+El botón solo es visible si hay invitaciones sin respuesta.
+====
+
+[arabic]
+. Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Usuarios*.
+. Haga clic en *Invitaciones pendientes*.
+
+Grafana muestra una lista de invitaciones pendientes. Si es necesario, puede usar el campo de búsqueda para filtrar la lista.
+
+image:media\image16.png[Pending Invites list,width=624,height=209]
+
+=== Cancelar la invitación
+
+Revocar la invitación de un usuario que fue invitado pero no ha iniciado sesión.
+
+[arabic]
+. {Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Usuarios*.
+. Haga clic en *Invitaciones pendientes*.
+. Haga clic en la *X* roja junto a la invitación que desea cancelar.
+
+== Cambiar rol de la organización
+
+A cada cuenta de usuario se le asigna un xref:permisos/roles-de-la-organizacion.adoc[Rol de organización]. Los Administradores de organización pueden cambiar el rol asignado a un usuario en su organización.
+
+* Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+* Haga clic en *Usuarios*.
+* Encuentre la cuenta de usuario para la cual desea cambiar el rol. Use el campo de búsqueda para filtrar la lista si es necesario.
+* Haga clic en la lista de *Roles* en la cuenta de usuario que desea cambiar. Grafana muestra la lista de roles disponibles.
+* Haga clic en el rol que desea asignar.
+
+== Eliminar usuario de la organización
+
+Eliminar una cuenta de usuario de su organización. Esto evita que accedan a los tableros y fuentes de datos asociadas con la organización, pero no elimina la cuenta de usuario del servidor.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haga clic en *Usuarios*.
+. Encuentre la cuenta de usuario que desea eliminar. Use el campo de búsqueda para filtrar la lista si es necesario.
+. Haga clic en la *X* roja para eliminar al usuario de su organización.

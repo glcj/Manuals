@@ -1,0 +1,35 @@
+= Solucionar problemas de alertas
+
+Si las alertas no se comportan como esperaba, aquí hay algunos pasos que puede seguir para solucionar problemas y averiguar qué está fallando.
+
+image::image189.png[Test Rule,width=624,height=360]
+
+El primer nivel de resolución de problemas que puede hacer es hacer clic en *Probar Regla*. Obtendrá un resultado que puede expandir hasta el punto en que pueda ver los datos sin procesar que se devolvieron de su consulta.
+
+También se pueden solucionar más problemas inspeccionando el registro del servidor grafana. Si no es un error o por alguna razón el registro no dice nada, puede habilitar el registro de depuración para algunos componentes relevantes. Esto se hace en el archivo de configuración ini de Grafana.
+
+Ejemplo que muestra registradores que podrían ser relevantes a la hora de solucionar problemas de alertas.
+
+[source,Ini]
+----
+[log]
+filters = alerting.scheduler:debug \
+          alerting.engine:debug \
+          alerting.resultHandler:debug \
+          alerting.evalHandler:debug \
+          alerting.evalContext:debug \
+          alerting.extractor:debug \
+          alerting.notifier:debug \
+          alerting.notifier.slack:debug \
+          alerting.notifier.pagerduty:debug \
+          alerting.notifier.email:debug \
+          alerting.notifier.webhook:debug \
+          tsdb.graphite:debug \
+          tsdb.prometheus:debug \
+          tsdb.opentsdb:debug \
+          tsdb.influxdb:debug \
+          tsdb.elasticsearch:debug \
+          tsdb.elasticsearch.client:debug \
+----
+
+Si desea registrar la consulta sin procesar enviada a su TSDB y la respuesta sin procesar en el registro, también debe configurar la opción de grafana.ini `app_mode` en `development`.

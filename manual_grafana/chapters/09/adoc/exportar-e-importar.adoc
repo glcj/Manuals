@@ -1,0 +1,90 @@
+= Exportar e importar
+
+Los Tableros de Grafana se pueden exportar e importar fácilmente, ya sea desde la interfaz de usuario o desde la xref:api-http/tablero.adoc#_crear_/_actualizar_tablero[API HTTP].
+
+== Exportar un tablero
+
+Los tableros se exportan en formato Grafana JSON y contienen todo lo que necesita (diseño, variables, estilos, fuentes de datos, consultas, etc.) para importar el tablero en un momento posterior.
+
+Se accede a la función de exportación en la ventana de compartir que se abre haciendo clic en el botón de compartir en el menú del tablero.
+
+image::image161.png[https://grafana.com/static/img/docs/export/export-modal.png,width=624,height=210]
+
+=== Hacer un tablero portáble
+
+Si desea exportar un tablero para que otros lo usen, podría ser una buena idea agregar variables de plantilla para cosas como un prefijo de métrica (use una variable constante) y el nombre del servidor.
+
+Una variable de plantilla del tipo `Constant` se ocultará automáticamente en el tablero y también se agregará como entrada requerida cuando se importe el tablero.
+
+== Importar un tablero
+
+Para importar un tablero, haga clic en el icono + en el menú lateral y luego haga clic en *Importar*.
+
+image::image162.png[https://grafana.com/static/img/docs/v70/import_step1.png,width=624,height=403]
+
+Desde aquí puede cargar un archivo JSON de tablero, pegar una URL de tablero de https://grafana.com/[Grafana.com] o pegar el texto JSON del tablero directamente en el área de texto.
+
+En el paso 2 del proceso de importación, Grafana le permitirá cambiar el nombre del tablero, elegir qué fuente de datos desea que use el tablero y especificar cualquier prefijo de métrica (si el tablero usa alguno).
+
+== Descubra tableros en Grafana.com
+
+Encuentre tableros para aplicaciones de servidor comunes en https://grafana.com/dashboards[Grafana.com/dashboards].
+
+image::image163.png[https://grafana.com/static/img/docs/v50/gcom_dashboard_list.png,width=624,height=361]
+
+== Importar y compartir con Grafana 2.xo 3.0
+
+Los tableros de Grafana.com utilizan una nueva función en Grafana 3.1 que permite que el proceso de importación actualice cada panel para que utilicen una fuente de datos de su elección. Si está ejecutando una versión de Grafana anterior a la 3.1, es posible que deba realizar algunos pasos manuales antes o después de la importación para que el tablero funcione correctamente.
+
+Los tableros exportados desde Grafana 3.1+ tienen una nueva sección json `__inputs` que define qué fuentes de datos y prefijos métricos usa el tablero.
+
+Ejemplo:
+
+[source,JSON]
+----
+{
+  "__inputs": [
+    {
+      "name": "DS_GRAPHITE",
+      "label": "graphite",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "graphite",
+      "pluginName": "Graphite"
+    },
+    {
+      "name": "VAR_PREFIX",
+      "type": "constant",
+      "label": "prefix",
+      "value": "collectd",
+      "description": ""
+    }
+  ]
+}
+----
+
+Luego, se hace referencia a estos en los paneles del tablero de la siguiente manera:
+
+[source,JSON]
+----
+{
+  "rows": [
+      {
+        "panels": [
+          {
+            "type": "graph",
+            "datasource": "${DS_GRAPHITE}"
+          }
+        ]
+      }
+  ]
+}
+----
+
+Estas entradas y su uso en las propiedades de la fuente de datos se agregan automáticamente durante la exportación en Grafana 3.1. Si ejecuta una versión anterior de Grafana y desea compartir un tablero en Grafana.com, debe agregar manualmente las entradas y crear plantillas de las propiedades de la fuente de datos como se indicó anteriormente.
+
+Si desea importar un tablero de Grafana.com a una versión anterior de Grafana, puede importarlo como de costumbre y luego actualizar la opción de fuente de datos en la pestaña de métricas para que el panel utilice la fuente de datos correcta. Otra alternativa es abrir el archivo json en un editor de texto y actualizar las propiedades de la fuente de datos a un valor que coincida con el nombre de su fuente de datos.
+
+== Nota
+
+En Grafana v5.3.4 +, el modal de exportación tiene una nueva casilla de verificación para compartir para uso externo (otras instancias). Si la casilla de verificación no está marcada, la sección `__inputs` no se incluirá en el archivo JSON exportado.

@@ -1,0 +1,22 @@
+= Descripción general de la autenticación de usuario
+
+Grafana ofrece muchas formas de autenticar a los usuarios. Algunas integraciones de autenticación también permiten sincronizar permisos de usuario y membresías de organizaciones.
+
+A continuación, se muestra una tabla que muestra todos los proveedores de autenticación admitidos y las funciones disponibles para ellos. La xref:grafana-enterprise/sincronizacion-de-equipo.adoc[sincronización de equipo] y la xref:grafana-enterprise/ldap-mejorada.adoc#_sincronizacion_ldap_activa[sincronización activa] solo están disponibles en Grafana Enterprise.
+
+Consulte también xref:autenticacion/grafana.adoc[Autenticación de Grafana].
+
+[cols=",,,,",options="header",]
+|===
+|Proveedor |Soporte |Mapeo de roles |Sincronización de equipo (Solo Enterprise) |Sincronización activa (Solo Enterprise)
+| | | | |
+|xref:autenticacion/proxy-de-autenticacion.adoc[Auth Proxy] |v2.1+ |- |v6.3+ |-
+|xref:autenticacion/autenticacion-de-azure-ad-oauth2.adoc[Azure AD OAuth] |v6.7+ |v6.7+ |v6.7+ |-
+|xref:autenticacion/autenticacion-generica-oauth2.adoc[Generic OAuth] |v4.0+ |v6.5+ |- |-
+|xref:autenticacion/autenticacion-de-github-oauth2.adoc[GitHub OAuth] |v2.0+ |- |v6.3+ |-
+|xref:autenticacion/autenticacion-de-gitlab-oauth2.adoc[GitLab OAuth] |v5.3+ |- |v6.4+ |-
+|xref:autenticacion/autenticacion-de-google-oauth2.adoc[Google OAuth] |v2.0+ |- |- |-
+|xref:autenticacion/autenticacion-ldap.adoc[LDAP] |v2.1+ |v2.1+ |v5.3+ |v6.3+
+|xref:autenticacion/autenticacion-okta-oauth2.adoc[Okta OAuth] |v7.0+ |v7.0+ |v7.0+ |-
+|xref:autenticacion/autenticacion-saml.adoc[SAML (Enterprise only)] |v6.3+ |v7.0+ |v7.0+ |-
+|===

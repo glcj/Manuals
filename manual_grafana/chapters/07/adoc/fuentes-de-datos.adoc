@@ -1,0 +1,44 @@
+= Fuentes de datos
+
+Grafana admite muchos backends de almacenamiento diferentes para sus datos de series temporales (fuente de datos). Consulte xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[Agregar una fuente de datos] para obtener instrucciones sobre cómo agregar una fuente de datos a Grafana. Solo los usuarios con el rol de administrador de la organización pueden agregar fuentes de datos.
+
+== Consultas
+
+Cada fuente de datos tiene un Editor de Consultas específico que se personaliza para las características y capacidades que expone la fuente de datos en particular. El lenguaje de consulta y las capacidades de cada fuente de datos son obviamente muy diferentes. Puede combinar datos de varias fuentes de datos en un solo Tablero, pero cada Panel está vinculado a una fuente de datos específica que pertenece a una Organización en particular.
+
+== Fuentes de datos compatibles
+
+Las siguientes fuentes de datos son compatibles oficialmente:
+
+[arabic]
+. AWS CloudWatch
+. Azure Monitor
+. Elasticsearch
+. Google Cloud Monitoring
+. Graphite
+. InfluxDB
+. xref:fuentes-de-datos/loki.adoc[Loki]
+. Microsoft SQL Server (MSSQL)
+. MySQL
+. OpenTSDB
+. PostgreSQL
+. xref:fuentes-de-datos/prometheus.adoc[Prometheus]
+. Jaeger
+. Zipkin
+. Tempo
+. Testdata
+
+Además de las fuentes de datos que ha configurado en su Grafana, hay tres fuentes de datos especiales disponibles:
+
+[arabic]
+. *Grafana:* una fuente de datos integrada que genera datos de recorridos aleatorios. Útil para probar visualizaciones y ejecutar experimentos.
+. *Mixto:* seleccione esta opción para consultar varias fuentes de datos en el mismo panel. Cuando se selecciona esta fuente de datos, Grafana le permite seleccionar una fuente de datos para cada nueva consulta que agregue.
+[arabic]
+.. La primera consulta utilizará la fuente de datos que se seleccionó antes de seleccionar *Mixta*.
+.. No puede cambiar una consulta existente para utilizar la [Fuente de Datos Mixta].
+.. Ejemplo de Grafana Play: https://play.grafana.org/d/000000100/mixed-datasources?orgId=1[Fuentes de datos mixtas]
+. *Tablero:* seleccione esta opción para usar un conjunto de resultados de otro panel en el mismo tablero.
+
+== Complementos de fuentes de datos
+
+Desde Grafana 3.0, puede instalar fuentes de datos como complementos. Visite https://grafana.com/plugins[Grafana.com/plugins] para obtener más fuentes de datos.

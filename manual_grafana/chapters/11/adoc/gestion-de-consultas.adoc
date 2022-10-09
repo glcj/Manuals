@@ -1,0 +1,113 @@
+= Gestión de consultas en Explorar
+
+Para ayudar con la depuración de consultas, Explorar le permite investigar solicitudes y respuestas de consultas, así como estadísticas de consultas, a través del inspector de Consultas. Esta funcionalidad es similar a la xref:paneles/inspeccionar-un-panel.adoc#_inspeccionar_el_rendimiento_de_las_consultas[pestaña Estadísticas] y la xref:paneles/inspeccionar-un-panel.adoc#_ver_solicitud_y_respuesta_sin_procesar_a_la_fuente_de_datos[pestaña Consulta] del inspector de paneles.
+
+image::image175.png[Screenshot of the query inspector button in Explore,width=624,height=94]
+
+== Historial de consultas
+
+El historial de consultas es una lista de consultas que ha utilizado en Explorar. El historial es local para su navegador y no se comparte. Para abrir e interactuar con su historial, haga clic en el botón *Historial de consultas* en Explorar.
+
+=== Ver historial de consultas
+
+El historial de consultas le permite ver el historial de sus consultas. Para cada consulta individual, puede:
+
+* Ejecute una consulta.
+* Cree y/o edite un comentario.
+* Copie una consulta al portapapeles.
+* Copie un enlace abreviado con la consulta en el portapapeles.
+* Marque una consulta.
+
+=== Gestionar consultas favoritas
+
+Todas las consultas destacadas en la pestaña Historial de consultas se muestran en Destacadas. Esto le permite acceder a sus consultas favoritas más rápido y reutilizar estas consultas sin tener que escribirlas desde cero.
+
+=== Ordenar historial de consultas
+
+De forma predeterminada, el historial de consultas muestra las consultas más recientes. Puede ordenar su historial por fecha o por nombre de fuente de datos en orden ascendente o descendente.
+
+[arabic]
+. Haga clic en el campo *Ordenar consultas por*.
+. Selecciona una de las siguientes opciones:
+** La más reciente primero
+** La más vieja primero
+** Fuente de datos A-Z
+** Fuente de datos Z-A
+
+[NOTE]
+====
+Si está en modo dividido, el modo de clasificación elegido se aplica solo al panel activo.
+====
+
+=== Filtrar historial de consultas
+
+Filtrar el historial de consultas en la pestaña Historial de consultas y Destacados por nombre de fuente de datos:
+
+[arabic]
+. Haga clic en el campo *Filtrar consultas para fuentes de datos específicas*.
+. Seleccione la fuente de datos por la que le gustaría filtrar su historial. Puede seleccionar varias fuentes de datos.
+
+En la pestaña *Historial de consultas* también es posible filtrar las consultas por fecha usando el control deslizante:
+
+[arabic]
+. Utilice el control deslizante vertical para filtrar las consultas por fecha.
+. Arrastrar el asa superior, ajusta la fecha de inicio.
+. Arrastrando el asa superior, ajusta la fecha de finalización.
+
+[NOTE]
+====
+Si está en modo dividido, los filtros se aplican solo a su panel activo actualmente.
+====
+
+=== Buscar en el historial de consultas
+
+Puede buscar en su historial entre consultas y comentarios. La búsqueda es posible para consultas en la pestaña Historial de consultas y la pestaña Destacados.
+
+[arabic]
+. Haga clic en el campo *Consultas de búsqueda*.
+. Escriba el término que está buscando en el campo de búsqueda.
+
+=== Configuración del historial de consultas
+
+Puede personalizar el historial de consultas en la pestaña Configuración. Las opciones se describen en la tabla siguiente.
+
+[cols=",",options="header",]
+|===
+|Configuración |Valor predeterminado
+|Período de tiempo durante el cual Grafana guardará su historial de consultas |1 semana
+|Cambiar la pestaña activa predeterminada |Pestaña Historial de consultas
+|Mostrar solo consultas para la fuente de datos actualmente activa en Explorar |Verdadero
+|Borrar historial de consultas |Elimina permanentemente todas las consultas almacenadas.
+|===
+
+[NOTE]
+====
+La configuración del historial de consultas es global y se aplica a ambos paneles en modo dividido.
+====
+
+== Funciones específicas de Prometheus
+
+La primera versión de Explorar presenta una experiencia de consulta personalizada para Prometheus. Cuando se ejecuta una consulta, en realidad ejecuta dos consultas, una consulta normal de Prometheus para el gráfico y una consulta instantánea para la tabla. Una Consulta Instantánea devuelve el último valor para cada serie de tiempo que muestra un buen resumen de los datos que se muestran en el gráfico.
+
+=== Explorador de métricas
+
+En el lado izquierdo del campo de consulta, haga clic en *Métricas* para abrir el Explorador de Métricas. Esto muestra un menú jerárquico con métricas agrupadas por su prefijo. Por ejemplo, todas las métricas de Alertmanager se agrupan bajo el prefijo `alertmanager`. Este es un buen punto de partida si solo desea explorar qué métricas están disponibles.
+
+image::image176.png[Screenshot of the new Explore option in the panel menu,width=624,height=247]
+
+=== Campo de consulta
+
+El campo Consulta admite el autocompletado para nombres de métricas, funciones y funciona casi de la misma manera que el editor de consultas estándar de Prometheus. Presione la tecla enter para ejecutar una consulta.
+
+El menú de autocompletar se puede activar presionando Ctrl+Espacio. El menú Autocompletar contiene una nueva sección de Historial con una lista de consultas ejecutadas recientemente.
+
+Las sugerencias pueden aparecer debajo del campo de consulta; haga clic en ellas para actualizar su consulta con el cambio sugerido.
+
+[arabic]
+. Para los contadores (métricas que aumentan monótonamente), se sugerirá una función de tasa.
+. Para los cubos, se sugerirá una función de histograma.
+. Para registrar reglas, es posible expandir las reglas.
+
+=== Filtros de tabla
+
+Haga clic en el botón de filtro en la columna "etiqueta" de un panel Tabla para agregar filtros a la expresión de la consulta. También puede agregar filtros para múltiples consultas; el filtro se agrega para todas las consultas.

@@ -1,0 +1,127 @@
+= Opciones de campo estándar
+
+Esta sección explica todas las opciones de campo disponibles. Se enumeran en orden alfabético.
+
+Puede aplicar opciones de campo estándar a la mayoría de los paneles integrados de Grafana. Algunos paneles antiguos y paneles comunitarios que no se han actualizado al nuevo modelo de datos y panel perderán todas o algunas de estas opciones de campo.
+
+La mayoría de las opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo-y-anulaciones/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo-y-anulaciones/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+[NOTE]
+====
+Trabajamos constantemente para agregar y expandir opciones para todas las visualizaciones, por lo que es posible que no todas las opciones estén disponibles para todas las visualizaciones.
+====
+
+== Decimales
+
+Número de decimales para representar el valor. Déjelo en blanco para que Grafana use el número de decimales proporcionado por la fuente de datos.
+
+Para cambiar esta configuración, escriba un número en el campo y luego haga clic fuera del campo o presione Entrar.
+
+== Enlaces de datos
+
+Le permite controlar la URL a la que se vincula un valor o visualización.
+
+Para obtener más información e instrucciones, consulte xref:enlaces/enlaces-de-datos.adoc[Enlaces de datos].
+
+== Nombre para mostrar
+
+Le permite establecer el título de visualización de todos los campos. Puede utilizar xref:plantillas-y-variables/plantillas-y-variables.adoc[variables] en el título del campo.
+
+Cuando se muestran múltiples estadísticas, campos o series, este campo controla el título en cada estadística. Puede usar expresiones como `${__field.name}` para usar solo el nombre de la serie o el nombre del campo en el título.
+
+Dado un campo con un nombre de Temp y etiquetas de `{“Loc”=“PBI”, “Sensor”=“3”}`
+
+[cols=",,,",options="header",]
+|===
+|Expresión de la sintaxis |Ejemplo |Muestra |Explicación
+|`${__field.displayName}` |Igual que la sintaxis |`Temp {Loc="PBI", Sensor="3"}` |Muestra el nombre del campo y las etiquetas en `{}` si están presentes. Si solo hay una clave de etiqueta en la respuesta, entonces, para la parte de la etiqueta, Grafana muestra el valor de la etiqueta sin las llaves adjuntas.
+|`${__field.name}` |Igual que la sintaxis |`Temp` |Muestra el nombre del campo (sin etiquetas).
+|`${__field.labels}` |Igual que la sintaxis |`Loc="PBI", Sensor="3"` |Muestra las etiquetas sin el nombre.
+|`${__field.labels.X}` |`$\{__field.labels.Loc}` |`PBI` |Muestra el valor de la clave de etiqueta especificada.
+|`${__field.labels.__values}` |Igual que la sintaxis |`PBI, 3` |Muestra los valores de las etiquetas separados por una coma (sin claves de etiqueta).
+|===
+
+Si el valor es una cadena vacía después de representar la expresión para un campo en particular, se usa el método de visualización predeterminado.
+
+== Max
+
+Le permite establecer el valor máximo utilizado en los cálculos de umbral de porcentaje. Déjelo en blanco para el cálculo automático basado en todas las series y campos
+
+== Min
+
+Le permite establecer el valor mínimo utilizado en los cálculos de umbral de porcentaje. Déjelo en blanco para el cálculo automático basado en todas las series y campos
+
+== Sin valor
+
+Ingrese lo que Grafana debe mostrar si el valor del campo está vacío o es nulo.
+
+== Unidad
+
+Le permite elegir qué unidad debe usar un campo. Haga clic en el campo *Unidad*, luego profundice hasta encontrar la unidad que desea. La unidad que seleccione se aplica a todos los campos excepto al tiempo.
+
+=== Unidades personalizadas
+
+Puede utilizar el menú desplegable de unidades para especificar también unidades personalizadas, prefijos o sufijos personalizados y formatos de fecha y hora.
+
+Para seleccionar una unidad personalizada ingrese la unidad y seleccione la última opción `Custom: xxx` en el menú desplegable.
+
+* `suffix:<suffix>` para la unidad personalizada que debe ir después del valor.
+* `time:<format>` Para formatos de fecha y hora personalizados, escriba, por ejemplo, `time:YYYY-MM-DD`. Consulte https://momentjs.com/docs/#/displaying/[formatos] para ver la sintaxis y las opciones del formato.
+* `si:<base scale><unit characters>` para unidades SI personalizadas. Por ejemplo: `si: mF`. Este es un poco más avanzado, ya que puede especificar tanto una unidad como la escala de datos de origen. Entonces, si sus datos de origen se representan como mili (miles de) algo, anteponga la unidad con ese carácter de escala SI.
+* `count:<unit>` para una unidad de conteo personalizada.
+* `currency:<unit>` para personalizar una unidad monetaria.
+
+También puede pegar un emoji nativo en el selector de unidades y seleccionarlo como una unidad personalizada:
+
+image::image61.png[Custom unit emoji,width=389,height=403]
+
+=== Unidades de cuerda
+
+En ocasiones, Grafana puede ser demasiado agresivo al analizar cadenas y mostrarlas como números. Para hacer que Grafana muestre la cadena original, cree una anulación de campo y agregue una propiedad de unidad con la unidad de `string`.
+
+== Esquema de colores
+
+[NOTE]
+====
+*Nota:* solo disponible en Grafana 7.3+.
+====
+
+image::image62.png[Color scheme,width=624,height=584]
+
+La opción de combinación de colores define cómo Grafana colorea series o campos. Aquí hay varios modos que funcionan de manera muy diferente y su utilidad depende en gran medida de la visualización que haya seleccionado actualmente.
+
+*Color por valor* Además de derivar el color de los umbrales, también existen esquemas de color continuos (degradados). Útil para visualizaciones que colorean valores individuales. Por ejemplo, los paneles de estadísticas y el panel de la tabla. Los modos de color continuo utilizan el porcentaje de un valor relativo al mínimo y al máximo para interpolar un color.
+
+[cols=",",options="header",]
+|===
+|Modo de color |Descripción
+|*Un solo color* |Especifique un solo color, útil en una regla de anulación
+|*Desde umbrales* |Informa a Grafana para que tome el color del umbral de coincidencia
+|*Paleta clásica* |Grafana asignará color buscando un color en una paleta por índice de serie. Útil para gráficos y gráficos circulares y otras visualizaciones de datos categóricos
+|*Verde-Amarillo-Rojo (por valor)* |Esquema de color continuo
+|*Azul-Amarillo-Rojo (por valor)* |Esquema de color continuo
+|*Azules (por valor)* |Esquema de color continuo (fondo del panel a azul)
+|*Rojos (por valor)* |Esquema de color continuo (color de fondo del panel a azul)
+|*Verdes (por valor)* |Esquema de color continuo (color de fondo del panel a azul)
+|*Púrpura (por valor)* |Esquema de color continuo (color de fondo del panel a azul)
+|===
+
+== Umbrales
+
+Los umbrales le permiten cambiar el color de un campo según el valor.
+
+Para obtener más información e instrucciones, consulte xref:paneles/umbrales.adoc[Umbrales].
+
+== Mapeo de valor
+
+Le permite establecer reglas que traduzcan un valor de campo o rango de valores en texto explícito. Puede agregar más de un mapeo de valores.
+
+* *Tipo de asignación:* haga clic en una opción.
+** *Valor:* ingrese un valor. Si el valor del campo es mayor o igual que el valor, se muestra el *Texto*.
+** *Desde* y *Hasta:* ingrese un rango. Si el valor del campo está entre los valores del rango o es igual a ellos, se muestra el *Texto*.
+* *Texto:* texto que se muestra si se cumplen las condiciones en un campo. Este campo acepta variables.

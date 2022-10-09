@@ -1,0 +1,57 @@
+= Agregar un panel
+
+Los paneles le permiten mostrar sus datos de forma visual. Este tema lo guía a través de los pasos más básicos para crear un panel.
+
+== 1. Agregar un panel a un tablero
+
+[arabic]
+. Navegue hasta el tablero al que desea agregar un panel.
+. Haga clic en el icono *Agregar panel*.
++
+image::image32.png[https://grafana.com/static/img/docs/panels/add-panel-icon-7-0.png,width=68,height=52]
++
+[arabic, start=3]
+. Haga clic en *Agregar un panel vacío*.
+
+Grafana crea un panel de gráficos vacío con su fuente de datos predeterminada seleccionada.
+
+== 2. Editar la configuración del panel
+
+Si bien no es obligatorio, le recomendamos que agregue un título y una descripción útiles a su panel. Puede utilizar xref:plantillas-y-variables/plantillas-y-variables.adoc[variables que haya definido] en cualquiera de los campos, pero no xref:plantillas-y-variables/tipos-de-variables/variables-globales.adoc[variables globales].
+
+image::image33.png[https://grafana.com/static/img/docs/panels/panel-settings-7-0.png,width=500,height=381]
+
+*Título del panel:* el texto ingresado en este campo se muestra en la parte superior de su panel en el editor de paneles y en el tablero.
+
+*Descripción:* el texto ingresado en este campo se muestra en una información sobre herramientas en la esquina superior izquierda del panel. Escriba una descripción del panel y los datos que está mostrando. Imagínese que se lo está explicando a un nuevo usuario dentro de seis meses, cuando ya no esté fresco en su mente. Los futuros editores (posiblemente usted mismo) se lo agradecerán.
+
+== 3. Escriba una consulta
+
+Cada panel necesita al menos una consulta para mostrar una visualización. Las consultas se escriben en la pestaña Consulta del editor de paneles. Para obtener más información sobre la pestaña Consulta, vea xref:paneles/consultas.adoc[Consultas].
+
+[arabic]
+. Elija una fuente de datos. En la primera línea de la pestaña Consulta, haga clic en la lista desplegable para ver todas las fuentes de datos disponibles. Esta lista incluye todas las fuentes de datos que agregó. Consulte xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[Agregar una fuente de datos] si necesita instrucciones.
+. Escriba o cree una consulta en el lenguaje de consulta de su fuente de datos. Las opciones variarán. Consulte la xref:fuentes-de-datos/fuentes-de-datos.adoc[documentación de su fuente de datos específica] para conocer las pautas específicas.
+
+== 4. Elija un tipo de visualización
+
+En la sección Visualización de la pestaña Panel, haga clic en un tipo de visualización. Grafana muestra una vista previa de los resultados de su consulta con esa visualización aplicada.
+
+Para obtener más información sobre visualizaciones individuales, consulte xref:paneles/visualizaciones.adoc[Visualizaciones].
+
+== 5. Aplicar cambios y guardar
+
+Guarde el tablero. Presione Ctrl/Cmd+S o haga clic en *Guardar* en la esquina superior derecha de la pantalla.
+
+Sus opciones varían según los cambios que haya realizado y si se trata de un tablero nuevo o no. Le recomendamos que agregue una nota para describir sus cambios antes de hacer clic en *Guardar*. Las notas son muy útiles si necesita revertir el tablero a una versión anterior.
+
+== ¿Qué sigue?
+
+Nuestro tutorial de conceptos básicos de Grafana es un excelente lugar para comenzar, o puede obtener más información sobre Grafana leyendo uno de los temas de documentación vinculados a continuación:
+
+* Obtenga más información sobre las opciones del xref:paneles/editor-de-paneles.adoc[editor de paneles].
+* Agregue más xref:paneles/consultas.adoc[consultas].
+* xref:paneles/transformaciones.adoc[Transforme] sus datos.
+* xref:paneles/opciones-de-campo.adoc[Configure] cómo se muestran sus resultados en la visualización.
+* Si hizo un panel gráfico, configure una xref:alertas/alertas.adoc[alerta].
+* Cree xref:plantillas-y-variables/plantillas-y-variables.adoc[plantillas y variables].

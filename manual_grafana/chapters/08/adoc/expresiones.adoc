@@ -1,0 +1,165 @@
+= Expresiones del lado del servidor
+
+[NOTE]
+====
+Esta documentación es para una función beta.
+====
+
+Las expresiones del lado del servidor le permiten manipular los datos devueltos por consultas con matemáticas y otras operaciones. Las expresiones crean nuevos datos y no manipulan los datos devueltos por las fuentes de datos, además de una pequeña reestructuración de datos para hacer que los datos sean una entrada aceptable para las expresiones.
+
+== Usando expresiones
+
+El caso de uso principal de las expresiones es para la próxima versión de las alertas de Grafana. Al igual que las alertas, el procesamiento se realiza en el lado del servidor, por lo que las expresiones pueden funcionar sin una sesión de navegador. Sin embargo, las expresiones también se pueden usar con fuentes de datos back-end y visualización.
+
+[NOTE]
+====
+Las expresiones no funcionan con las alertas actuales de Grafana.
+====
+
+[NOTE]
+====
+Las expresiones no funcionan con variables de panel.
+====
+
+Las expresiones están destinadas a aumentar las fuentes de datos al permitir que las consultas de diferentes fuentes de datos se combinen o al proporcionar operaciones no disponibles en una fuente de datos.
+
+[NOTE]
+====
+Cuando sea posible, debe realizar el procesamiento de datos dentro de la fuente de datos. Copiar datos desde el almacenamiento al servidor Grafana para su procesamiento es ineficiente, por lo que las expresiones están dirigidas al procesamiento de datos livianos.
+====
+
+Las expresiones funcionan con consultas de fuentes de datos que devuelven series de tiempo o datos numéricos. También operan con xref:conceptos-basicos/dimensiones-de-las-series-de-tiempo.adoc[datos multidimensionales]. Por ejemplo, una consulta que devuelve varias series, donde cada serie se identifica mediante etiquetas o chapas.
+
+Una expresión individual toma una o más consultas u otras expresiones como entrada y agrega datos al resultado. Cada expresión o consulta individual está representada por una variable que es un identificador con nombre conocido como su RefID (por ejemplo, la letra predeterminada `A` o `B`).
+
+Para hacer referencia a la salida de una expresión individual o una consulta de fuente de datos en otra expresión, este identificador se utiliza como variable.
+
+== Tipos de expresión
+
+Las expresiones funcionan con dos tipos de datos.
+
+* Colecciones de series temporales.
+* Una colección de números, donde cada colección puede ser una sola serie o un solo número.
+
+Cada colección se devuelve desde una única consulta o expresión de fuente de datos y se representa mediante RefID. Cada colección es un conjunto, donde cada elemento del conjunto se identifica de forma única por sus dimensiones que se almacenan como xref:conceptos-basicos/dimensiones-de-las-series-de-tiempo.adoc#_etiquetas[etiquetas] o pares clave-valor.
+
+== Consultas de fuentes de datos
+
+Las expresiones del lado del servidor solo admiten consultas de fuentes de datos para fuentes de datos de back-end. En general, se supone que los datos se etiquetan como datos de series de tiempo. En el futuro, teníamos la intención de agregar una afirmación de los datos del tipo de retorno de la consulta (número o serie temporal) para que las expresiones puedan manejar mejor los errores.
+
+Las consultas de fuentes de datos, cuando se utilizan con expresiones, son ejecutadas por el motor de expresiones. Cuando hace esto, reestructura los datos para que sean una serie de tiempo o un número por marco de datos. Entonces, por ejemplo, si usa una fuente de datos que devuelve múltiples series en un marco en la vista de tabla, puede notar que se ve diferente cuando se ejecuta con expresiones.
+
+Actualmente, el único formato de serie que no es de tiempo (número) es compatible cuando se usan marcos de datos si tiene una respuesta de tabla que devuelve un marco de datos sin tiempo, columnas de cadena y una columna numérica:
+
+[cols=",,",options="header",]
+|===
+|Loc |Host |Avg_CPU
+|MIA |A |1
+|NYC |B |2
+|===
+
+producirá un número que funciona con expresiones. Las columnas de cadena se convierten en etiquetas y la columna numérica en el valor correspondiente. Por ejemplo, `{"Loc": "MIA", "Host": "A"}` con un valor de 1.
+
+== Operaciones
+
+Puede utilizar las siguientes operaciones en expresiones: matemáticas, reducir y volver a muestrear.
+
+=== Matemáticas
+
+Mátematicas es para fórmulas matemáticas de forma libre en series de tiempo o datos numéricos. Las operaciones matemáticas toman números y series de tiempo como entrada y los cambian a diferentes números y series de tiempo.
+
+Los datos de otras consultas o expresiones se referencian con el RefID prefijado con un signo de dólar, por ejemplo `$A`. Si la variable tiene espacios en el nombre, entonces puede usar una sintaxis de llaves como `${my variable}`.
+
+Las constantes numéricas pueden estar en decimal (`2.24`), octal (con un cero inicial como `072`) o hexadecimal (con un 0x inicial como `0x2A`). También se admiten exponenciales y signos (p. Ej., `-0.8e-2`).
+
+==== Operadores
+
+La aritmética (`+`, binaria y unaria `-`, `*`, `/`, `%`, exponente `**`), relacional (`<`, `>`, `==`, `!=`, `>=`, `<=`) Y lógica (`&&`, `||` y unaria `!`) los operadores son compatibles.
+
+El comportamiento de la operación con los datos depende de si se trata de un número o de una serie temporal.
+
+Con operaciones binarias, como `$A + $B` o `$A || $B`, el operador se aplica de las siguientes formas según el tipo de dato:
+
+* Si tanto `$A` como `$B` son un número, la operación se realiza entre los dos números.
+* Si una variable es un número y la otra variable es una serie de tiempo, entonces se realiza la operación entre el valor de cada punto de la serie de tiempo y el número.
+* Si tanto `$A` como `$B` son datos de series de tiempo, la operación entre cada valor de las dos series se realiza para cada marca de tiempo que exista tanto en `$A` como en `$B`. La operación Remuestrear se puede utilizar para alinear las marcas de tiempo. (*Nota:* en el futuro, planeamos agregar opciones a la operación Matemática para diferentes comportamientos).
+
+Entonces, en resumen:
+
+* Número OP número = número
+* Número OP serie = serie
+* Serie OP serie = serie
+
+Debido a que las expresiones funcionan con múltiples series o números representados por una sola variable, las operaciones binarias también realizan una unión entre las dos variables. Esto se hace en base a las etiquetas de identificación asociadas con cada serie o número individual.
+
+Entonces, si tiene números con etiquetas como `{host=web01}` en `$A` y otro número en `$B` con las mismas etiquetas, entonces la operación se realiza entre esos dos elementos dentro de cada variable, y el resultado compartirá las mismas etiquetas. Las reglas para el comportamiento de esta unión son las siguientes:
+
+* Un artículo sin etiquetas se unirá a cualquier cosa.
+* Si tanto `$A` como `$B` contienen cada uno solo un elemento (una serie o un número), se unirán.
+* Si las etiquetas son matemáticas exactas, se unirán.
+* Si las etiquetas son un subconjunto del otro, por ejemplo, y el elemento en `$A` está etiquetado como `{host=A, dc=MIA}` y el elemento en `$B` está etiquetado como `{host=A}`, se unirán.
+* Actualmente, si dentro de una variable como `$A` hay diferentes _claves_ de etiqueta para cada elemento, el comportamiento de unión no está definido.
+
+Los operadores lógicos y relacionales devuelven 0 para falso 1 para verdadero.
+
+==== Funciones matemáticas
+
+Si bien la mayoría de las funciones existen en las propias operaciones de expresión, la operación matemática tiene algunas funciones similares a los operadores matemáticos o símbolos. Cuando las funciones pueden tomar números o series, se devolverá el mismo tipo que el argumento. Cuando es una serie, la operación se realiza por el valor de cada punto de la serie.
+
+===== abs
+
+abs devuelve el valor absoluto de su argumento, que puede ser un número o una serie. Por ejemplo `abs(-1)` o `abs($A)`.
+
+===== log
+
+Log devuelve el logaritmo natural de de su argumento, que puede ser un número o una serie. Si el valor es menor que 0, se devuelve NaN. Por ejemplo, `log(-1)` o `log($A)`.
+
+===== inf, nan y null
+
+Las funciones inf, nan y null devuelven un solo valor del nombre. Existen principalmente para realizar pruebas. Ejemplo: `null()`. (Nota: inf siempre devuelve infinito positivo, probablemente debería cambiar esto para tomar un argumento para que pueda devolver infinito negativo).
+
+=== Reducir
+
+Reducir toma una o más series de tiempo devueltas por una consulta o una expresión y convierte cada serie en un solo número. Las etiquetas de la serie temporal se mantienen como etiquetas en cada número reducido generado.
+
+*Campos:*
+
+* *Función:* la función de reducción a utilizar
+* *Entrada:* la variable (refID (como `A`)) para volver a muestrear
+
+==== Funciones de reducción
+
+[NOTE]
+====
+En el futuro planeamos agregar opciones para controlar el comportamiento vacío, NaN y nulo para las funciones de reducción.
+====
+
+===== Contar
+
+Contar devuelve el número de puntos de cada serie.
+
+===== Promediar
+
+La media devuelve el total de todos los valores de cada serie dividido por el número de puntos de esa serie. Si algún valor de la serie es nulo o nan, o si la serie está vacía, se devuelve NaN.
+
+===== Min y Max
+
+Min y Max devuelven el valor más pequeño o más grande de la serie, respectivamente. Si algún valor de la serie es nulo o nan, o si la serie está vacía, se devuelve NaN.
+
+===== Sumar
+
+Sum devuelve el total de todos los valores de la serie. Si la serie tiene una longitud cero, la suma será 0. Si hay valores NaN o Null en la serie, se devuelve NaN.
+
+=== Remuestrear
+
+Volver a muestrear cambia las marcas de tiempo en cada serie de tiempo para tener un intervalo de tiempo coherente. El caso de uso principal es para que pueda volver a muestrear series de tiempo que no comparten las mismas marcas de tiempo para que se puedan realizar operaciones matemáticas entre ellas. Esto se puede hacer volviendo a muestrear cada una de las dos series, y luego en una Operación matemática haciendo referencia a las variables remuestreadas.
+
+*Campos:*
+
+* *Entrada:* la variable de datos de series de tiempo (refID (como `A`)) para volver a muestrear
+* *Volver a muestrear a:* la duración del tiempo para volver a muestrear, por ejemplo, `10s`. Las unidades pueden ser `s` segundos, `m` para minutos, `h` para horas, `d` para días, `w` para semanas e `y` para años.
+* *Downsample:* la función de reducción que se utiliza cuando hay más de un punto de datos por muestra de ventana. Consulte la operación de reducción para obtener detalles sobre el comportamiento.
+* *Upsample:* el método que se usa para llenar una muestra de ventana que no tiene puntos de datos.
+** *almohadilla* se llena con el último valor conocido
+** *relleno* con el siguiente valor conocido
+** *fillna* para llenar ventanas de muestra vacías con NaNs

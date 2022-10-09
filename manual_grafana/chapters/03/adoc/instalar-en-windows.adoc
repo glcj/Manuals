@@ -1,0 +1,44 @@
+= Instalar en Windows
+
+Puede descargar el paquete de instalación de Windows o un archivo binario de Windows independiente.
+
+Lea xref:instalacion/actualizar-grafana.adoc[Actualizar Grafana] para obtener sugerencias y orientación sobre cómo actualizar una instalación existente.
+
+[arabic]
+. Navegue hasta https://grafana.com/grafana/download?platform=windows[Descargar Grafana].
+. Seleccione la versión de Grafana que desee instalar.
+** La versión más reciente de Grafana está seleccionada de forma predeterminada.
+** El campo *Versión* muestra solo las versiones terminadas. Si desea instalar una versión beta, haga clic en *Nightly Builds* y luego seleccione una versión.
+. Seleccione una *Edición*.
+** *Enterprise*: descarga recomendada. Funcionalmente idéntico a la versión de código abierto, pero incluye características que puede desbloquear con una licencia si así lo desea.
+** *Open Source*: funcionalmente idéntico a la versión empresarial, pero deberá descargar la versión empresarial si desea funciones empresariales.
+. Haga clic en *Windows*.
+
+Puede utilizar el instalador de Windows o puede instalar un binario de Windows independiente.
+
+== Instalar con el instalador de Windows (recomendado)
+
+[arabic]
+. Haz clic en *Descargar el instalador*.
+. Abra y ejecute el instalador.
+
+Para ejecutar Grafana, abra su navegador y vaya al puerto de Grafana (http:/localhost:3000/ es el predeterminado) y luego siga las instrucciones en xref:comenzando/comenzando-con-grafana.adoc[Comenzando].
+
+== Instalar binario de Windows independiente
+
+[arabic]
+. Haga clic en *Descargar el archivo zip*. *Importante:* Una vez que haya descargado el archivo zip y antes de extraerlo, asegúrese de abrir las propiedades de ese archivo (haga clic con el botón derecho en *Propiedades*) y seleccione la casilla de verificación `unblock` y luego haga clic en `Ok`.
+. Extraiga esta carpeta a cualquier lugar desde donde desee que se ejecute Grafana.
+. Inicie Grafana ejecutando `grafana-server.exe`, ubicado en el directorio bin, preferiblemente desde la línea de comandos. Si desea ejecutar Grafana como un servicio de Windows, descargue https://nssm.cc/[NSSM]. Es muy fácil agregar Grafana como un servicio de Windows usando esa herramienta.
+
+Para ejecutar Grafana, abra su navegador y vaya al puerto de Grafana (http://localhost:3000/ es el predeterminado) y luego siga las instrucciones en xref:comenzando/comenzando-con-grafana.adoc[Comenzando].
+
+[NOTE]
+====
+*Nota:* El puerto Grafana predeterminado es `3000`. Este puerto puede requerir permisos adicionales en Windows. Si no aparece en el puerto predeterminado, puede intentar cambiar a un
+[NOTE] puerto diferente.
+====
+
+[arabic]
+. Vaya al directorio `conf` y copie `sample.ini` en `custom.ini`. *Nota:* debe editar `custom.ini`, nunca `defaults.ini`.
+. Edite `custom.ini` y elimine el comentario de la opción de configuración `http_port` (`;` es el carácter de comentario en los archivos ini) y cámbielo a algo como `8080` o similar. Ese puerto no debería requerir privilegios adicionales de Windows. Lea más sobre las xref:administracion/configuracion[opciones de configuración].

@@ -1,0 +1,20 @@
+= Compartir los resultados de la consulta entre paneles
+
+Grafana le permite usar el resultado de la consulta de un panel para cualquier otro panel en el tablero. Compartir los resultados de las consultas entre paneles reduce la cantidad de consultas realizadas a su fuente de datos, lo que puede mejorar el rendimiento de su tablero.
+
+La fuente de datos del Tablero le permite seleccionar un panel en su tablero que contiene las consultas para las que desea compartir los resultados. En lugar de enviar una consulta separada para cada panel, Grafana envía una consulta y otros paneles utilizan los resultados de la consulta para construir visualizaciones.
+
+Esta estrategia puede reducir drásticamente la cantidad de consultas que se realizan cuando, por ejemplo, tiene varios paneles que visualizan los mismos datos.
+
+Para compartir consultas de fuentes de datos con otro panel:
+
+[arabic]
+. xref:comenzando/comenzando-con-grafana.adoc#_crear_un_tablero[Cree un tablero].
+. xref:paneles/agregar-un-panel.adoc[Agregue un panel] al tablero.
+. Cambie el título a "Panel fuente". Utilizará este panel como fuente para los otros paneles. Defina la xref:paneles/consultas.adoc[consulta] o consultas que se compartirán. Si no tiene una fuente de datos disponible en este momento, puede usar la fuente de datos de *Grafana*, que devuelve una serie de tiempo aleatoria que puede usar para realizar pruebas.
+. Agregue un segundo panel y seleccione la fuente de datos del *Tablero* en el editor de consultas.
+. En la lista *Usar resultados de panel*, seleccione el primer panel que creó.
+
+Todas las consultas definidas en el panel de origen ahora están disponibles para el nuevo panel. Las consultas realizadas en el panel de origen se pueden compartir con varios paneles.
+
+Puede hacer clic en cualquiera de las consultas para ir al panel donde están definidas.

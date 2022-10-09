@@ -1,0 +1,124 @@
+= Crear alertas
+
+Las alertas de Grafana le permiten adjuntar reglas a los paneles de su tablero. Cuando guarda el tablero, Grafana extrae las reglas de alerta en un almacenamiento de reglas de alerta separado y las programa para su evaluación.
+
+image::image186.gif[Alerting overview,width=624,height=475]
+
+En la pestaña Alerta del panel de gráficos, puede configurar la frecuencia con la que se debe evaluar la regla de alerta y las condiciones que deben cumplirse para que la alerta cambie de estado y active sus xref:alertas/notificaciones-de-alertas.adoc[notificaciones].
+
+Actualmente, solo el panel de gráficos admite reglas de alerta.
+
+== Agregar o editar una regla de alerta
+
+[arabic]
+. Navegue hasta el panel para el que desea agregar o editar una regla de alerta, haga clic en el título y luego en *Editar*.
+. En la pestaña Alerta, haga clic en *Crear alerta*. Si ya existe una alerta para este panel, puede editar los campos en la pestaña Alerta.
+. Complete los campos. Las descripciones se enumeran a continuación en los <<Campos de reglas de alerta>>.
+. Cuando haya terminado de escribir su regla, haga clic en *Guardar* en la esquina superior derecha para guardar la regla de alerta y el tablero.
+. (Opcional pero recomendado) Haga clic en *Probar regla* para asegurarse de que la regla devuelva los resultados esperados.
+
+== Eliminar una alerta
+
+Para eliminar una alerta, desplácese hasta la parte inferior de la alerta y luego haga clic en *Eliminar*.
+
+== Campos de reglas de alerta
+
+Esta sección describe los campos que llena para crear una alerta.
+
+=== Regla
+
+* *Nombre:* ingrese un nombre descriptivo. El nombre se mostrará en la lista de reglas de alerta. Este campo admite xref:alertas/plantillas-de-notificaciones-de-alertas.adoc[plantillas].
+* *Evaluar cada:* especifique la frecuencia con la que el programador debe evaluar la regla de alerta. Esto se conoce como _intervalo de evaluación_.
+* *Por:* especifique cuánto tiempo necesita la consulta para violar los umbrales configurados antes de que se active la notificación de alerta.
+
+Puede establecer un intervalo de evaluación mínimo en el campo de configuración `alerting.min_interval_seconds`, para establecer un tiempo mínimo entre evaluaciones. Consulte Configuración para obtener más información.
+
+[CAUTION]
+====
+No utilice `For` con el ajuste `If no data or all values are null` establecido en `No Data`. La activación de `No Data` se activará instantáneamente y no se tendrá en cuenta `For`. Esto también puede provocar que no se envíe una notificación OK si la alerta cambia de `No Data -> Pending -> OK`.
+====
+
+Si una regla de alerta tiene configurado `For` y la consulta viola el umbral configurado, primero pasará de `OK` a `Pending`. Pasar de `OK` a `Pending` Grafana no enviará ninguna notificación. Una vez que la regla de alerta se haya activado durante más de un período de duración de `For`, cambiará a `Alerting` y enviará notificaciones de alerta.
+
+Por lo general, siempre es una buena idea usar esta configuración, ya que a menudo es peor obtener un falso positivo que esperar unos minutos antes de que se active la notificación de alerta. Si `Alert List` o `Alert list panels` observará las alertas pendientes.
+
+A continuación, puede ver una línea de tiempo de ejemplo de una alerta utilizando la configuración `For`. A las ~16:04, el estado de alerta cambia a `Pending` y después de 4 minutos cambia a `Alerting`, que es cuando se envían las notificaciones de alerta. Una vez que la serie vuelve a la normalidad, la regla de alerta vuelve a estar `OK`.
+
+image::image187.png[Alerting For,width=624,height=179]
+
+=== Condiciones
+
+image::image188.png[Alerting Conditions,width=624,height=312]
+
+Actualmente, el único tipo de condición que existe es una condición de `Query` que le permite especificar una letra de consulta, un rango de tiempo y una función de agregación.
+
+==== Ejemplo de condición de consulta
+
+[source,SQL]
+----
+avg() OF query(A, 15m, now) IS BELOW 14
+----
+
+* `avg()` Controla cómo se deben reducir los valores de *cada* serie a un valor que se pueda comparar con el umbral. Haga clic en la función para cambiarla a otra función de agregación.
+* `query(A, 15m, now)` La letra define qué consulta ejecutar desde la pestaña *Métricas*. Los dos segundos parámetros definen el rango de tiempo, `15m, now` significa 15 minutos atrás hasta ahora. También puede hacer `10m, now-2` para definir un rango de tiempo que será de hace 10 minutos a hace 2 minutos. Esto es útil si desea ignorar los últimos 2 minutos de datos.
+* `IS BELOW 14` Define el tipo de umbral y el valor del umbral. Puede hacer clic en `IS BELOW` para cambiar el tipo de umbral.
+
+La consulta utilizada en una regla de alerta no puede contener variables de plantilla. Actualmente solo admitimos operadores `AND` y `OR` entre condiciones y se ejecutan en serie. Por ejemplo, tenemos 3 condiciones en el siguiente orden: condición: _condition:A(evaluates to: TRUE) OR condition:B(evaluates to: FALSE) AND condition:C(evaluates to: TRUE)_ por lo que el resultado se calculará como ((TRUE OR FALSE) AND TRUE) = TRUE.
+
+Planeamos agregar otros tipos de condiciones en el futuro, como `Other Alert`, donde puede incluir el estado de otra alerta en sus condiciones y `Time of Day`.
+
+==== Múltiples series
+
+Si una consulta devuelve varias series, la función de agregación y la verificación de umbral se evaluarán para cada serie. Lo que Grafana no hace actualmente es rastrear el estado de la regla de alerta *por serie*. Esto tiene implicaciones que se detallan en el escenario siguiente.
+
+* Condición de alerta con consulta que devuelve 2 series: *servidor1* y *servidor2*
+* La serie *servidor1* hace que la regla de alerta se active y cambie al estado `Alerting`.
+* Las notificaciones se envían con el mensaje: _pico de carga (servidor1)_
+* En una evaluación posterior de la misma regla de alerta, la serie *servidor2* también hace que se active la regla de alerta.
+* No se envían nuevas notificaciones como la regla de alerta ya está en estado `Alerting`.
+
+Entonces, como puede ver en el escenario anterior, Grafana no enviará notificaciones cuando otras series hagan que se active la alerta si la regla ya está en estado `Alerting`. Para mejorar la compatibilidad con las consultas que devuelven varias series, planeamos realizar un seguimiento del estado *por serie* en una versión futura.
+
+====
+A partir de Grafana v5.3, puede configurar recordatorios para que se envíen para las alertas activadas. Esto enviará notificaciones adicionales cuando se continúe disparando una alerta. Si otras series (como servidor2 en el ejemplo anterior) también hacen que se active la regla de alerta, se incluirán en la notificación de recordatorio. Dependiendo del canal de notificación que esté usando, es posible que pueda aprovechar esta función para identificar series nuevas/existentes que provocan que se active la alerta.
+====
+
+=== Manejor de errores y falta de datos
+
+A continuación, se muestran las condiciones en las que puede configurar cómo el motor de evaluación de reglas debe manejar las consultas que no devuelven datos o solo valores nulos.
+
+[cols=",",options="header",]
+|===
+|Opción Sin Datos |Descripción
+|No Data |Establece el estado de regla de alerta a `NoData`
+|Alerting |Establece el estado de la regla de alerta en `Alerting`
+|Keep Last State |Mantiene el estado actual de la regla de alerta, sea cual sea.
+|Ok |No estoy seguro de por qué querrías enviarte una alerta cuando las cosas estén bien, pero podrías.
+|===
+
+=== Errores de ejecución o tiempos de espera
+
+Dígale a Grafana cómo manejar la ejecución o los errores de tiempo de espera.
+
+[cols=",",options="header",]
+|===
+|Opción de error o tiempo de espera |Descripción
+|Alerting |Establecer el estado de la regla de alerta en `Alerting`
+|Keep Last State |Mantiene el estado actual de la regla de alerta, sea cual sea.
+|===
+
+Si tiene un almacén de series de tiempo no confiable desde el cual las consultas en algún momento se agotan o fallan al azar, puede configurar esta opción en `Keep Last State` para básicamente ignorarlas.
+
+== Notificaciones
+
+En la pestaña de alerta también puede especificar notificaciones de reglas de alerta junto con un mensaje detallado sobre la regla de alerta. El mensaje puede contener cualquier cosa, información sobre cómo podría resolver el problema, un vínculo al runbook, etc.
+
+Las notificaciones reales se configuran y comparten entre múltiples alertas. Lea las xref:alertas/notificaciones-de-alertas.adoc[Notificaciones de alerta] para obtener información sobre cómo configurar y configurar las notificaciones.
+
+* *Enviar a:* seleccione un canal de notificación de alerta si tiene uno configurado.
+* *Mensaje:* ingrese un mensaje de texto que se enviará en el canal de notificación. Algunos notificadores de alertas admiten la transformación del texto a HTML u otros formatos enriquecidos. Este campo admite xref:alertas/plantillas-de-notificaciones-de-alertas.adoc[plantillas].
+* *Etiquetas:* especifique una lista de etiquetas (clave/valor) que se incluirán en la notificación. Solo es compatible con xref:alertas/notificaciones-de-alertas.adoc#_lista_de_notificadores_admitidos[algunos notificadores].
+
+== Historial y anotaciones del estado de alerta
+
+Los cambios de estado de alerta se registran en la tabla de anotaciones internas en la base de datos de Grafana. Los cambios de estado se visualizan como anotaciones en el panel de gráficos de la regla de alerta. También puede acceder al submenú `State history` en la pestaña de alerta para ver y borrar el historial del estado.

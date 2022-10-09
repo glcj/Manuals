@@ -1,0 +1,12 @@
+= Ver las reglas de alerta existentes
+
+Grafana almacena reglas de alerta individuales en los paneles donde están definidas, pero también puede ver una lista de todas las reglas de alerta existentes y su estado actual.
+
+En la barra lateral de Grafana, pase el cursor sobre el icono de Alerta (campana) y luego haga clic en *Reglas de Alerta*. Se enumeran todas las reglas de alerta configuradas, junto con su estado actual.
+
+Puede hacer varias cosas mientras ve las alertas.
+
+* *Filtrar alertas por nombre:* escriba un nombre de alerta en el campo *Buscar alertas*.
+* *Filtrar alertas por estado:* en *Estados*, seleccione los estados de alerta que desea ver. Todos los demás estarán ocultos.
+* *Pausar o reanudar una alerta:* haga clic en el icono *Pausar* o *Reproducir* junto a la alerta para pausar o reanudar la evaluación. Consulte xref:alertas/pausar-regla-de-alerta.adoc[Pausar una regla de alerta] para obtener más información.
+* *Acceda a la configuración de la regla de alerta:* haga clic en el nombre de la alerta o en el icono *Editar regla de alerta* (engranaje). Grafana abre la pestaña Alerta del panel donde se define la regla de alerta. Esto es útil cuando se activa una alerta pero no sabe en qué panel está definida.

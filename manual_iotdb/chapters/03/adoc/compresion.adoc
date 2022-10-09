@@ -1,0 +1,15 @@
+= Compresión
+
+Cuando la serie temporal se escribe y codifica como datos binarios de acuerdo con el tipo especificado, IoTDB comprime los datos mediante tecnología de compresión para mejorar aún más la eficiencia del almacenamiento espacial. Aunque tanto la codificación como la compresión están diseñadas para mejorar la eficiencia del almacenamiento, las técnicas de codificación generalmente están disponibles solo para tipos de datos específicos (por ejemplo, la codificación diferencial de segundo orden solo es adecuada para el tipo de datos INT32 o INT64, y el almacenamiento de números de punto flotante requiere multiplicarlos por 10m para convertir a números enteros), después de lo cual los datos se convierten en un flujo binario. El método de compresión (SNAPPY) comprime el flujo binario, por lo que el uso del método de compresión ya no está limitado por el tipo de datos.
+
+IoTDB le permite especificar el método de compresión de la columna al crear una serie temporal y admite los siguientes métodos de compresión:
+
+. UNCOMPRESSED
+
+. SNAPPY
+
+. LZ4
+
+. GZIP
+
+La sintaxis especificada para la compresión se detalla en [Crear Declaración de Serie Temporal].

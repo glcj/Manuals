@@ -1,0 +1,10 @@
+= Atajos de teclado
+
+Grafana tiene varios atajos de teclado disponibles. Presione Shift + `?` en su teclado para mostrar todos los atajos de teclado disponibles en su versión de Grafana.
+
+*Atajos populares:*
+
+* Ctrl+S guarda el tablero actual.
+* Ctrl+F abre el buscador/búsqueda del tablero.
+* Ctrl+H oculta todos los controles (bueno para pantallas de televisión).
+* Presione Escape para salir del gráfico cuando esté en pantalla completa o en modo de edición.

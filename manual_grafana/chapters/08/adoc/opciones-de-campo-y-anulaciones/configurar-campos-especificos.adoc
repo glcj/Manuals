@@ -1,0 +1,67 @@
+= Configurar campos específicos
+
+Las anulaciones le permiten cambiar la configuración de uno o más campos. Las opciones de campo para anulaciones son exactamente las mismas que las opciones de campo disponibles en una visualización en particular. La única diferencia es que usted elige a qué campos aplicarlos.
+
+Por ejemplo, puede cambiar el número de posiciones decimales que se muestran en todos los campos numéricos o columnas cambiando la opción *Decimales* para los *Campos con un tipo* que coincida con *Numérico*. Para obtener más información sobre las opciones, consulte:
+
+* xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-estandar.adoc[Opciones de campo estándar], que se aplican a todas las visualizaciones de panel que permiten transformaciones.
+* xref:paneles/opciones-de-campo-y-anulaciones/opciones-de-campo-de-tabla.adoc[Opciones de campo de tabla], que solo se aplican a visualizaciones de panel de tabla.
+
+== Agregar una anulación de campo
+
+Puede anular tantas opciones de campo como desee.
+
+[arabic]
+. Navegue hasta el panel que desea editar, haga clic en el título del panel y luego haga clic en *Editar*.
+. Haga clic en la pestaña *Anulaciones*.
+. Haga clic en *Agregar una anulación para*.
+. Seleccione a qué campos se aplicará una regla de anulación:
+** *Campos con nombre:* seleccione un campo de la lista de todos los campos disponibles. Las propiedades que agrega a una regla con este selector solo se aplican a este único campo.
+** *Campos con expresión regular que coincida con el nombre:* especifique los campos para anularlos con una expresión regular. Las propiedades que agrega a una regla con este selector se aplican a todos los campos donde el nombre del campo coincide con la expresión regular.
+** *Campos con tipo:* seleccione campos por tipo, como cadena, numérico, etc. Las propiedades que agrega a una regla con este selector se aplican a todos los campos que coinciden con el tipo seleccionado.
+** *Campos devueltos por consulta:* seleccione todos los campos devueltos por una consulta específica, como A, B o C. Las propiedades que agregue a una regla con este selector se aplican a todos los campos devueltos por la consulta seleccionada.
+. Haga clic en *Agregar propiedad de anulación*.
+. Seleccione la opción de campo que desea aplicar.
+** Opciones de campo estándar, que se aplican a todas las visualizaciones de panel que permiten transformaciones.
+** Opciones de campo de tabla, que solo se aplican a visualizaciones de panel de tabla.
+. Ingrese opciones agregando valores en los campos. Para devolver las opciones a los valores predeterminados, elimine el texto blanco en los campos.
+. Continúe agregando anulaciones a este campo haciendo clic en *Agregar propiedad de anulación*, o puede hacer clic en *Agregar anulación* y seleccionar un campo diferente para agregar anulaciones.
+. Cuando termine, haga clic en *Guardar* para guardar todas las ediciones del panel en el tablero.
+
+== Eliminar una anulación de campo
+
+[arabic]
+. Navegue hasta la pestaña Anulaciones que contiene la anulación que desea eliminar.
+. Haga clic en el icono de la papelera junto a la anulación.
+
+== Ejemplo de anulación de campo
+
+Supongamos que nuestro conjunto de resultados es un marco de datos que consta de cuatro campos: tiempo, temperatura alta, temperatura baja y humedad.
+
+[cols=",,,",options="header",]
+|===
+|Tiempo |temperatura alta |temperatura baja |humedad
+|2020-01-02 03:04:00 |45.0 |30.0 |67
+|2020-01-02 03:05:00 |47.0 |34.0 |68
+|2020-01-02 03:06:00 |48.0 |31.0 |68
+|===
+
+Apliquemos las opciones de campo del xref:paneles/opciones-de-campo-y-anulaciones/configurar-todos-los-campos.adoc#_ejemplo_de_opcion_de_campo[ejemplo de opción de campo] para aplicar la unidad Celsius y eliminar el lugar decimal. Esto da como resultado la siguiente tabla:
+
+[cols=",,,",options="header",]
+|===
+|tiempo |temperatura alta |temperatura baja |humedad
+|2020-01-02 03:04:00 |45 ° C |30 ° C |67 ° C
+|2020-01-02 03:05:00 |47 ° C |34 ° C |68 ° C
+|2020-01-02 03:06:00 |48 ° C |31 ° C |68 ° C
+|===
+
+Los campos de temperatura se ven bien, pero la humedad no tiene sentido. Podemos solucionar esto aplicando una anulación de la opción de campo al campo de humedad y cambiando la unidad a Misc > porcentaje (0-100). Esto da como resultado una tabla que tiene mucho más sentido:
+
+[cols=",,,",options="header",]
+|===
+|tiempo |temperatura alta |temperatura baja |humedad
+|2020-01-02 03:04:00 |45 ° C |30 ° C |67%
+|2020-01-02 03:05:00 |47 ° C |34 ° C |68%
+|2020-01-02 03:06:00 |48 ° C |31 ° C |68%
+|===

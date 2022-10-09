@@ -1,0 +1,48 @@
+= Cambiar el nombre y el correo electrónico de Grafana
+
+En Grafana, puede cambiar sus nombres y correos electrónicos asociados con grupos o cuentas en Configuración o Preferencias. Este tema proporciona instrucciones para cada tarea.
+
+Algunas tareas requieren ciertos permisos. Para obtener más información sobre los roles, consulte xref:permisos/permisos.adoc[Permisos].
+
+== Cambiar el nombre de la organización
+
+Los administradores del servidor de Grafana y los administradores de la organización pueden cambiar los nombres de las organizaciones.
+
+=== Cambiar el nombre de la organización como administrador del servidor de grafana
+
+Siga estas instrucciones si es administrador del servidor de Grafana.
+
+[arabic]
+. Pase el cursor sobre el icono de *Administrador de Servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Organizaciones*.
+. En la lista de organizaciones, haga clic en el nombre de la organización que desea cambiar.
+. En *Nombre*, ingrese el nuevo nombre de la organización.
+. Haga clic en *Actualizar*.
+
+=== Cambiar el nombre de la organización como administrador de la organización
+
+Si es administrador de una organización, siga estos pasos:
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje).
+. Haga clic en *Preferencias*.
+. En *Nombre de la organización*, ingrese el nuevo nombre.
+. Haz clic en *Actualizar nombre de la organización*.
+
+== Cambiar el nombre o el correo electrónico del equipo
+
+Los administradores de la organización y los administradores del equipo pueden cambiar los nombres y las direcciones de correo electrónico del equipo. Para cambiar el nombre del equipo o el correo electrónico, siga estos pasos:
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. En la lista de equipos, haga clic en el nombre del equipo que desea cambiar.
+. Haga clic en la pestaña *Configuración*.
+. En la sección Configuración del equipo, puede editar lo siguiente:
+** *Nombre:* edite este campo para cambiar el nombre asociado con el equipo.
+** *Correo electrónico:* edite este campo para cambiar la dirección de correo electrónico asociada con el equipo.
+. Haga clic en *Actualizar*.
+
+== Cambiar nombre de usuario o correo electrónico
+
+Para saber cómo editar su información de usuario, consulte xref:administrar-usuarios/tareas-de-la-cuenta-de-usuario/perfil-de-la-cuenta-de-usuario.adoc[Perfil de la cuenta de usuario de Grafana].

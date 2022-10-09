@@ -1,0 +1,93 @@
+= Administrar organizaciones como Administrador de servidor
+
+Este tema explica las tareas de gestión de la organización realizadas por Administradores de servidor de Grafana.
+
+Para realizar cualquiera de estas tareas, debe iniciar sesión en Grafana en una cuenta con los permisos de administración de Grafana Server. Para obtener más información sobre los permisos de administración de Grafana, consulte el xref:permisos/permisos.adoc#_rol_de_administrador_de_servidor_de_grafana[rol de Administrador de Servidor de Grafana]
+
+[NOTE]
+====
+El rol de administración de Grafana Server no existe en Grafana Cloud. Los usuarios de Grafana Cloud no pueden realizar tareas enumeradas en esta sección.
+====
+
+== Ver lista de organizaciones
+
+Consulte una lista completa de organizaciones configuradas en su servidor de Grafana.
+
+[arabic]
+. Coloque su cursor sobre el icono del *Administrador del servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Organizaciones*.
+
+Grafana muestra todas las organizaciones configuradas en el servidor, enumeradas en orden alfabético por nombre de la organización. La siguiente información se muestra:
+
+* *ID:* el número de identificación de la organización.
+* *Nombre:* el nombre de la organización.
+
+image::image11.png[Server Admin organization list,width=624,height=277]
+
+== Crear organización
+
+Agregue una organización a su servidor de Grafana.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Administrador del servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Organizaciones*.
+. Haga clic en *+ Nueva organización*.
+. Ingrese el nombre de la nueva organización y luego haga clic en *Crear*.
+
+Ocurren dos cosas:
+
+* Grafana crea una nueva organización con usted como miembro único y administrador.
+* Grafana abre la [pestaña de preferencias] de la nueva organización.
+
+Ahora puede agregar usuarios o realizar otras tareas de administración de la organización.
+
+== Borrar la organización
+
+Retire permanentemente a una organización de su servidor Grafana.
+
+*Advertencia:* Eliminar la organización también elimina a todos los equipos y tableros para esta organización.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Administrador del servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Organizaciones*.
+. Haga clic en la *X* roja junto a la organización que desea eliminar.
+. Haga clic en *Eliminar*.
+
+== Editar una organización
+
+Los Administradores de servidor de Grafana pueden realizar algunas tareas de administración de organizaciones que son casi idénticas a las tareas de administración de la organización, solo se acceden desde una ruta de menú diferente.
+
+image::image12.png[Server admin Edit Organization,width=624,height=316]
+
+=== Ver miembros y roles de la organización*
+
+Consulte qué cuentas de usuario están asignadas a la organización y sus roles asignados.
+
+[arabic]
+. Coloque su cursor sobre el icono de *Administrador del servidor* (escudo) hasta que aparezca un menú.
+. Haga clic en *Organizaciones*.
+. Haga clic en el nombre de la organización para la que desea ver a los miembros.
+. Desplácese hasta la sección de Usuarios de la organización. Las cuentas de usuario se muestran en orden alfabético.
+
+=== Cambiar el nombre de la organización
+
+[arabic]
+. Haga clic en el nombre de la organización que desea editar.
+. En el campo *Nombre*, escriba el nombre de la nueva organización.
+. Haga clic en *Actualizar*.
+
+=== Cambiar el rol de un miembro de la organización
+
+Cambie el rol de un miembro de la organización asignado a una cuenta de usuario que está asignada la organización que está editando.
+
+[arabic]
+. Haga clic en el nombre de la organización que desea editar.
+. En la sección de Usuarios de la organización, ubique la cuenta de usuario a la que desea cambiar el rol.
+. En el campo del *Rol*, seleccione el nuevo rol que desea asignar.
+
+== Eliminar a un usuario de una organización
+
+[arabic]
+. Haga clic en el nombre de la organización que desea editar.
+. En la sección de Usuarios de la organización, ubique la cuenta de usuario a la que desea cambiar el rol.
+. Haga clic en la *X* roja junto a la lista de cuentas de usuario y luego haga clic en *Eliminar*.

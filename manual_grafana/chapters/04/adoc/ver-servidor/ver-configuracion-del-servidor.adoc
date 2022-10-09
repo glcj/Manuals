@@ -1,0 +1,18 @@
+= Ver la configuración del servidor de Grafana
+
+Si es un administrador del servidor Grafana, use la pestaña xref:administracion/configuracion.adoc#_ubicaciones_del_archivo_de_configuracion[Configuración] para ver la configuración que se aplica a su servidor Grafana a través del archivo de Configuración y cualquier variable ambiental.
+
+[NOTE]
+====
+Solo los administradores del servidor Grafana pueden acceder al menú *Administrador del servidor*. Para obtener más información sobre los permisos administrativos, consulte xref:permisos/permisos.adoc[administrador del servidor de Grafana].
+====
+
+== Ver la configuración del servidor
+
+[arabic]
+. Inicie sesión en su servidor de Grafana con una cuenta que tenga la marca de administrador de Grafana.
+. Pase el cursor sobre el icono de *Administrador del servidor* (escudo) en el menú lateral y luego haga clic en la pestaña *Configuración*.
+
+== Configuraciones disponibles
+
+Para obtener una lista completa de la configuración del servidor, consulte xref:administracion/configuracion.adoc[Configuración].

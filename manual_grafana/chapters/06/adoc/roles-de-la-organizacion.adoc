@@ -1,0 +1,75 @@
+= Roles de la organización
+
+Los usuarios pueden pertenecer a una o más organizaciones. La membresía de la organización de un usuario está vinculada a un rol que define lo que el usuario puede hacer en esa organización. Grafana admite varias _organizaciones_ para admitir una amplia variedad de modelos de implementación, incluido el uso de una sola instancia de Grafana para brindar servicio a múltiples organizaciones potencialmente no confiables.
+
+En la mayoría de los casos, Grafana se implementa con una sola organización.
+
+Cada organización puede tener una o más fuentes de datos.
+
+Todos los tableros son propiedad de una organización en particular.
+
+[NOTE]
+====
+La mayoría de las bases de datos métricas no proporcionan autenticación de series por usuario. Esto significa que las fuentes de datos de la organización y los tableros están disponibles para todos los usuarios de una organización en particular.
+====
+
+== Comparar roles
+
+La siguiente tabla compara lo que puede hacer cada rol. Lea las secciones siguientes para obtener explicaciones más detalladas.
+
+[cols=",,,",options="header",]
+|===
+|  |Administrador |Editor |Espectador
+|Ver tableros |x |x |x
+|Añadir, editar, borrar tableros |x |x | 
+|Añadir, editar, borrar carpetas |x |x | 
+|Ver listas de reproducción |x |x |x
+|Crear, actualizar, borrar listas de reproducción |x |x | 
+|Acceder a Explorar |x |x | 
+|Añadir, editar, borrar fuentes de datos |x |  | 
+|Añadir y editar usuarios |x |  | 
+|Añadir y editar equipos |x |  | 
+|Cambiar configuración de organización |x |  | 
+|Cambiar configuración de equipo |x |  | 
+|Configurar complementos de aplicaciones |x |  | 
+|===
+
+== Rol de administrador de la organización
+
+Puede hacer todo lo que esté dentro del alcance de la organización, Por ejemplo:
+
+* Puede agregar, editar y eliminar fuentes de datos.
+* Puede agregar y editar usuarios y equipos en su organización.
+* Puede agregar, editar y eliminar carpetas que contienen tableros para fuentes de datos asociadas con su organización. También pueden editar los permisos de las carpetas.
+* Puede configurar complementos de aplicaciones y configuraciones de organización.
+* Puede hacer todo lo que permita la función de Editor.
+
+== Rol de editor
+
+[arabic]
+. Puede ver, agregar y editar tableros, paneles y reglas de alerta en tableros a los que tienen acceso. Esto se puede desactivar en carpetas y tableros específicos.
+. Puede agregar, editar y eliminar carpetas que contienen tableros para fuentes de datos asociadas con su organización. No pueden editar los permisos de la carpeta.
+. Puede crear, actualizar o eliminar listas de reproducción.
+. Puede acceder a Explorar.
+. Puede agregar, editar o eliminar canales de notificación de alerta.
+. No se pueden agregar, editar ni eliminar fuentes de datos.
+. No se pueden administrar otras organizaciones, usuarios y equipos.
+
+Este rol se puede cambiar con la configuración del servidor Grafana xref:administracion/configuracion#_editors_can_admin[editors_can_admin]. Si establece esto en `true`, los usuarios con el rol de Editor también pueden administrar tableros, carpetas y equipos que creen. Esto es especialmente útil para permitir que los equipos autoorganizados administren sus propios tableros.
+
+== Rol de espectador
+
+* Puede ver cualquier tablero al que tengan acceso. Esto se puede desactivar en carpetas y tableros específicos.
+* No se puede agregar, editar ni eliminar fuentes de datos.
+* No se puede agregar, editar ni eliminar tableros o paneles.
+* No se puede crear, actualizar ni eliminar listas de reproducción.
+* No se puede agregar, editar ni eliminar canales de notificación de alerta.
+* No puede acceder a Explorar.
+* No puede administrar otras organizaciones, usuarios y equipos.
+
+Este rol se puede cambiar con la configuración del servidor Grafana xref:administracion/configuracion#_viewers_can_edit[viewers_can_edit]. Si establece esto en true, los usuarios con el rol de Espectador pueden:
+
+* Realizar ediciones transitorias del tablero, lo que significa que pueden modificar paneles y consultas, pero no guardar los cambios ni crear nuevos tableros.
+* Acceder y usar xref:explorar/explorar.adoc[Explorar].
+
+Esto es especialmente útil para instalaciones públicas de Grafana donde desea que los usuarios anónimos puedan editar paneles y consultas, pero no guardar ni crear nuevos tableros.

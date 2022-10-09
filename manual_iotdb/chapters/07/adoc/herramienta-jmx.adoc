@@ -1,0 +1,37 @@
+= Herramienta JMX
+
+Java VisualVM es una herramienta que proporciona una interfaz visual para ver información detallada sobre las aplicaciones Java mientras se ejecutan en una máquina virtual Java (JVM) y para la resolución de problemas y la creación de perfiles de estas aplicaciones.
+
+== Uso
+
+Paso 1: obtenga el servidor IoTDB.
+
+Paso 2: edite la configuración.
+
+* IoTDB es LOCAL Vea `$IOTDB_HOME/conf/jmx.password` y use el usuario predeterminado o agregue nuevos usuarios aquí. Si se agregan nuevos usuarios, recuerde editar `$IOTDB_HOME/conf/jmx.access` y agregar el acceso de nuevos usuarios
+
+* IoTDB no es LOCAL Edite `$IOTDB_HOME/conf/iotdb-env.sh` y modifique la configuración a continuación:
+
+[source]
+----
+JMX_LOCAL="false"
+JMX_IP="the_real_iotdb_server_ip"  # Write the actual IoTDB IP address
+----
+
+Vea `$IOTDB_HOME/conf/jmx.password` y use el usuario predeterminado o agregue nuevos usuarios aquí. Si se agregan nuevos usuarios, recuerde editar `$IOTDB_HOME/conf/jmx.access` y agregar el acceso de nuevos usuarios
+
+Paso 3: inicie el servidor IoTDB.
+
+Paso 4: use jvisualvm
+
+. Asegúrese de que jdk 8 esté instalado. Para versiones posteriores a jdk 8, debe [descargar visualvm]
+
+. Abra jvisualvm
+
+. Haga clic derecho en el área de navegación izquierda -> Agregar conexión JMX
+
+image::imagen-23.png[]
+
+. Complete la información e inicie sesión como se muestra a continuación. Recuerde marcar "`Do not require SSL connection`". Un ejemplo es: `Connection：192.168.130.15:31999 Username：iotdb Password：passw!d `
+
+image::imagen-24.png[]

@@ -1,0 +1,29 @@
+= Historial de versiones del tablero
+
+Siempre que guarde una versión de su tablero, se guarda una copia de esa versión para que las versiones anteriores de su tablero nunca se pierdan. Una lista de estas versiones está disponible ingresando a la configuración del tablero y luego seleccionando "Versiones" en el menú del lado izquierdo.
+
+image::image157.png[https://grafana.com/static/img/docs/v50/dashboard_versions_list.png,width=624,height=312]
+
+La función de historial de versiones del tablero le permite comparar y restaurar versiones del tablero guardadas previamente.
+
+== Comparación de dos versiones de tablero
+
+Para comparar dos versiones del tablero, seleccione las dos versiones de la lista que desea comparar. Una vez seleccionado, se podrá hacer clic en el botón "Comparar versiones". Haga clic en el botón para ver la diferencia entre las dos versiones.
+
+image::image158.png[https://grafana.com/static/img/docs/v50/dashboard_versions_select.png,width=624,height=312]
+
+Al hacer clic en el botón, accederá a la vista de diferencias. De forma predeterminada, verá un resumen textual de los cambios, como en la imagen a continuación.
+
+image::image159.png[https://grafana.com/static/img/docs/v50/dashboard_versions_diff_basic.png,width=624,height=312]
+
+Si desea ver las diferencias del JSON sin procesar que representa su tablero, también puede hacerlo haciendo clic en el botón "Ver diferencias JSON" en la parte inferior.
+
+Si desea restaurar a la versión con la que se diferencia, puede hacerlo haciendo clic en el botón "Restaurar a la versión <x>" en la parte superior derecha.
+
+== Restaurar a una versión de tablero previamente guardada
+
+Si necesita restaurar a una versión del tablero previamente guardada, puede hacerlo haciendo clic en el botón "Restaurar" a la derecha de una fila en la lista de versiones del tablero o haciendo clic en el botón "Restaurar a la versión <x>" que aparece en la vista de diferencias. Al hacer clic en el botón, aparecerá la siguiente ventana emergente que le pedirá que confirme la restauración.
+
+image::image160.png[https://grafana.com/static/img/docs/v50/dashboard_versions_restore.png,width=624,height=312]
+
+Después de restaurar a una versión anterior, se creará una nueva versión que contiene los mismos datos exactos que la versión anterior, solo que con un número de versión diferente. Esto se indica en la “columna Notas” de la fila de la nueva versión del tablero. Esto se hace simplemente para garantizar que las versiones anteriores del tablero no se vean afectadas por el cambio.

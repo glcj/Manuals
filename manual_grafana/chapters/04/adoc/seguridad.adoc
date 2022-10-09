@@ -1,0 +1,38 @@
+= Seguridad
+
+Si ejecuta servicios web que no son de Grafana en su servidor de Grafana o dentro de su red local, es posible que sean vulnerables a la explotación a través del proxy de la fuente de datos de Grafana u otros métodos.
+
+Para evitar que suceda este tipo de explotación, le recomendamos que aplique una o más de las precauciones que se enumeran a continuación.
+
+== Limite las direcciones IP / nombres de host para la URL de la fuente de datos
+
+Puede configurar Grafana para permitir que solo determinadas direcciones IP o nombres de host se utilicen como URL de origen de datos y se transfieran a través del proxy de origen de datos de Grafana. Consulte xref:administracion/configuracion.adoc#_data_source_proxy_whitelist[data_source_proxy_whitelist] para obtener instrucciones de uso.
+
+== Reglas del cortafuegos
+
+Configure un cortafuegos para restringir que Grafana realice solicitudes de red a servicios web internos sensibles.
+
+Hay muchas herramientas de cortafuegos disponibles, consulte la documentación de su herramienta de seguridad específica. Por ejemplo, los usuarios de Linux pueden usar https://en.wikipedia.org/wiki/Iptables[iptables].
+
+== Servidor proxy
+
+Requiera que todas las solicitudes de red que realiza Grafana pasen por un servidor proxy.
+
+== Limitar los permisos de consulta del visor
+
+Los usuarios con el rol de Espectador pueden ingresar _cualquier consulta posible_ en _cualquiera_ de las fuentes de datos disponibles en la *organización*, no solo las consultas que están definidas en los tableros para los cuales el usuario tiene permisos de Espectador.
+
+*Por ejemplo:* en una instancia de Grafana con una fuente de datos, un tablero y un panel que tiene una consulta definida, puede suponer que un Espectador solo puede ver el resultado de la consulta definida en ese panel. En realidad, el Espectador tiene acceso para enviar cualquier consulta a la fuente de datos. Con una herramienta de línea de comandos como curl (hay muchas herramientas para esto), el Espectador puede realizar su propia consulta a la fuente de datos y potencialmente acceder a datos confidenciales.
+
+Para abordar esta vulnerabilidad, puede restringir el acceso a consultas de fuentes de datos de las siguientes maneras:
+
+* Cree múltiples fuentes de datos con algunas restricciones agregadas en la configuración de la fuente de datos que restringen el acceso (como el nombre de la base de datos o las credenciales). Luego, use la función de Enterprise xref:permisos/permisos-de-fuente-de-datos.adoc[Permisos de fuente de datos] para restringir el acceso de los usuarios a la fuente de datos en Grafana.
+* Cree una organización en Grafana separada y, en esa organización, cree una fuente de datos separada. Asegúrese de que la fuente de datos tenga alguna configuración de opción/usuario/credenciales que limite el acceso a un subconjunto de los datos. No todas las fuentes de datos tienen la opción de limitar el acceso.
+
+== Implicaciones de habilitar el acceso anónimo a los tableros
+
+Cuando habilita el acceso anónimo a un tablero, estará disponible públicamente. Esta sección enumera las implicaciones de seguridad de habilitar el acceso anónimo.
+
+* Cualquiera que tenga la URL puede acceder al panel de control.
+* Cualquiera puede ver llamadas a la API y enumerar todas las carpetas, tableros y fuentes de datos.
+* Cualquiera puede realizar consultas arbitrarias a cualquier fuente de datos con la que esté configurada la instancia de Grafana.

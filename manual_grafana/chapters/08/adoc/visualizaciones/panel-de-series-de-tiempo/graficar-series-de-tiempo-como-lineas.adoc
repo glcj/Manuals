@@ -1,0 +1,231 @@
+= Graficar series de tiempo como líneas
+
+[NOTE]
+====
+Esta es una función beta. El panel de series de tiempo reemplazará al panel de gráficos en las versiones futuras.
+====
+
+Esta sección explica cómo utilizar las opciones del Campo Serie temporal para visualizar los datos de la serie temporal como líneas e ilustra lo que hacen las opciones.
+
+== Crear el panel
+
+[arabic]
+. xref:paneles/agregar-un-panel.adoc[Agregue un panel]. Seleccione la Visualización de xref:paneles/visualizaciones/panel-de-serie-de-tiempo.adoc[Serie de tiempo].
+. En el xref:paneles/editor-de-paneles.adoc[Editor de paneles], haga clic en la pestaña *Campo*.
+. En Estilo, haga clic en *Líneas*.
+
+== Estilizar las líneas
+
+Utilice la siguiente configuración de campo para refinar su visualización.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+Algunas opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+=== Interpolación de línea
+
+Elija cómo Grafana interpola la línea de la serie. Las capturas de pantalla a continuación muestran los mismos datos mostrados con diferentes interpolaciones de líneas.
+
+==== Lineal
+
+image::image90.png[Linear interpolation icon,width=142,height=65]
+
+Los puntos están unidos por líneas rectas.
+
+image::image91.png[Linear interpolation example,width=624,height=137]
+
+==== Suave
+
+image::image92.png[Smooth interpolation icon,width=143,height=65]
+
+Los puntos están unidos por líneas curvas que dan como resultado transiciones suaves entre puntos.
+
+image::image93.png[Smooth interpolation example,width=624,height=135]
+
+==== Paso antes
+
+image::image94.png[Step before interpolation icon,width=144,height=68]
+
+La línea se muestra como pasos entre puntos. Los puntos se representan al final del paso.
+
+image::image95.png[Step before interpolation example,width=624,height=138]
+
+==== Paso después
+
+image::image96.png[Step after interpolation icon,width=144,height=68]
+
+La línea se muestra como pasos entre puntos. Los puntos se representan al comienzo del paso.
+
+image::image97.png[Step after interpolation example,width=624,height=131]
+
+=== Ancho de línea
+
+Establezca el grosor de la línea de la serie, de 0 a 10 píxeles.
+
+Grosor de línea establecido en 1:
+
+image::image98.png[Line thickness 1 example,width=624,height=164]
+
+Grosor de línea establecido en 7:
+
+image::image99.png[Line thickness 7 example,width=624,height=164]
+
+=== Opacidad de relleno
+
+Establezca la opacidad del relleno de la serie, de 0 a 100 por ciento.
+
+Opacidad de relleno establecida en 20:
+
+image::image100.png[Fill opacity 20 example,width=624,height=163]
+
+Opacidad de relleno establecida en 95:
+
+image::image101.png[Fill opacity 95 example,width=624,height=158]
+
+=== Modo de gradiente
+
+Establece el modo del relleno degradado. El degradado de relleno se basa en el color de la línea. Para cambiar el color, use la opción de campo estándar de xref:paneles/opciones-de-campo/opciones-de-campo-estandar.adoc#_esquema_de_color[esquema de color].
+
+La apariencia del degradado está influenciada por la configuración de *Opacidad de relleno*. En las capturas de pantalla a continuación, la *Opacidad de relleno* se establece en 50.
+
+==== Ninguno
+
+Sin relleno degradado. Ésta es la configuración predeterminada.
+
+image::image102.png[Gradient mode none example,width=624,height=158]
+
+==== Opacidad
+
+La transparencia del gradiente se calcula en función de los valores del eje y. La opacidad del relleno aumenta con los valores del eje Y.
+
+image::image103.png[Gradient mode opacity example,width=624,height=161]
+
+==== Tono
+
+El color degradado se genera en función del tono del color de la línea.
+
+image::image104.png[Gradient mode hue example,width=624,height=159]
+
+=== Estilo de línea
+
+Establece el estilo de la línea. Para cambiar el color, use la opción de campo estándar de xref:paneles/opciones-de-campo/opciones-de-campo-estandar.adoc#_esquema_de_color[esquema de color].
+
+La apariencia del estilo de línea está influenciada por la configuración de *Ancho de línea* y *Opacidad de relleno*. En las capturas de pantalla a continuación, el *Ancho de línea* se establece en 3 y la *Opacidad de relleno* se establece en 20.
+
+==== Sólido
+
+Muestra una línea sólida. Ésta es la configuración predeterminada.
+
+image::image105.png[Line style solid example,width=624,height=157]
+
+==== Guión
+
+Muestre una línea discontinua. Cuando elige esta opción, aparece una lista para que pueda seleccionar la longitud y el espacio (largo, espacio) para los guiones de línea.
+
+Espaciado de guiones establecido en 10, 10 (predeterminado):
+
+image::image106.png[Line style dashed 10, 10 example,width=624,height=157]
+
+Espaciado de guiones establecido en 10, 30:
+
+image::image107.png[Line style dashed 10, 30 example,width=624,height=161]
+
+Espaciado de guiones establecido en 40, 10:
+
+image::image108.png[Line style dashed 40, 10 example,width=624,height=157]
+
+==== Puntos
+
+Muestra líneas de puntos. Cuando elige esta opción, aparece una lista para que pueda seleccionar el espacio (longitud = 0, espacio) para el espaciado de puntos.
+
+Espaciado de puntos establecido en 0, 10 (predeterminado):
+
+image::image109.png[Line style dots 0, 10 example,width=624,height=155]
+
+Espaciado de puntos establecido en 0, 30:
+
+image::image110.png[Line style dots 0, 30 example,width=624,height=157]
+
+=== Valores nulos
+
+Elija cómo se muestran los valores nulos (espacios en los datos) en el gráfico.
+
+==== Brechas
+
+Si hay una brecha en la serie, la línea en el gráfico se romperá y mostrará la brecha.
+
+image::image111.png[Null values gaps example,width=624,height=264]
+
+==== Conectado
+
+Si hay un espacio en la serie, la línea saltará el espacio y se conectará al siguiente valor no nulo.
+
+image::image112.png[Null values connected example,width=624,height=259]
+
+=== Mostrar puntos
+
+Elija cuándo deben mostrarse los puntos en el gráfico.
+
+==== Auto
+
+Grafana decide automáticamente si muestra o no los puntos en función de la densidad de los datos. Si la densidad es baja, se muestran los puntos.
+
+==== Siempre
+
+Muestre los puntos sin importar cuán denso sea el conjunto de datos. Este ejemplo usa un *Ancho de línea* de 1 y 50 puntos de datos. Si el ancho de la línea es más grueso que el tamaño del punto, la línea oscurece los puntos.
+
+===== Tamaño de punto
+
+Establezca el tamaño de los puntos, de 1 a 40 píxeles de diámetro.
+
+Tamaño de punto establecido en 4:
+
+image::image113.png[Show points point size 4 example,width=624,height=146]
+
+Tamaño de punto establecido en 10:
+
+image::image114.png[Show points point size 10 example,width=624,height=145]
+
+==== Nunca
+
+Nunca muestre los puntos.
+
+image::image115.png[Show points point never example,width=624,height=148]
+
+== Rellene debajo hasta
+
+Esta opción solo está disponible en la pestaña Anulaciones.
+
+Rellena el área entre dos series. En la pestaña Anulaciones:
+
+[arabic]
+. Seleccione los campos para completar a continuación.
+. En *Agregar propiedad de anulación*, seleccione *Rellenar debajo hasta*.
+. Seleccione la serie en la que desea que se detenga el relleno.
+
+Serie A rellenada hasta la serie B:
+
+image::image116.png[Fill below to example,width=624,height=140]
+
+== Ejemplos de gráficos de líneas
+
+A continuación se muestran algunos ejemplos de gráficos de líneas para darle ideas.
+
+=== Varios estilos de línea
+
+Este es un gráfico con diferentes estilos de línea y colores aplicados a cada serie y relleno de cero.
+
+image::image117.png[Various line styles example,width=624,height=252]
+
+=== Ejemplo de modos de interpolación
+
+image::image118.png[Interpolation modes example,width=624,height=381]
+
+=== Ejemplo de Rellene debajo hasta
+
+Este gráfico muestra tres series: Min, Max y Valor. Las series Min y Max tienen el *Ancho de línea* establecido en 0. Max tiene una anulación de *Rellene debajo hasta* establecido en Min, que llena el área entre Max y Min con el color de línea Max.
+
+image::image119.png[Fill below example,width=624,height=252]

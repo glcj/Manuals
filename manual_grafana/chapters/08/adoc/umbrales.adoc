@@ -1,0 +1,76 @@
+= Umbrales
+
+Los umbrales establecen el color del texto del valor o del fondo según las condiciones que defina.
+
+Puede definir umbrales de dos formas:
+
+* Los umbrales *absolutos* se definen en función de un número. Por ejemplo, 80 en una escala de 1 a 150.
+* Los umbrales de *porcentaje* se definen en relación con el mínimo o el máximo. Por ejemplo, 80 por ciento.
+
+Puede aplicar umbrales a las siguientes visualizaciones:
+
+* xref:paneles/visualizaciones/panel-de-indicador-de-barra.adoc[Indicador de barra]
+* xref:paneles/visualizaciones/panel-de-medidor.adoc[Medidor]
+* xref:paneles/visualizaciones/panel-de-grafico.adoc[Grafico]
+* xref:paneles/visualizaciones/panel-de-estadisticas.adoc[Estadísticas]
+* xref:paneles/visualizaciones/panel-de-tabla.adoc[Tabla]
+
+== Umbrales predeterminados
+
+En las visualizaciones que lo admiten, Grafana establece valores de umbral predeterminados de:
+
+* 80 = rojo
+* Base = verde
+* Modo = Absoluto
+
+El valor *Base* representa menos infinito. Generalmente es el color "bueno".
+
+== Agregar un umbral
+
+Puede agregar tantos umbrales a un panel como desee. Grafana clasifica automáticamente los umbrales del valor más alto al más bajo.
+
+[NOTE]
+====
+Estas instrucciones se aplican solo a las visualizaciones de estadísticas, medidores, medidores de barras y tablas.
+====
+
+[arabic]
+. Navegue hasta el panel al que desea agregar un umbral.
+. Haga clic en la pestaña *Campo*.
+. Haga clic en *Agregar umbral*.
+. Grafana agrega un umbral con valores numéricos y de color sugeridos.
+. Acepte las recomendaciones o edite el nuevo umbral.
+** *Editar color:* haz clic en el punto de color que deseas cambiar y luego selecciona un nuevo color.
+** *Editar número:* haga clic en el número que desea cambiar y luego ingrese un nuevo número.
+** *Modo de umbrales:* haga clic en el modo para cambiarlo para todos los umbrales de este panel.
+. Haga clic en *Guardar* para guardar los cambios en el tablero.
+
+== Agregar un umbral a un Panel de gráficos
+
+En la visualización del panel Gráfico, los umbrales le permiten agregar líneas o secciones arbitrarias al gráfico para que sea más fácil ver cuándo el gráfico cruza un umbral en particular.
+
+[arabic]
+. Navegue hasta el panel de gráficos al que desea agregar un umbral.
+. En la pestaña Panel, haga clic en *Umbrales*.
+. Haga clic en *Agregar umbral*.
+. Complete todos los campos que desee. Solo se requieren los campos *T1*.
+** *T1:* ambos valores son necesarios para mostrar un umbral.
+*** *lt* o *gt:* seleccione *lt* para menor que o *gt* para mayor que para indicar a qué se aplica el umbral.
+*** *Valor:* ingrese un valor de umbral. Grafana dibuja una línea de umbral a lo largo del eje Y en ese valor.
+** *Color:* elija una condición que corresponda a un color o defina su propio color.
+*** *custom:* define el color de relleno y el color de la línea.
+*** *critical* el relleno y el color de la línea son rojos.
+*** *warning:* el relleno y el color de la línea son amarillos.
+*** *ok:* el relleno y el color de la línea son verdes.
+** *Fill:* controla si se muestra el umbral de relleno.
+** *Line:* controla si se muestra la línea de umbral.
+** *Eje Y:* elija *izquierda* o *derecha*.
+. Haga clic en *Guardar* para guardar los cambios en el tablero.
+
+== Eliminar un umbral
+
+[arabic]
+. Navegue hasta el panel al que desea agregar un umbral.
+. Haga clic en la pestaña *Campo*. (O pestaña *Panel* para un panel gráfico).
+. Haga clic en el icono de la papelera junto al umbral que desea eliminar.
+. Haga clic en *Guardar* para guardar los cambios en el tablero.

@@ -1,0 +1,201 @@
+= Gestión de la Administración
+
+IoTDB proporciona a los usuarios operaciones de administración de privilegios de cuenta, a fin de garantizar la seguridad de los datos.
+
+Le mostraremos las operaciones básicas de administración de privilegios de usuario a través de los siguientes ejemplos específicos. La sintaxis SQL detallada y los detalles de uso se pueden encontrar en la [Documentación de SQL]. Al mismo tiempo, en el entorno de programación JAVA, puede usar [Java JDBC] para ejecutar declaraciones de administración de privilegios en un modo único o por lotes.
+
+== Conceptos Básicos
+
+=== Usuario
+
+El usuario es el usuario legal de la base de datos. Un usuario corresponde a un nombre de usuario único y tiene una contraseña como medio de autenticación. Antes de utilizar una base de datos, una persona debe proporcionar un nombre de usuario y una contraseña legítimos para convertirse en un usuario.
+
+=== Privilegio
+
+La base de datos proporciona una variedad de operaciones y no todos los usuarios pueden realizar todas las operaciones. Si un usuario puede realizar una operación, se dice que el usuario tiene el privilegio de realizar la operación. Los privilegios se dividen en privilegio de administración de datos (como agregar, eliminar y modificar datos) y privilegio de administración de autoridad (como crear y eliminar usuarios y roles, otorgar y revocar privilegios, etc.). El privilegio de administración de datos a menudo necesita una ruta para limitar su rango efectivo, que es un subárbol enraizado en el nodo correspondiente de la ruta.
+
+=== Rol
+
+Un rol es un conjunto de privilegios y tiene un nombre de rol único como identificador. Un usuario generalmente corresponde a una identidad real (como un despachador de tráfico), mientras que una identidad real puede corresponder a múltiples usuarios. Estos usuarios con la misma identidad real tienden a tener los mismos privilegios. Los roles son abstracciones que pueden unificar la gestión de dichos privilegios.
+
+=== Usuario Predeterminado
+
+Hay un usuario predeterminado en IoTDB después de la instalación inicial: root, y la contraseña predeterminada es root. Este usuario es un usuario administrador, que no se puede eliminar y tiene todos los privilegios. Tampoco se pueden otorgar nuevos privilegios al usuario root ni se pueden eliminar los privilegios que posee el usuario root.
+
+== Ejemplos de Operaciones de Administración de privilegios
+
+Según los https://github.com/thulab/iotdb/files/4438687/OtherMaterial-Sample.Data.txt[datos de muestra], los datos de muestra de IoTDB pueden pertenecer a diferentes grupos de generación de energía como ln, sgcc, etc. Los diferentes grupos de generación de energía no quieren que otros obtengan sus propios datos de base de datos, por lo que debemos tener privilegios de datos aislados en la capa de grupo.
+
+=== Crear Usuario
+
+Podemos crear dos usuarios para los grupos ln y sgcc, llamados ln_write_user y sgcc_write_user, siendo ambas contraseñas write_pwd. La declaración SQL es:
+
+[source]
+----
+CREATE USER ln_write_user 'write_pwd'
+CREATE USER sgcc_write_user 'write_pwd'
+----
+
+Luego use la siguiente declaración SQL para mostrarle al usuario:
+
+[source]
+----
+LIST USER
+----
+
+Como se puede ver en el resultado que se muestra a continuación, se han creado los dos usuarios:
+
+[source]
+----
++---------------+
+|           user|
++---------------+
+|  ln_write_user|
+|           root|
+|sgcc_write_user|
++---------------+
+Total line number = 3
+It costs 0.004s
+----
+
+=== Otorgar Privilegios de Usuario
+
+En este punto, aunque se han creado dos usuarios, estos no tienen ningún privilegio, por lo que no pueden operar en la base de datos. Por ejemplo, usamos ln_write_user para escribir datos en la base de datos, la declaración SQL es:
+
+[source]
+----
+INSERT INTO root.ln.wf01.wt01(timestamp,status) values(1509465600000,true)
+----
+
+La instrucción SQL no se ejecutará y el mensaje de error correspondiente se proporciona de la siguiente manera:
+
+[source]
+----
+Msg: 602: No permissions for this operation INSERT
+----
+
+Ahora, otorgamos a los dos usuarios privilegios de escritura en los grupos de almacenamiento correspondientes e intentamos escribir datos nuevamente. La declaración SQL es:
+
+[source]
+----
+GRANT USER ln_write_user PRIVILEGES 'INSERT_TIMESERIES' on root.ln
+GRANT USER sgcc_write_user PRIVILEGES 'INSERT_TIMESERIES' on root.sgcc
+INSERT INTO root.ln.wf01.wt01(timestamp, status) values(1509465600000, true)
+----
+
+El resultado de la ejecución es el siguiente:
+
+[source]
+----
+IoTDB> GRANT USER ln_write_user PRIVILEGES 'INSERT_TIMESERIES' on root.ln
+Msg: The statement is executed successfully.
+IoTDB> GRANT USER sgcc_write_user PRIVILEGES 'INSERT_TIMESERIES' on root.sgcc
+Msg: The statement is executed successfully.
+IoTDB> INSERT INTO root.ln.wf01.wt01(timestamp, status) values(1509465600000, true)
+Msg: The statement is executed successfully.
+----
+
+== Otras Instrucciones
+
+=== La Relación entre Usuarios, Privilegios y Roles
+
+Un rol es un conjunto de privilegios, y los privilegios y roles son atributos de los usuarios. Es decir, un rol puede tener varios privilegios y un usuario puede tener varios roles y privilegios (llamados privilegios propios del usuario).
+
+En la actualidad, no hay ningún privilegio en conflicto en IoTDB, por lo que los privilegios reales de un usuario son la unión de los propios privilegios del usuario y los privilegios de los roles del usuario. Es decir, para determinar si un usuario puede realizar una operación, depende de si uno de los privilegios propios del usuario o los privilegios de los roles del usuario permiten la operación. Los propios privilegios del usuario y los privilegios de los roles del usuario pueden superponerse, pero no importa.
+
+Cabe señalar que si los usuarios tienen un privilegio (correspondiente a la operación A) y sus roles contienen el mismo privilegio, entonces revocar el privilegio de los propios usuarios por sí solos no pueden prohibir a los usuarios realizar la operación A, ya que es necesario revocar el privilegio del rol, o revocar el rol del usuario. De manera similar, revocar el privilegio de los roles de los usuarios por sí solo no puede prohibir que los usuarios realicen la operación A.
+
+Al mismo tiempo, los cambios en los roles se reflejan inmediatamente en todos los usuarios que poseen los roles. Por ejemplo, agregar ciertos privilegios a los roles otorgará inmediatamente a todos los usuarios que poseen los roles los privilegios correspondientes, y eliminar ciertos privilegios también privará a los usuarios correspondientes de los privilegios (a menos que los propios usuarios tengan los privilegios).
+
+=== Lista de Privilegios Incluidos en el Sistema
+
+.Lista de Privilegios Incluidos en el Sistema
+[cols="1,1"]
+|===
+|Nombre del Privilegio
+|Interpretación
+
+|SET_STORAGE_GROUP 
+|Establece grupos de almacenamiento; dependiente de la ruta
+
+|CREATE_TIMESERIES 
+|Crea series de tiempo; dependiente de la ruta
+
+|INSERT_TIMESERIES 
+|Insertar datos; dependiente de la ruta
+
+|READ_TIMESERIES 
+|Consulta de datos; dependiente de la ruta
+
+|DELETE_TIMESERIES 
+|Eliminar datos o series de tiempo; dependiente de la ruta
+
+|CREATE_USER 
+|Crear usuarios; independiente de la ruta
+
+|DELETE_USER 
+|Eliminar usuarios; independiente de la ruta
+
+|MODIFY_PASSWORD 
+|Modificar las contraseñas de todos los usuarios; independiente de la ruta; (Aquellos que no tienen este privilegio aún pueden cambiar sus propias contraseñas).
+
+|LIST_USER 
+|Lista todos los usuarios; enumerar los privilegios de un usuario; enumerar los roles de un usuario con tres tipos de privilegios de operación; independiente de la ruta
+
+|GRANT_USER_PRIVILEGE 
+|Conceder privilegios de usuario; independiente de la ruta
+
+|REVOKE_USER_PRIVILEGE 
+|Revocar privilegios de usuario; independiente de la ruta
+
+|GRANT_USER_ROLE 
+|Conceder roles de usuario; independiente de la ruta
+
+|REVOKE_USER_ROLE 
+|Revocar roles de usuario; independiente de la ruta
+
+|CREATE_ROLE 
+|Crear roles; independiente de la ruta
+
+|DELETE_ROLE 
+|Eliminar roles; independiente de la ruta
+
+|LIST_ROLE 
+|Lista todos los roles; enumerar los privilegios de un rol; enumere los tres tipos de privilegios de operación de todos los usuarios que poseen un rol; independiente de la ruta
+
+|GRANT_ROLE_PRIVILEGE 
+|Conceder privilegios de rol; independiente de la ruta
+
+|REVOKE_ROLE_PRIVILEGE 
+|Revocar privilegios de rol; independiente de la ruta
+
+|CREATE_FUNCTION 
+|Registra UDF; independiente de la ruta
+
+|DROP_FUNCTION 
+|Anular el registro de las UDF; independiente de la ruta
+
+|CREATE_TRIGGER 
+|Crear activadores; independiente de la ruta
+
+|DROP_TRIGGER 
+|Anular activadores;  independiente de la ruta
+
+|START_TRIGGER 
+|Iniciar activadores; independiente de la ruta
+
+|STOP_TRIGGER 
+|Detiene los activadores; independiente de la ruta
+|===
+
+=== Restricciones de Nombre de Usuario
+
+IoTDB especifica que la longitud de los caracteres de un nombre de usuario no debe ser inferior a 4 y que el nombre de usuario no puede contener espacios.
+
+=== Restricciones de Contraseña
+
+IoTDB especifica que la longitud de caracteres de una contraseña no debe tener menos de 4 caracteres ni espacios. La contraseña está encriptada con MD5.
+
+=== Restricciones de Nombres de Roles
+
+IoTDB especifica que la longitud de los caracteres de un nombre de función no debe tener menos de 4 caracteres ni espacios.

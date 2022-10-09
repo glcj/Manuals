@@ -1,0 +1,28 @@
+= Glosario
+
+Este tema enumera palabras y abreviaturas que se usan comúnmente en la documentación y la comunidad de Grafana.
+
+|===
+|Tablero |Un conjunto de uno o más paneles, organizados y dispuestos en una o más filas, que proporcionan un vistazo de la información relacionada.
+|Fuente de datos |Un archivo, base de datos o servicio que proporciona los datos. Grafana admite varias fuentes de datos de forma predeterminada y se puede ampliar para admitir fuentes de datos adicionales a través de complementos.
+|Ejemplar |Un ejemplar es cualquier dato que sirve como ejemplo detallado de una de las observaciones agregadas en una métrica. Un ejemplar contiene el valor observado junto con una marca de tiempo opcional y etiquetas arbitrarias, que normalmente se utilizan para hacer referencia a un rastreo.
+|Explorar |Explorar permite que un usuario se centre en crear una consulta. Los usuarios pueden refinar la consulta para devolver las métricas esperadas antes de crear un tablero. Para obtener más información, consulte el tema xref:explorar/explorar.adoc[Explorar].
+|Exportar/Importar tablero |Grafana incluye la capacidad de exportar sus tableros a un archivo que contiene JSON. Los miembros de la comunidad a veces comparten sus tableros creados en la https://grafana.com/grafana/dashboards[página Grafana Dashboards]. Otros usuarios pueden importar tableros previamente exportados o encontrados en este sitio.
+|Exportador |Un exportador traduce los datos que provienen de una fuente de datos a un formato que Prometheus puede digerir.
+|Integración (Grafana Cloud) |Cada integración en Grafana Cloud utiliza el agente de nube para conectar su fuente de datos a Grafana Cloud para la visualización. Nota: Prometheus usa la palabra "integraciones" para referirse al software que expone las métricas de Prometheus sin necesidad de un exportador, que es un uso diferente de la misma palabra que usamos aquí.
+|Gráfico |Una visualización de uso común que muestra datos como puntos, líneas o barras.
+|Mixin |Un mixin es un conjunto de tableros de Grafana y reglas y alertas de Prometheus, escritos en Jsonnet y empaquetados en un paquete.
+|Panel |Unidad fundamental de Grafana, compuesto por una consulta y una visualización. Se puede mover y cambiar de tamaño dentro de un tablero.
+|Complemento a|
+Una extensión de Grafana que permite a los usuarios proporcionar funcionalidad adicional para mejorar su experiencia. Los tipos de complementos admitidos actualmente son:
+
+* *Complemento de la aplicación:* amplía Grafana con una experiencia personalizada. Incluye un conjunto de complementos de panel y fuente de datos, así como páginas personalizadas.
+* *Complemento de fuente de datos:* amplía Grafana con soporte para fuentes de datos adicionales.
+* *Complemento de panel:* amplía Grafana con opciones de visualización adicionales.
+
+|Consulta |Se utiliza para solicitar datos de una fuente de datos. La estructura y el formato de la consulta dependen de la fuente de datos específica.
+|Serie de tiempo |Una serie de medidas ordenadas por tiempo. Las series de tiempo se almacenan en fuentes de datos y se devuelven como resultado de una consulta.
+|Rastreo |Una ruta de ejecución observada de una solicitud a través de un sistema distribuido. Para obtener más información, consulte https://opentracing.io/docs/overview/what-is-tracing/[¿Qué es el Rastreo Distribuido?]
+|Transformación |Las transformaciones procesan el conjunto de resultados de una consulta antes de pasarla para su visualización. Para obtener más información, consulte el tema de xref:paneles/transformaciones.adoc[descripción general Transformaciones].
+|Visualización |Una representación gráfica de los resultados de la consulta.
+|===

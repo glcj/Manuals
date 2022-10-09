@@ -1,0 +1,149 @@
+= Grafana-IoTDB
+
+Grafana es una herramienta de monitorización y visualización de métricas de volumen de código abierto, que se puede utilizar para mostrar datos de series de tiempo y análisis de tiempo de ejecución de aplicaciones. Grafana admite Graphite, InfluxDB y otras bases de datos de series temporales importantes como fuentes de datos. IoTDB-Grafana es un conector que desarrollamos para mostrar datos de series de tiempo en IoTDB leyendo datos de IoTDB y los enviamos a Grafana (https://grafana.com/). Antes de usar esta herramienta, asegúrese de que Grafana e IoTDB estén instalados e iniciados correctamente.
+
+== Instalación e Implementación de Grafana
+
+=== Instalar Grafana
+
+* Descarga url: https://grafana.com/grafana/download
+
+* Versión >= 4.4.1
+
+=== Instalar el Complemento de Fuente de Datos
+
+* Nombre del complemento: simple-json-datasource
+* Descarga url: https://github.com/grafana/simple-json-datasource
+
+Después de descargar este complemento, use la herramienta grafana-cli para instalar SimpleJson desde la línea de comandos:
+
+[source]
+----
+grafana-cli plugins install grafana-simple-json-datasource
+----
+
+Alternativamente, descargue manualmente el archivo .zip y descomprímalo en el directorio de complementos de grafana.
+
+* `{grafana-install-directory}\data\plugins\` (Windows)
+
+* `/var/lib/grafana/plugins` (Linux)
+
+* `/usr/local/var/lib/grafana/plugins` (Mac)
+
+=== Iniciar Grafana
+
+Si se usa Unix, Grafana se iniciará automáticamente después de la instalación, o puede ejecutar el comando de inicio `sudo service grafana-server start`. Ver más información [aquí].
+
+Si se usa Mac y homebrew para instalar Grafana, puede usar `homebrew` para iniciar Grafana. Primero asegúrese de que `homebrew` / services esté instalado ejecutando `brew tap homebrew/services`, luego inicie Grafana usando: `brew services start grafana`. Ver más información [aquí.
+
+Si se usa Windows, inicie Grafana ejecutando grafana-server.exe, ubicado en el directorio bin, preferiblemente desde la línea de comandos. Ver más información [aquí].
+
+== Instalación de IoTDB
+
+Vea https://github.com/apache/iotdb
+
+== Instalación de IoTDB-Grafana
+
+[source,Shell]
+----
+git clone https://github.com/apache/iotdb.git
+----
+
+== Iniciar IoTDB-Grafana
+
+* Opcion uno
+
+Importe el proyecto completo, después de instalar la dependencia de maven, directamente ejecute el directorio `iotdb/grafana/rc/main/java/org/apache/iotdb/web/grafana` `TsfileWebDemoApplication.java`, este conector Grafana es desarrollado por springboot
+
+* Opcion dos
+
+En el directorio `/grafana/target/`
+
+[source,Shell]
+----
+cd iotdb
+mvn clean package -pl grafana -am -Dmaven.test.skip=true
+cd grafana/target
+java -jar iotdb-grafana-{version}.war
+----
+
+Si se muestra el siguiente resultado, el conector iotdb-grafana se activó correctamente.
+
+[source,Shell]
+    ----
+    $ java -jar iotdb-grafana-{version}.war
+
+    .   ____          _            __ _ _
+    /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+    ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+    \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+    '  |____| .__|_| |_|_| |_\__, | / / / /
+    =========|_|==============|___/=/_/_/_/
+    :: Spring Boot ::        (v1.5.4.RELEASE)
+    ...
+    ----
+
+Para configurar las propiedades, mueva `grafana/src/main/resources/application.properties` al mismo directorio que el paquete war (`grafana/target`)
+
+== Explore en Grafana
+
+El puerto predeterminado de Grafana es 3000, consulte `http://localhost:3000/`
+
+El nombre de usuario y la contraseña son `admin` de forma predeterminada.
+
+=== Agregar Fuente de Datos
+
+Seleccione `Data Sources` y luego `Add data source`, seleccione `SimpleJson` en `Type` y la `URL` es `http: // localhost:8888`. Después de eso, asegúrese de que se haya iniciado IoTDB, haga clic en `Save & Test` y se mostrará "Data Source is working" para indicar que la configuración se ha realizado correctamente.
+
+image::imagen-26.png[]
+
+image::imagen-27.png[]
+
+=== Diseño en Tablero
+
+Agregue diagramas en el tablero y personalice su consulta. Ver http://docs.grafana.org/guides/getting_started/
+
+image::imagen-28.png[]
+
+== `config grafana`
+
+[source]
+----
+# ip and port of IoTDB 
+spring.datasource.url=jdbc:iotdb://127.0.0.1:6667/
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=org.apache.iotdb.jdbc.IoTDBDriver
+server.port=8888
+# Use this value to set timestamp precision as "ms", "us" or "ns", which must to be same with the timestamp
+# precision of Apache IoTDB engine.
+timestamp_precision=ms
+
+# Use this value to set down sampling true/false
+isDownSampling=true
+# defaut sampling intervals
+interval=1m
+# aggregation function to use to downsampling the data (int, long, float, double)
+# COUNT, FIRST_VALUE, LAST_VALUE, MAX_TIME, MAX_VALUE, AVG, MIN_TIME, MIN_VALUE, NOW, SUM
+continuous_data_function=AVG
+# aggregation function to use to downsampling the data (boolean, string)
+# COUNT, FIRST_VALUE, LAST_VALUE, MAX_TIME, MIN_TIME, NOW
+discrete_data_function=LAST_VALUE
+----
+
+La información de configuración específica del intervalo es la siguiente
+
+<1h: sin muestreo
+
+1h ~ 1d: intervalos = 1m
+
+1d ~ 30d: intervalos = 1h
+
+> 30d: intervalos = 1d
+
+Después de la configuración, vuelva a ejecutar el paquete war
+
+[source]
+----
+java -jar iotdb-grafana-{version}.war
+----

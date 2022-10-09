@@ -1,0 +1,270 @@
+= Herramienta de Sincronización TsFile
+
+== Introducción
+
+La herramienta de sincronización es una herramienta de la suite de IoTDB que carga periódicamente TsFiles persistentes desde el disco del remitente al receptor y los carga.
+
+En el lado del remitente de la sincronización, el módulo de sincronización es un proceso separado, independiente del proceso de IoTDB. Puede iniciarse y cerrarse mediante un script independiente (consulte las secciones [Uso] para obtener más detalles). El usuario puede configurar el ciclo de secuencia de la sincronización.
+
+En el lado del receptor de la sincronización, el módulo de sincronización está integrado en el motor de IoTDB y está en el mismo proceso que IoTDB. El módulo receptor escucha un puerto separado, que puede configurar el usuario (consulte la sección [Configuración] para obtener más detalles). Antes de usarlo, debe configurar una lista blanca en el receptor de sincronización, que se expresa como un segmento de red. El receptor solo acepta los datos transferidos desde el remitente ubicado en el segmento de la lista blanca, como se detalla en la sección [Configuración].
+
+La herramienta de sincronización tiene un modo de remitente-receptor de muchos a uno, es decir, un receptor de sincronización puede recibir datos de varios remitentes de sincronización simultáneamente, mientras que un remitente de sincronización solo puede enviar datos a un receptor de sincronización.
+
+[NOTE]
+====
+Antes de utilizar la herramienta de sincronización, el cliente y el servidor deben configurarse por separado. La configuración se detalla en la sección Configuración.
+====
+
+== Escenario de Aplicación
+
+En el caso de una aplicación de fábrica, generalmente hay varias subfábricas y varias fábricas generales (principales). Cada subfábrica utiliza una instancia de IoTDB para recopilar datos y luego sincronizar los datos con la fábrica general para realizar copias de seguridad o análisis. Una fábrica general puede recibir datos de varias subfábricas y una subfábrica también puede sincronizar datos con varias fábricas generales. En este escenario, cada instancia de IoTDB administra diferentes dispositivos.
+En el módulo de sincronización, cada subfábrica es un remitente, una fábrica general es un receptor y los remitentes sincronizan periódicamente los datos con los receptores. En el escenario anterior, los datos de un dispositivo solo pueden ser recopilados por un remitente, por lo que no hay superposición de dispositivos entre los datos sincronizados por varios remitentes. De lo contrario, el escenario de aplicación del módulo de sincronización no se satisface.
+
+Cuando hay un escenario anormal, es decir, dos o más remitentes sincronizan los datos del mismo dispositivo (cuyo grupo de almacenamiento está configurado como `root.sg`) al mismo receptor, los datos `root.sg` del remitente que contienen los datos del dispositivo recibidos más tarde por el receptor será rechazada. Ejemplo: el motor 1 sincroniza los grupos de almacenamiento` root.sg1` y `root.sg2` con el receptor, y el motor 2 sincroniza los grupos de almacenamiento `root.sg2` y `root.sg3` con el receptor. Todos ellos incluyen la serie temporal `root.sg2.d0.s0`. Si el receptor recibe primero los datos de `root.sg2.d0.s0` del remitente 1, el receptor rechazará los datos de `root.sg2` del remitente 2.
+
+== Configuración
+
+=== Receptor de Sincronización
+
+La configuración de parámetros del receptor de sincronización se encuentra en el archivo de configuración `iotdb-engine.properties` de IoTDB, y su directorio es `$IOTDB_HOME/conf/iotdb-engine.properties`. En este archivo de configuración, hay cuatro parámetros relacionados con el receptor de sincronización. Las instrucciones de configuración son las siguientes:
+
+[cols="1,1"]
+|===
+|Parámetro: `is_sync_enable`
+|
+
+|Descripción
+|Interruptor de función de sincronización, que está configurado como verdadero para indicar que el receptor puede recibir los datos del remitente y cargarlos. Cuando se establece en falso, significa que el receptor no puede recibir los datos de ningún remitente.
+
+|Tipo
+|booleano
+
+|Predeterminado
+|`false`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del receptor
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `IP_white_list`
+|
+
+|Descripción
+|Configure una lista blanca de direcciones IP de remitentes, que se expresa en forma de segmentos de red y se separa por comas entre varios segmentos de red. Cuando el remitente transfiere datos al receptor, solo cuando la dirección IP del remitente se encuentra dentro del segmento de red establecido por la lista blanca, el receptor puede permitir la operación de sincronización. Si la lista blanca está vacía, el receptor no permite que ningún remitente sincronice datos. El receptor predeterminado acepta todas las solicitudes de sincronización de IP.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`0.0.0.0/0`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del receptor
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `sync_server_port`
+|
+
+|Descripción
+|Puerto del receptor de sincronización para escuchar. Asegúrese de que el puerto no sea un puerto reservado del sistema y no esté ocupado. Este parámetro es válido solo cuando el parámetro `is_sync_enable` se establece en `TRUE`.
+
+|Tipo
+|Entero corto: [0,65535]
+
+|Predeterminado
+|`5555`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del receptor
+|===
+
+=== Sincronizar Remitente
+
+Los parámetros del remitente de sincronización se configuran en un archivo de configuración independiente `iotdb-sync-client.properties` con el directorio de instalación `$IOTDB_HOME/conf/iotdb-sync-client.properties`. En este archivo de configuración, hay cinco parámetros relacionados con el remitente de sincronización. Las instrucciones de configuración son las siguientes:
+
+[cols="1,1"]
+|===
+|Parámetro: `server_ip`
+|
+
+|Descripción
+|Dirección IP del receptor de sincronización.
+
+|Tipo
+|De cadena
+
+|Predeterminado
+|`127.0.0.1`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `server_port`
+|
+
+|Descripción
+|Puerto de escucha del receptor de sincronización, es necesario asegurarse de que el puerto sea coherente con la configuración del puerto de escucha establecido en el receptor.
+
+|Tipo
+|Entero corto: [0,65535]
+
+|Predeterminado
+|`5555`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `sync_period_in_second`
+|
+
+|Descripción
+|El período de tiempo del proceso de sincronización, la unidad de tiempo es el segundo.
+
+|Tipo
+|Entero: [0,2147483647]
+
+|Predeterminado
+|`600`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `iotdb_schema_directory`
+|
+
+|Descripción
+|La ruta absoluta del archivo de esquema de IoTDB del remitente, como `$IOTDB_HOME/data/system/schema/mlog.txt` (si el usuario no establece manualmente la ruta de los metadatos del esquema, la ruta es la ruta predeterminada del motor de IoTDB). Este parámetro no es válido por defecto y se configura manualmente cuando el usuario lo necesita.
+
+|Tipo
+|De cadena
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `sync_storage_groups`
+|
+
+|Descripción
+|Este parámetro representa los grupos de almacenamiento que participan en la tarea de sincronización, que distingue cada grupo de almacenamiento por comas. Si la lista está vacía, significa que todos los grupos de almacenamiento participan en la sincronización. Por defecto, es una lista vacía.
+
+|Tipo
+|Entero: [0,2147483647]
+
+|Ejemplo
+|`root.sg1, root.sg2`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+[cols="1,1"]
+|===
+|Parámetro: `max_number_of_sync_file_retry`
+|
+
+|Descripción
+|El número máximo de reintentos cuando falla la sincronización de un archivo con el receptor.
+
+|Tipo
+|Entero: [0,2147483647]
+
+|Ejemplo
+|`5`
+
+|Modalidades de Entrada en Vigor Después de la Modificación
+|Reinicio del cliente
+|===
+
+== Uso
+
+=== Iniciar Receptor de Sincronización
+
+. Configure los parámetros del receptor de sincronización. Por ejemplo:
+
+[source]
+----
+	####################
+	### Sync Server Configuration
+	####################
+	# Whether to open the sync_server_port for receiving data from sync client, the default is closed
+	is_sync_enable=false
+	# Sync server port to listen
+	sync_server_port=5555
+	# White IP list of Sync client.
+	# Please use the form of network segment to present the range of IP, for example: 192.168.0.0/16
+	# If there are more than one IP segment, please separate them by commas
+	# The default is to allow all IP to sync
+	ip_white_list=0.0.0.0/0
+----
+
+. Inicie el motor de IoTDB, y el receptor de sincronización se iniciará al mismo tiempo, y el registro de LOG comenzará con la oración IoTDB: `IoTDB: start SYNC ServerService successfully` indicando el inicio exitoso del receptor de retorno.
+
+=== Detener el Receptor de Sincronización
+
+Detenga IoTDB y el receptor de sincronización se cerrará al mismo tiempo.
+
+=== Iniciar el Remitente de Sincronización
+
+. Configure los parámetros del remitente de sincronización. Por ejemplo:
+
+[source]
+----
+	# Sync receiver server address
+	server_ip=127.0.0.1
+	# Sync receiver server port
+	server_port=5555
+	# The period time of sync process, the time unit is second.
+	sync_period_in_second=600
+	# This parameter represents storage groups that participate in the synchronization task, which distinguishes each storage group by comma.
+	# If the list is empty, it means that all storage groups participate in synchronization.
+	# By default, it is empty list.
+	# sync_storage_groups = root.sg1, root.sg2
+	# The maximum number of retry when syncing a file to receiver fails.
+	max_number_of_sync_file_retry=5
+----
+
+. Iniciar el remitente de sincronización los usuarios pueden utilizar los scripts de la carpeta `$IOTDB_HOME/tools` para iniciar el remitente de sincronización. Para usuarios de Linux y Mac OS X:
+
+[source,Shell]
+----
+  Shell >$IOTDB_HOME/tools/start-sync-client.sh
+----
+
+Para usuarios de Windows:
+
+[source,Shell]
+----
+  Shell >$IOTDB_HOME\tools\start-sync-client.bat
+----
+
+=== Detener el Remitente de Sincronización
+
+Los usuarios pueden utilizar los scripts de la carpeta $ IOTDB_HOME / tools para detener el remitente de sincronización. Para usuarios de Linux y Mac OS X:
+
+[source,Shell]
+----
+  Shell >$IOTDB_HOME/tools/stop-sync-client.sh
+----
+
+Para usuarios de Windows:
+
+[source,Shell]
+----
+  Shell >$IOTDB_HOME\tools\stop-sync-client.bat
+----

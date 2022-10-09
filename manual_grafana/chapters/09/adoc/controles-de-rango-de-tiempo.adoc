@@ -1,0 +1,113 @@
+= Controles de rango de tiempo
+
+Grafana proporciona varias formas de administrar los rangos de tiempo de los datos que se visualizan, tanto a nivel del tablero como a nivel del panel.
+
+Esta página describe las unidades de tiempo admitidas y los rangos relativos, los controles de tiempo comunes, la configuración de tiempo de todo el tablero y la configuración de tiempo específica del panel.
+
+== Unidades de tiempo y rangos relativos
+
+Se admiten las siguientes unidades de tiempo: `s (segundos)`, `m (minutos)`, `h (horas)`, `d (días)`, `w (semanas)`, `M (meses)`, `y (años)`.
+
+El operador menos le permite retroceder en el tiempo, en relación con el ahora. Si desea mostrar el período completo de la unidad (día, semana, mes, etc.), agregue `/<time unit>` al final.
+
+El operador más le permite avanzar en el tiempo en relación con el ahora. Puede utilizar esta función para ver datos pronosticados en el futuro, por ejemplo.
+
+Aquí hay unos ejemplos:
+
+[cols=",,",options="header",]
+|===
+|Ejemplo de rango relativo |Desde: |Hasta:
+|Últimos 5 minutos |`now-5m` |`now`
+|El día hasta ahora |`now/d` |`now`
+|Esta semana |`now/w` |`now/w`
+|Esta semana hasta ahora |`now/w` |`now`
+|Este mes |`now/M` |`now/M`
+|Este mes hasta ahora |`now/M` |`now`
+|Mes anterior |`now-1M/M` |`now-1M/M`
+|Este año hasta ahora |`now/Y` |`now`
+|Este año |`now/Y` |`now/Y`
+|===
+
+== Controles de rango de tiempo común
+
+El tablero y los controles de tiempo del panel tienen una interfaz de usuario (UI) común.
+
+image::image153.png[https://grafana.com/static/img/docs/time-range-controls/common-time-controls-7-0.png,width=452,height=76]
+
+Las opciones se definen a continuación.
+
+=== Rango de tiempo actual
+
+El rango de tiempo actual, también llamado _selector de tiempo_, muestra el rango de tiempo que se muestra actualmente en el tablero o panel que está viendo.
+
+Pase el cursor sobre el campo para ver las marcas de tiempo exactas en el rango y su fuente (como el navegador local).
+
+image::image154.png[https://grafana.com/static/img/docs/time-range-controls/time-picker-7-0.png,width=262,height=223]
+
+Haga clic en el rango de tiempo actual para cambiar el rango de tiempo. Puede cambiar la hora actual utilizando un rango de tiempo relativo, como los últimos 15 minutos, o un rango de tiempo absoluto, como `2020-05-14 00:00:00` to `2020-05-15 23:59:59`.
+
+image::image155.png[https://grafana.com/static/img/docs/time-range-controls/change-current-time-range-7-0.png,width=624,height=471]
+
+=== Rango de tiempo relativo
+
+Seleccione el intervalo de tiempo relativo de la lista de *Intervalos de tiempo relativos*. Algunos ejemplos de rangos de tiempo son:
+
+* Últimos 30 minutos
+* Últimas 12 horas
+* Últimos 7 días
+* Últimos 2 años
+* Ayer
+* Anteayer
+* Este día la semana pasada
+* Hoy hasta ahora
+* Esta semana hasta ahora
+* Este mes hasta ahora
+
+=== Rango de tiempo absoluto
+
+Establezca un intervalo de tiempo absoluto de dos formas:
+
+* Escriba valores en los campos *Desde* y *Hasta*. Puede escribir valores de tiempo exactos o valores relativos, como `now-24h`, y luego hacer clic en *Aplicar rango de tiempo*.
+* Haga clic en el campo *Desde* o *Hasta*. Grafana muestra un calendario. Haga clic en el día o los días que desea usar como rango de tiempo actual y luego haga clic en *Aplicar rango de tiempo*.
+
+Esta sección también muestra los rangos absolutos usados ​​recientemente.
+
+=== Alejar (Cmd+Z o Ctrl+Z)
+
+Haga clic en el icono *Alejar* para ver un intervalo de tiempo más grande en el tablero o visualización del panel.
+
+=== Acercar (solo aplicable a visualizaciones de gráficos)
+
+Haga clic y arrastre para seleccionar el rango de tiempo en la visualización que desea ver.
+
+=== Actualizar el tablero
+
+Haga clic en el icono *Actualizar tablero* para ejecutar inmediatamente todas las consultas en el tablero y actualizar las visualizaciones. Grafana cancela cualquier solicitud pendiente cuando se activa una nueva actualización.
+
+De forma predeterminada, Grafana no actualiza automáticamente el tablero. Las consultas se ejecutan en su propio horario de acuerdo con la configuración del panel. Sin embargo, si desea actualizar periódicamente el tablero, haga clic en la flecha hacia abajo junto al icono *Actualizar tablero* y luego seleccione un intervalo de actualización.
+
+== Configuración de tiempo del tablero
+
+La configuración de tiempo se guarda por tablero.
+
+Para acceder a la configuración de tiempo del tablero, haga clic en el icono de *configuración del Tablero* (engranaje) en la parte superior de la pantalla. La configuración se encuentra en la sección *Opciones de tiempo* de la pestaña General.
+
+* *Zona horaria:* especifique la zona horaria local del servicio o sistema que está supervisando. Esto puede resultar útil al monitorear un sistema o servicio que opera en varias zonas horarias.
+** *Predeterminado:* se utiliza la zona horaria seleccionada predeterminada para el perfil de usuario, el equipo o la organización. Si no se especifica una zona horaria para el perfil de usuario, un equipo del que el usuario es miembro o la organización, entonces Grafana usa la hora del navegador local.
+** *Hora local del navegador:* se utiliza la zona horaria configurada para el navegador del usuario de visualización. Esta suele ser la misma zona horaria que la configurada en la computadora.
+** https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[Zonas horarias estándar ISO 8601], incluido UTC.
+* *Actualización automática:* personalice las opciones que se muestran por tiempo relativo y las opciones de actualización automática. Las entradas están separadas por comas y aceptan cualquier unidad de tiempo válida.
+* *Ahora retrasa ahora:* anule el valor `now` introduciendo un retraso de tiempo. Por lo general, esta función se utiliza para adaptarse a retrasos conocidos en la agregación de datos para evitar valores nulos.
+* *Ocultar selector de tiempo:* seleccione esta opción si no desea que Grafana muestre el selector de tiempo.
+
+== Anulaciones de tiempo del panel y cambio de tiempo
+
+En las xref:paneles/consultas.adoc#_opciones_de_consulta[Opciones de consulta], puede anular el intervalo de tiempo relativo para paneles individuales, lo que hace que sean diferentes de lo que está seleccionado en el selector de tiempo del tablero en la parte superior derecha. Esto le permite mostrar métricas de diferentes períodos de tiempo o días al mismo tiempo.
+
+== Controle el rango de tiempo usando una URL
+
+El rango de tiempo de un tablero se puede controlar proporcionando los siguientes parámetros de consulta en la URL del panel:
+
+* `from`: define el límite inferior del rango de tiempo, especificado en ms epoch o <<rango de tiempo relativo>>
+* `to`: define el límite superior del rango de tiempo, especificado en ms epoch o <<rango de tiempo relativo>>
+* `time` y `time.window`: define un rango de tiempo desde time-time.window/2 hasta time+time.window/2. Ambos parámetros deben especificarse en ms. Por ejemplo `?time=1500000000000&time.window=10000` dará como resultado un rango de tiempo de 10s desde 1499999995000 a 1500000005000

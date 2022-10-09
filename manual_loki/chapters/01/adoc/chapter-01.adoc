@@ -1,0 +1,12 @@
+include::comenzando.adoc[]
+
+include::etiquetas.adoc[]
+
+include::introducir-registros-en-loki.adoc[]
+
+include::logcli.adoc[]
+
+include::loki-en-grafana.adoc[]
+
+include::solucion-de-problemas.adoc[]
+

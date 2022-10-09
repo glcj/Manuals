@@ -1,0 +1,92 @@
+= Dimensiones de las series de tiempo
+
+== Dimensiones de las series de tiempo
+
+En xref:comenzando/series-de-tiempo#_bases_de_datos_de_series_de_tiempo[Introducción a las series de tiempo], se introduce el concepto de _etiquetas_:
+
+****
+Otra característica de una TSDB es la capacidad de filtrar mediciones mediante _etiquetas_. Cada punto de datos está etiquetado con una etiqueta que agrega información de contexto, como dónde se tomó la medición.
+****
+
+Con los datos de series de tiempo, los datos a menudo contienen más de una serie y son un conjunto de multiples series de tiempo. Muchas fuentes de datos de Grafana admiten este tipo de datos.
+
+image::image3.png[https://grafana.com/static/img/docs/example_graph_multi_dim.png,width=624,height=280]
+
+El caso común es emitir una única consulta para una medición con una o más propiedades adicionales como dimensiones. Por ejemplo, consultar una medición de temperatura junto con una propiedad de ubicación. En este caso, se devuelven varias series desde esa única consulta y cada serie tiene una ubicación única como dimensión.
+
+Para identificar series únicas dentro de un conjunto de series de tiempo, Grafana almacena dimensiones en _etiquetas_.
+
+== Etiquetas
+
+Cada serie de tiempo en Grafana tiene opcionalmente etiquetas. Las etiquetas se establecen en pares clave / valor para identificar dimensiones. Las etiquetas de ejemplo podrían ser `{location=us}` o `{country=us,state=ma,city=boston}`. Dentro de un conjunto de series de tiempo, la combinación de su nombre y etiquetas identifica cada serie. Por ejemplo, `temperature {country=us,state=ma,city=boston}`.
+
+Las diferentes fuentes de datos de series de tiempo tienen dimensiones almacenadas de forma nativa o patrones de almacenamiento comunes que permiten extraer los datos en dimensiones.
+
+Las bases de datos de series de tiempo (TSDB) suelen admitir de forma nativa la dimensionalidad. Prometheus también almacena dimensiones en _etiquetas_.
+
+En bases de datos de tablas como SQL, estas dimensiones son generalmente los parámetros `GROUP BY` de una consulta.
+
+== Varias dimensiones en formato de tabla
+
+En SQL o bases de datos similares a SQL que devuelven respuestas de tabla, las dimensiones adicionales suelen ser columnas en la tabla de respuesta de la consulta.
+
+=== Dimensión única
+
+Por ejemplo, considere una consulta como:
+
+[source,SQL]
+----
+SELECT BUCKET(StartTime, 1h), AVG(Temperature) AS Temp, Location FROM T
+  GROUP BY BUCKET(StartTime, 1h), Location
+  ORDER BY time asc
+----
+
+Podría devolver una tabla con tres columnas, cada una de las cuales tiene respectivamente tipos de datos tiempo, número y cadena.
+
+[cols=",,",options="header",]
+|===
+|StartTime |Temp |Location
+|09:00 |24 |LGA
+|09:00 |20 |BOS
+|10:00 |26 |LGA
+|10:00 |22 |BOS
+|===
+
+El formato de la tabla es una serie de tiempo con formato _largo_, también llamado _alto_. Tiene marcas de tiempo repetidas y valores repetidos en Ubicación. En este caso, tenemos dos series de tiempo en el conjunto que se identificarían como `Temp {Location=LGA}` y `Temp {Location=BOS}`.
+
+Las series de tiempo individuales del conjunto se extraen utilizando la columna con tipo de tiempo `StartTime` como índice de tiempo de la serie de tiempo, la columna de tipo numérico `Temp` como el nombre de la serie y el nombre y los valores de la columna de `Location` con tipo de cadena para construir las etiquetas, como Location=LGA.
+
+=== Múltiples dimensiones
+
+Si la consulta se actualiza para seleccionar y agrupar por más de una columna de cadena, por ejemplo, `GROUP BY BUCKET(StartTime, 1h), Location, Sensor`, entonces se agrega una dimensión adicional:
+
+[cols=",,,",options="header",]
+|===
+|StartTime |Temp |Location |Sensor
+|09:00 |24 |LGA |A
+|09:00 |24.1 |LGA |B
+|09:00 |20 |BOS |A
+|09:00 |20.2 |BOS |B
+|10:00 |26 |LGA |A
+|10:00 |26.1 |LGA |B
+|10:00 |22 |BOS |A
+|10:00 |22.2 |BOS |B
+|===
+
+En este caso, las etiquetas que representan las dimensiones tendrán dos claves basadas en las dos columnas con tipo de cadena `Location` y `Sensor`. Estos datos dan como resultado cuatro series: `Temp {Location=LGA,Sensor=A}`, `Temp {Location=LGA,Sensor=B}`, `Temp {Location=BOS,Sensor=A}` y `Temp {Location=BOS,Sensor=B}` .
+
+[NOTE] 
+====
+Actualmente, más de una dimensión solo se admite en las consultas de registros dentro del servicio Azure Monitor a partir de la versión 7.1.
+====
+
+[NOTE]
+====
+No se admiten varias dimensiones de forma que se asignen a varias alertas en Grafana, sino que se tratan como varias condiciones para una sola alerta. Consulte la documentación sobre cómo xref:alertas/crear-alertas.adoc#_multiples_series[crear alertas con múltiples series].
+====
+
+=== Múltiples valores
+
+En el caso de fuentes de datos similares a SQL, se puede seleccionar más de una columna numérica, con o sin columnas de cadena adicionales para usar como dimensiones. Por ejemplo, `AVG(Temperature) AS AvgTemp, MAX(Temperature) AS MaxTemp`. Esto, si se combina con múltiples dimensiones, puede resultar en muchas series. Actualmente, la selección de varios valores solo está diseñada para usarse con visualización.
+
+Se puede encontrar información técnica adicional sobre formatos tabulares de series de tiempo y cómo se extraen las dimensiones en xref:desarrolladores/complementos/marcos-de-datos.adoc#_marcos_de_datos_como_series_de_tiempo[la documentación del desarrollador sobre marcos de datos como series de tiempo].

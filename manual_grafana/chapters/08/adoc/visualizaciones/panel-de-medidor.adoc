@@ -1,0 +1,27 @@
+= Panel de medidor
+
+Indicador es un panel de valor único que puede repetir un indicador para cada serie, columna o fila.
+
+image::image69.png[https://grafana.com/static/img/docs/v66/gauge_panel_cover.png,width=624,height=170]
+
+== Opciones de campo y datos
+
+Las visualizaciones de medidores le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Opciones de pantalla
+
+Utilice las siguientes opciones para refinar su visualización:
+
+* *Mostrar:* elija cómo Grafana muestra sus datos.
+** *Calcular:* muestra un *Valor* calculado basado en todas las filas. Para obtener una lista de los cálculos disponibles, consulte xref:paneles/lista-de-calculas[Lista de cálculos].
+** *Todos los valores:* muestra una estadística separada para cada fila. Si selecciona esta opción, también puede seleccionar un *Límite* o el número máximo de filas para mostrar.
+* *Orientación:* elija una dirección de apilamiento.
+** *Auto:* Grafana selecciona lo que cree que es la mejor orientación.
+** *Horizontal:* las barras se estiran horizontalmente, de izquierda a derecha.
+** *Vertical:* las barras se estiran verticalmente, de arriba hacia abajo.
+* *Mostrar etiquetas de umbral:* controla si se muestran los valores de umbral.
+* *Mostrar marcadores de umbral:* controla si se muestra una banda de umbral fuera de la banda de valor del medidor interior.

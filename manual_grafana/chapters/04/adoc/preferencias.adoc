@@ -1,0 +1,14 @@
+= Preferencias de Grafana
+
+Las preferencias de Grafana son configuraciones básicas. Controlan el tema de la interfaz de usuario, el panel de inicio, la zona horaria, etc.
+
+Las preferencias a veces son confusas porque se pueden establecer en cuatro niveles diferentes, enumerados del nivel más alto al más bajo:
+
+* *Servidor:* afecta a todos los usuarios del servidor de Grafana. Establecido por un xref:permisos/permisos.adoc#_rol_de_administrador_de_servidor_de_grafana[Administrador de Servidor de Grafana].
+* *Organización:* afecta a todos los usuarios de una organización. Establecido por un xref:permisos/permisos.adoc#_rol_de_administrador_de_organizacion[Administrador de Organización].
+* *Equipo:* afecta a todos los usuarios asignados a un equipo. Establecido por un administrador de organización o administrador de equipo. Para obtener más información sobre estos roles, consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la Organización].
+* *Cuenta de usuario:* afecta al usuario individual. Establecido por el usuario en su propia cuenta.
+
+El nivel más bajo siempre tiene prioridad. Por ejemplo, si un usuario establece su tema en *Claro*, entonces su visualización de Grafana muestra el tema claro. Nada en ningún nivel superior puede anular eso.
+
+Si el usuario es consciente del cambio y tiene la intención de hacerlo, ¡es genial! Pero si el usuario es un administrador de servidor que hizo el cambio en sus preferencias de usuario hace mucho tiempo, es posible que haya olvidado que lo hizo. Luego, si ese administrador del servidor está tratando de cambiar el tema a nivel del servidor, se frustrará ya que ninguno de sus cambios tiene ningún efecto que puedan ver. (Además, los usuarios del servidor pueden estar confundidos, ¡porque pueden ver los cambios en el nivel del servidor!)

@@ -1,0 +1,120 @@
+= Herramienta CSV
+
+La herramienta CSV puede ayudarlo a importar datos en formato CSV a IoTDB o exportar datos de IoTDB a un archivo CSV.
+
+== Uso de import-csv.sh
+
+=== Crear Metadatos (Opcional)
+
+[source,SQL]
+----
+SET STORAGE GROUP TO root.fit.d1;
+SET STORAGE GROUP TO root.fit.d2;
+SET STORAGE GROUP TO root.fit.p;
+CREATE TIMESERIES root.fit.d1.s1 WITH DATATYPE=INT32,ENCODING=RLE;
+CREATE TIMESERIES root.fit.d1.s2 WITH DATATYPE=TEXT,ENCODING=PLAIN;
+CREATE TIMESERIES root.fit.d2.s1 WITH DATATYPE=INT32,ENCODING=RLE;
+CREATE TIMESERIES root.fit.d2.s3 WITH DATATYPE=INT32,ENCODING=RLE;
+CREATE TIMESERIES root.fit.p.s1 WITH DATATYPE=INT32,ENCODING=RLE;
+----
+
+IoTDB tiene la capacidad de inferencia de tipos, por lo que no es necesario crear metadatos antes de importar los datos. Sin embargo, recomendamos crear metadatos antes de importar datos con la herramienta de importación CSV, ya que esto puede evitar errores de conversión de tipo innecesarios.
+
+=== Ejemplo de Archivo CSV para Importar
+
+[source,SQL]
+----
+Time,root.fit.d1.s1,root.fit.d1.s2,root.fit.d2.s1,root.fit.d2.s3,root.fit.p.s1
+1,100,hello,200,300,400
+2,500,world,600,700,800
+3,900,"hello, \"world\"",1000,1100,1200
+----
+
+=== Sintaxis
+
+[source,Shell]
+----
+# Unix/OS X
+> tools/import-csv.sh -h <ip> -p <port> -u <username> -pw <password> -f <xxx.csv>
+
+# Windows
+> tools\import-csv.bat -h <ip> -p <port> -u <username> -pw <password> -f <xxx.csv>
+----
+
+=== Ejemplo
+
+[source,Shell]
+----
+# Unix/OS X
+> tools/import-csv.sh -h 127.0.0.1 -p 6667 -u root -pw root -f example-filename.csv
+
+# Windows
+> tools\import-csv.bat -h 127.0.0.1 -p 6667 -u root -pw root -f example-filename.csv
+----
+
+=== Nota
+
+Tenga en cuenta que los siguientes caracteres especiales en los campos deben verificarse antes de importar:
+
+. `,`: los campos que contienen `,` deben estar entrecomillados por un par de `"` o un par de `'`.
+
+. "`:`" en los campos debe reemplazarse por `\"` o los campos deben encerrarse entre `'`.
+
+. '`:`' en los campos debe reemplazarse por `\'` o los campos deben encerrarse entre `"`.
+
+. puede ingresar un formato de hora como `yyyy-MM-dd'T'HH:mm:ss`, `yyy-MM-dd HH:mm:ss`, o `yyyy-MM-dd'T'HH:mm:ss.SSSZ`.
+
+== Uso de export-csv.sh
+
+=== Sintaxis
+
+[source,Shell]
+----
+# Unix/OS X
+> tools/export-csv.sh -h <ip> -p <port> -u <username> -pw <password> -td <directory> [-tf <time-format> -s <sqlfile>]
+
+# Windows
+> tools\export-csv.bat -h <ip> -p <port> -u <username> -pw <password> -td <directory> [-tf <time-format> -s <sqlfile>]
+----
+
+Después de ejecutar el script de exportación, debe ingresar algunas consultas o especificar algunos archivos SQL. Si hay varios SQL en un archivo SQL, los SQL deben estar separados por saltos de línea.
+
+=== Ejemplo de Archivo SQL
+
+[source,SQL]
+----
+# Unix/OS X
+select * from root.fit.d1
+select * from root.sg1.d1
+----
+
+=== Ejemplo
+
+[source,Shell]
+----
+# Unix/OS X
+> tools/export-csv.sh -h 127.0.0.1 -p 6667 -u root -pw root -td ./
+# Or
+> tools/export-csv.sh -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -tf yyyy-MM-dd\ HH:mm:ss
+# Or
+> tools/export-csv.sh -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -s sql.txt
+# Or
+> tools/export-csv.sh -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -tf yyyy-MM-dd\ HH:mm:ss -s sql.txt
+
+# Windows
+> tools/export-csv.bat -h 127.0.0.1 -p 6667 -u root -pw root -td ./
+# Or
+> tools/export-csv.bat -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -tf yyyy-MM-dd\ HH:mm:ss
+# Or
+> tools/export-csv.bat -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -s sql.txt
+# Or
+> tools/export-csv.bat -h 127.0.0.1 -p 6667 -u root -pw root -td ./ -tf yyyy-MM-dd\ HH:mm:ss -s sql.txt
+----
+
+=== Nota
+
+Tenga en cuenta que si los campos exportados por la herramienta de exportación tienen los siguientes caracteres especiales:
+
+. `,`: el campo se incluirá entre `"`.
+
+. `"`: el campo estará encerrado por `"` y los caracteres originales `"` en el campo serán reemplazados por `\"`.

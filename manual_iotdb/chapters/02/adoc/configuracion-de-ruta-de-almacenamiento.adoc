@@ -1,0 +1,43 @@
+= Archivos
+
+En IoTDB, es necesario almacenar muchos tipos de datos. Esta sección presenta la estrategia de almacenamiento de datos de IoTDB para proporcionarle una comprensión explícita de la gestión de datos de IoTDB.
+
+Los datos en IoTDB se dividen en tres categorías, a saber, archivos de datos, archivos del sistema y archivos de registro de preescritura.
+
+== Archivos de Datos
+
+Los archivos de datos almacenan todos los datos que el usuario escribió en IoTDB, que contiene TsFile y otros archivos. El directorio de almacenamiento TsFile se puede configurar con el elemento de configuración `data_dirs` (consulte la [capa de archivo] para obtener más detalles). Se pueden configurar otros archivos a través del elemento de configuración [data_dirs] (consulte [Capa de Motor] para obtener más detalles).
+
+Para soportar mejor los requisitos de almacenamiento de los usuarios, como la expansión del espacio en disco, IoTDB admite varios métodos de almacenamiento de directorios de archivos para la configuración de almacenamiento de TsFile. Los usuarios pueden establecer múltiples rutas de almacenamiento como ubicaciones de almacenamiento de datos (consulte el elemento de configuración [data_dirs]) y usted puede especificar o personalizar la estrategia de selección de directorio (consulte el elemento de configuración [multi_dir_strategy] para obtener más detalles).
+
+== Archivos del Sistema
+
+Los archivos del sistema incluyen archivos de esquema, que almacenan información de metadatos de datos en IoTDB. Se puede configurar a través del elemento de configuración `base_dir` (consulte [Capa de Sistema] para obtener más detalles).
+
+== Archivos de Registro de Preescritura
+
+Los archivos de registro de preescritura almacenan archivos WAL. Se puede configurar a través del elemento de configuración `wal_dir` (consulte [Capa de Sistema] para obtener más detalles).
+
+== Ejemplo de Configuración del Directorio de almacenamiento de Datos
+
+Para una comprensión más clara de la configuración del directorio de almacenamiento de datos, daremos un ejemplo en esta sección.
+
+La ruta del directorio de datos incluida en la configuración del directorio de almacenamiento es: base_dir, data_dirs, multi_dir_strategy y wal_dir, que se refieren a archivos del sistema, carpetas de datos, estrategia de almacenamiento y archivos de registro de preescritura.
+
+Un ejemplo de los elementos de configuración son los siguientes:
+
+[source]
+----
+base_dir = $IOTDB_HOME/data
+data_dirs = /data1/data, /data2/data, /data3/data 
+multi_dir_strategy=MaxDiskUsableSpaceFirstStrategy
+wal_dir= $IOTDB_HOME/data/wal
+----
+
+Después de establecer la configuración, el sistema:
+
+. Guarde todos los archivos del sistema en $ IOTDB_HOME / data
+
+. Guarde TsFile en /data1/data, /data2/data, /data3/data. Y la estrategia de elección es `MaxDiskUsableSpaceFirstStrategy`, cuando los datos se escriben en el disco, el sistema seleccionará automáticamente un directorio con el mayor espacio de disco restante para escribir datos.
+
+. Guarde los datos de WAL en $IOTDB_HOME/data/wal

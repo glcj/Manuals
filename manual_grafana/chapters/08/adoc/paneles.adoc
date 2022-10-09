@@ -1,0 +1,20 @@
+= Descripción general del panel
+
+El _panel_ es el componente básico de visualización en Grafana. Cada panel tiene un editor de consultas específico para la fuente de datos seleccionada en el panel. El editor de consultas le permite extraer la visualización perfecta para mostrar en el panel.
+
+Existe una amplia variedad de opciones de estilo y formato para cada panel. Los paneles se pueden arrastrar, soltar y reorganizar en el tablero. También se pueden cambiar de tamaño.
+
+== Mover paneles
+
+Puede arrastrar y soltar paneles haciendo clic y manteniendo presionado el título del panel, luego arrastrándolo a su nueva ubicación. También puede cambiar el tamaño de los paneles fácilmente haciendo clic en los iconos (-) y (+).
+
+image::image31.gif[image,width=623,height=211]
+
+=== Consejos y atajos
+
+* Haga clic en el título del gráfico y, en el menú desplegable, duplique rápidamente el panel.
+* Haga clic en el icono de color de la leyenda para cambiar el color de una serie o el eje y.
+* Haga clic en el nombre de la serie en la leyenda para ocultar la serie.
+* Ctrl/Shift/Meta + clic en el nombre de la leyenda para ocultar otras series.
+* Pase el cursor sobre un panel y presione `e` para abrir el editor de paneles.
+* Pase el cursor sobre un panel y presione `v` para abrir el panel en la vista de pantalla completa.

@@ -1,0 +1,44 @@
+= Ver estadísticas del servidor Grafana
+
+Si es administrador del servidor de Grafana, puede ver estadísticas útiles sobre su servidor Grafana en la pestaña Estadísticas.
+
+[NOTE] 
+====
+Solo los administradores del servidor Grafana pueden acceder al menú *Administrador del servidor*. Para obtener más información sobre los permisos administrativos, consulte xref:permisos/permisos.adoc[administrador del servidor de Grafana].
+====
+
+== Ver estadísticas del servidor
+
+[arabic]
+. Inicie sesión en su servidor de Grafana con una cuenta que tenga la marca de administrador de Grafana.
+. Pase el cursor sobre el icono de *Administrador del servidor* (escudo) en el menú lateral y luego haga clic en la pestaña *Estadísticas*.
+
+== Estadísticas disponibles
+
+Las siguientes estadísticas se muestran en la pestaña Estadísticas:
+
+* Total de usuarios *Nota:* Total de usuarios = Total de administradores + Total de editores + Total de espectadores
+* Total de administradores
+* Total de editores
+* Total de espectadores
+* Usuarios activos (visto en los últimos 30 días) *Nota:* Usuarios activos = Administradores activos + Editores activos + Espectadores activos
+* Administradores activos (visto en los últimos 30 días)
+* Editores activos (vistos los últimos 30 días)
+* Espectadores activos (visto en los últimos 30 días)
+* Sesiones activas
+* Total de tableros
+* Total de organizaciones
+* Total de listas de reproducción
+* Total de instantáneas
+* Total de etiquetas de tablero
+* Total de paneles destacados
+* Total de alertas
+
+== Contando usuarios
+
+Si un usuario pertenece a varias organizaciones, ese usuario se cuenta una vez como usuario en el rol de organización más alto que se le asigne, independientemente de la cantidad de organizaciones a las que pertenezca.
+
+Por ejemplo, si Sofía es espectadora en dos organizaciones, editora en dos organizaciones y administradora en tres organizaciones, entonces se reflejaría en las estadísticas como:
+
+* Total de usuarios 1
+* Total de administradores 1

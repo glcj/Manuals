@@ -1,0 +1,242 @@
+= Modelo JSON de tablero
+
+Un tablero en Grafana está representado por un objeto JSON, que almacena metadatos de su tablero. Los metadatos del tablero incluyen propiedades del tablero, metadatos de paneles, variables de plantilla, consultas de panel, etc.
+
+Para ver el JSON de un panel:
+
+[arabic]
+. Navegue a un tablero.
+. En el menú de navegación superior, haga clic en el icono de *Configuración del tablero* (engranaje).
+. Haga clic en *Modelo JSON*.
+
+== Campos JSON
+
+Cuando un usuario crea un tablero nuevo, se inicializa un objeto JSON de tablero nuevo con los siguientes campos:
+
+[NOTE]
+====
+En el siguiente JSON, id se muestra como nulo, que es el valor predeterminado que se le asigna hasta que se guarda un tablero. Una vez que se guarda un tablero, se asigna un valor entero al campo `id`.
+====
+
+[source,JSON]
+----
+{
+  "id": null,
+  "uid": "cLV5GDCkz",
+  "title": "New dashboard",
+  "tags": [],
+  "style": "dark",
+  "timezone": "browser",
+  "editable": true,
+  "hideControls": false,
+  "graphTooltip": 1,
+  "panels": [],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "time_options": [],
+    "refresh_intervals": []
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "refresh": "5s",
+  "schemaVersion": 17,
+  "version": 0,
+  "links": []
+}
+----
+
+Cada campo del JSON del tablero se explica a continuación con su uso:
+
+[cols=",",options="header",]
+|===
+|Nombre |Uso
+|*id* |identificador numérico único para el tablero. (generado por la base de datos)
+|*uid* |identificador de tablero único que puede ser generado por cualquier persona. cadena (8-40)
+|*title* |título actual del tablero
+|*tags* |etiquetas asociadas con el tablero, una matriz de cadenas
+|*style* |tema del tablero, es decir, `dark` o `light`
+|*timezone* |zona horaria del tablero, es decir, `utc` o `browser`
+|*editable* |si un tablero es editable o no
+|*graphTooltip* |0 para ninguna cruz compartida o información sobre herramientas (predeterminado), 1 para cruz compartida, 2 para cruz compartida E información sobre herramientas compartida
+|*time* |intervalo de tiempo para el tablero, es decir, últimas 6 horas, últimos 7 días, etc.
+|*timepicker* |metadatos de selector de tiempo, consulte la sección de <<selector de tiempo>> para obtener más detalles
+|*templating* |metadatos de plantillas, consulte la sección de <<plantillas>> para obtener más detalles
+|*annotations* |metadatos de anotaciones, consulte la sección de <<anotaciones>> para obtener más detalles
+|*refresh* |el intervalo de actualización automática
+|*schemaVersion* |versión del esquema JSON (int), que se incrementa cada vez que una actualización de Grafana trae cambios a dicho esquema
+|*version* |versión del tablero (int), que se incrementa cada vez que se actualiza el tablero
+|*panels* |Matriz de paneles, consulte los detalles a continuación.
+|===
+
+== Paneles
+
+Los paneles son los componentes básicos de un tablero. Consiste en consultas de fuentes de datos, tipo de gráficos, alias, etc. El panel JSON consiste en una matriz de objetos JSON, cada uno de los cuales representa un panel diferente. La mayoría de los campos son comunes para todos los paneles, pero algunos campos dependen del tipo de panel. A continuación se muestra un ejemplo de panel JSON de un panel de texto.
+
+[source,JSON]
+----
+"panels": [
+  {
+    "type": "text",
+    "title": "Panel Title",
+    "gridPos": {
+      "x": 0,
+      "y": 0,
+      "w": 12,
+      "h": 9
+    },
+    "id": 4,
+    "mode": "markdown",
+    "content": "# title"
+  }
+----
+
+=== Tamaño y posición del panel
+
+La propiedad gridPos describe el tamaño y la posición del panel en coordenadas de cuadrícula.
+
+* `w` 1-24 (el ancho del tablero se divide en 24 columnas)
+* `h` En unidades de altura de cuadrícula, cada una representa 30 píxeles.
+* `x` La posición x, en la misma unidad que `w`.
+* `y` La posición y, en la misma unidad que `h`.
+
+La cuadrícula tiene una gravedad negativa que mueve los paneles hacia arriba si hay un espacio vacío encima de un panel.
+
+=== Selector de tiempo
+
+[source,JSON]
+----
+"timepicker": {
+    "collapse": false,
+    "enable": true,
+    "notice": false,
+    "now": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "status": "Stable",
+    "type": "timepicker"
+  }
+----
+
+El uso de los campos se explica a continuación:
+
+[cols=",",options="header",]
+|===
+|Nombre |Uso
+|*collapse* |si el selector de tiempo está colapsado o no
+|*enable* |si el selector de tiempo está habilitado o no
+|*notice* |por hacer
+|*now* |por hacer
+|*refresh_intervals* |por hacer
+|*status* |por hacer
+|*type* |por hacer
+|===
+
+=== Plantillas
+
+El campo `templating` contiene una matriz de variables de plantilla con sus valores guardados junto con algunos otros metadatos, por ejemplo:
+
+[source,JSON]
+----
+"templating": {
+    "enable": true,
+    "list": [
+      {
+        "allFormat": "wildcard",
+        "current": {
+          "tags": [],
+          "text": "prod",
+          "value": "prod"
+        },
+        "datasource": null,
+        "includeAll": true,
+        "name": "env",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "*"
+          },
+          {
+            "selected": false,
+            "text": "stage",
+            "value": "stage"
+          },
+          {
+            "selected": false,
+            "text": "test",
+            "value": "test"
+          }
+        ],
+        "query": "tag_values(cpu.utilization.average,env)",
+        "refresh": false,
+        "type": "query"
+      },
+      {
+        "allFormat": "wildcard",
+        "current": {
+          "text": "apache",
+          "value": "apache"
+        },
+        "datasource": null,
+        "includeAll": false,
+        "multi": false,
+        "multiFormat": "glob",
+        "name": "app",
+        "options": [
+          {
+            "selected": true,
+            "text": "tomcat",
+            "value": "tomcat"
+          },
+          {
+            "selected": false,
+            "text": "cassandra",
+            "value": "cassandra"
+          }
+        ],
+        "query": "tag_values(cpu.utilization.average,app)",
+        "refresh": false,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  }
+----
+
+El uso de los campos mencionados anteriormente en la sección de plantillas se explica a continuación:
+
+[cols=",",options="header",]
+|===
+|Nombre |Uso
+|*enable* |si la creación de plantillas está habilitada o no
+|*list* |una matriz de objetos, cada uno representando una variable de plantilla
+|*allFormat* |formato para usar al obtener todos los valores de la fuente de datos, por ejemplo: `wildcard`, `glob`, `regex`, `pipe`, etc.
+|*current* |muestra el texto/valor de la variable seleccionada en el tablero actual
+|*data source* |muestra la fuente de datos para las variables
+|*includeAll* |si todas las opciones de valor están disponibles o no
+|*multi* |si se pueden seleccionar o no varios valores de la lista de valores de variable
+|*multiFormat* |para usar mientras se obtienen series temporales de la fuente de datos
+|*name* |nombre de la variable
+|*options* |matriz de de pares de variables valores/texto disponibles para su selección en el tablero
+|*query* |consulta de fuente de datos utilizada para obtener valores para una variable
+|*refresh* |por hacer
+|*regex* |por hacer
+|*type* |tipo de variable, es decir, `custom`, `query` o `interval`
+|===

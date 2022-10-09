@@ -1,0 +1,61 @@
+= Cambiar el tema de la interfaz de usuario de Grafana
+
+En Grafana, puede modificar el tema de la interfaz de usuario configurado en Configuración o Preferencias. Configure el tema de la interfaz de usuario para el servidor, una organización, un equipo o su cuenta de usuario personal siguiendo las instrucciones de este tema.
+
+Algunas tareas requieren ciertos permisos. Para obtener más información sobre los roles, consulte xref:permisos/permisos.adoc[Permisos].
+
+== Opciones de tema
+
+El tema afecta la forma en que Grafana muestra gráficos, menús y otros elementos de la interfaz de usuario.
+
+=== Predeterminado
+
+El tema *predeterminado* es el tema de oscuro o el que haya sido seleccionado en un nivel superior. Por ejemplo, si un administrador de la organización estableció el tema de *Claro*, entonces ese es el predeterminado para todos los equipos de esa organización.
+
+*Oscuro*
+
+Aquí hay un ejemplo del tema oscuro.
+
+image::image4.png[Dark theme example,width=624,height=119]
+
+*Claro*
+
+Aquí hay un ejemplo del tema de claro.
+
+image::image5.png[Light theme example,width=624,height=118]
+
+== Cambiar el tema de la interfaz de usuario del servidor
+
+Los administradores del servidor pueden cambiar el tema de la interfaz de usuario de Grafana para todos los usuarios del servidor configurando la opción xref:administracion/configuracion.adoc#_default_theme[default_theme] en el archivo de configuración de Grafana.
+
+Para ver cuál es la configuración actual, consulte xref:administracion/ver-servidor/ver-configuracion-del-servidor.adoc[Ver la configuración del servidor].
+
+== Cambiar el tema de la interfaz de usuario de la organización
+
+Los administradores de la organización pueden cambiar el tema de la interfaz de usuario para todos los usuarios de una organización.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje).
+. Haga clic en *Preferencias*.
+. En la sección Preferencias, seleccione el *tema de la interfaz de usuario*.
+. Clic en *Guardar*.
+
+== Cambiar el tema de la interfaz de usuario del equipo
+
+Los administradores de la organización y del equipo pueden cambiar el tema de la interfaz de usuario para todos los usuarios de un equipo.
+
+[arabic]
+. Pase el cursor sobre el icono de *Configuración* (engranaje) en el menú lateral.
+. Haz clic en *Equipos*. Grafana muestra la lista de equipos.
+. Haga clic en el equipo para el que desea cambiar el tema de la interfaz de usuario y luego navegue a la pestaña *Configuración*.
+. En la sección Preferencias, seleccione el *tema de la interfaz de usuario*.
+. Clic en *Guardar*.
+
+== Cambia tu tema de interfaz de usuario personal
+
+Puede cambiar el tema de la interfaz de usuario para su cuenta de usuario. Esta configuración anula la configuración del tema de la interfaz de usuario en niveles superiores.
+
+[arabic]
+. En el menú de la izquierda, coloca el cursor sobre tu avatar y luego haz clic en *Preferencias*.
+. En la sección Preferencias, seleccione el *tema de la interfaz de usuario*.
+. Clic en *Guardar*.

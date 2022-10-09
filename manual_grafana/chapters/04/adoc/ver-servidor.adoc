@@ -1,0 +1,3 @@
+= Ver información del servidor
+
+Esta configuración contiene información sobre las herramientas que los administradores de servidores de Grafana pueden utilizar para obtener más información sobre sus servidores.

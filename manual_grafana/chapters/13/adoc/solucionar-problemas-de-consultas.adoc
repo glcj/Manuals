@@ -1,0 +1,21 @@
+= Solucionar problemas de consultas
+
+Esta página proporciona información para resolver problemas comunes del tablero.
+
+== Obtengo resultados diferentes cuando reorganizo mis funciones
+
+El orden de las funciones es muy importante. Al igual que en matemáticas, el orden en que coloque sus funciones puede afectar el resultado.
+
+== Inspeccione su solicitud de consulta y respuesta
+
+Los problemas más comunes están relacionados con la consulta y la respuesta de su fuente de datos. Incluso si parece un error o un problema de visualización en Grafana, casi siempre es un problema con la consulta de la fuente de datos o la respuesta de la fuente de datos. Empiece por inspeccionar la consulta y respuesta de su panel.
+
+Para obtener más información, consulte xref:paneles/inspeccionar-un-panel.adoc[Inspeccionar un panel].
+
+== Mi consulta es lenta
+
+¿Cuántos puntos de datos devuelve su consulta? Una consulta que devuelve muchos puntos de datos será lenta. Pruebe esto:
+
+* En las *Opciones de consulta*, limite los *Puntos de datos máximos* devueltos.
+* En *Opciones de consulta*, aumente el *Intervalo de tiempo mínimo*.
+* En su consulta, utilice una función `group by`.

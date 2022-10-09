@@ -1,0 +1,15 @@
+= Cambiar su contraseña de Grafana
+
+Puede cambiar su contraseña de Grafana en la pestaña Cambiar contraseña.
+
+[NOTE]
+====
+Si su instancia de Grafana utiliza un proveedor de autenticación externo, es posible que no pueda cambiar su contraseña. Póngase en contacto con su administrador de Grafana para obtener más información.
+====
+
+[arabic]
+. Pase el mouse sobre el ícono de usuario en la esquina inferior izquierda de la pantalla.
+. Haga clic en *Cambiar contraseña*. Grafana abre la pestaña Cambiar contraseña.
+. Ingrese su *Contraseña anterior* para autorizar el cambio.
+. Ingrese su *Nueva contraseña* y luego *Confirme la contraseña*.
+. Haga clic en *Cambiar contraseña*.

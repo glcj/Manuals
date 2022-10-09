@@ -1,0 +1,53 @@
+= Administrar usuarios
+
+Grafana ofrece varias opciones para agrupar usuarios. Cada nivel tiene diferentes herramientas para administrar las cuentas de los usuarios y diferentes tareas que pueden realizar.
+
+Una de las tareas de administración de usuarios más importantes es la asignación de roles, que rigen los xref:permisos/permisos.adoc[permisos] que tiene un usuario. Los permisos correctos garantizan que los usuarios tengan acceso solo a los recursos que necesitan.
+
+== Servidor
+
+El nivel más alto y más amplio de grupo de usuarios en Grafana es el servidor. Cada usuario con una cuenta en una instancia de Grafana es miembro del grupo de servidores.
+
+Los administradores de servidor de Grafana son cuentas de usuario que tienen la opción de administrador de Grafana establecida en *Sí*. Pueden administrar cuentas de usuarios individuales y organizaciones en su servidor.
+
+Los administradores del servidor pueden:
+
+* xref:administrar-usuarios/tareas-de-administrador-de-servidor/administrar-usuarios.adoc[Administrar usuarios]
+* xref:administrar-usuarios/tareas-de-administrador-de-servidor/administrar-organizaciones.adoc[Administrar organizaciones]
+
+== Organización
+
+Las organizaciones son grupos de usuarios en un servidor. Los usuarios pueden pertenecer a una o más organizaciones, pero cada usuario debe pertenecer al menos a una organización.
+
+Las fuentes de datos, los complementos y los tableros están asociados con las organizaciones. Esto significa que puede tener un servidor con dos organizaciones, una con una fuente de datos Prometheus y otra con una fuente de datos InfluxDB. Cada organización tiene datos y tableros separados.
+
+Los miembros de organizaciones tienen permisos basados ​​en su rol en la organización. Para obtener más información, consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la Organización].
+
+Los administradores de la organización son cuentas de usuario a las que se les asigna la función de administrador para una organización. Pueden administrar a sus usuarios y equipos en su organización.
+
+Los administradores de la organización pueden:
+
+* xref:administrar-usuarios/tareas-de-administrador-de organizacion[Administrar usuarios]
+* xref:administrar-usuarios/administrar-equipos.adoc[Administrar equipos]
+
+== Equipos
+
+Los equipos son grupos de usuarios dentro de la misma organización. Los equipos le permiten otorgar permisos a un grupo de usuarios. Se utilizan con mayor frecuencia para administrar xref:permisos/permisos-para-tablero-y-carpetas.adoc[permisos para carpetas y tableros]. Los usuarios de Enterprise pueden utilizarlos para xref:grafana-enterprise/permisos-de-fuente-de-datos[aplicar permisos de fuentes de datos].
+
+Los equipos son administrados principalmente por administradores de la organización. Sin embargo, si se aplica la configuración del servidor de Grafana xref:administracion/configuracion.adoc#_editors_can_admin[editors_can_admin], los usuarios a los que se les asigna la función de administrador de equipo también pueden administrar equipos en su organización y usuarios asignados a sus equipos.
+
+Los administradores de equipo pueden xref:administrar-usuarios/administrar-equipos.adoc[administrar equipos].
+
+== Usuarios
+
+Los usuarios son cuentas con nombre en Grafana con permisos otorgados para acceder a los recursos en Grafana. Todos los usuarios pueden administrar sus propias cuentas hasta cierto punto.
+
+Los usuarios pueden:
+
+* xref:administrar-usuarios/tareas-de-cuenta-de-usuario/perfil-de-cuenta-de-usuario.adoc[Ver y editar el perfil de usuario]
+* xref:administrar-usuarios/tareas-de-cuenta-de-usuario/cambie-su-contraseña.adoc[Cambiar la contraseña]
+* xref:administrar-usuarios/tareas-de-cuenta-de-usuario/cambiar-de-organizacion.adoc[Cambiar de organización]
+
+== Aprenda más
+
+Configure usuarios y equipos en nuestro tutorial sobre cómo https://grafana.com/tutorials/create-users-and-teams[crear usuarios y equipos].

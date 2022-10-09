@@ -1,0 +1,24 @@
+= Tipo de Datos
+
+IoTDB admite los siguientes tipos de datos:
+
+. BOOLEAN (Booleano)
+. INT32 (Entero)
+. INT64 (Entero Largo)
+. FLOAT (Punto Flotante de Precisión Simple)
+. DOBLE (Coma Flotante De Doble Precisión)
+. TEXTO (Cadena)
+
+La serie de tiempo de tipo *FLOAT* y *DOUBLE* puede especificar (MAX_POINT_NUMBER, consulte [esta página] para obtener más información sobre cómo especificar), cual es el número de dígitos después del punto decimal del número de punto flotante, si el método de codificación es [*RLE*] o [*TS_2DIFF*]. Si no se especifica MAX_POINT_NUMBER, el sistema utilizará [float_precision] en el archivo de configuración `iotdb-engine.properties`.
+
+. Para el valor de datos flotantes, el rango de datos es (-Integer.MAX_VALUE, Integer.MAX_VALUE), en lugar de Float.MAX_VALUE, y el max_point_number es 19, causado por la limitación de la función Math.round(float) en Java.
+
+Para el valor de datos dobles, el rango de datos es (-Long.MAX_VALUE, Long.MAX_VALUE), en lugar de Double.MAX_VALUE, y el max_point_number es 19, causado por la limitación de la función Math.round (double)en Java (Long.MAX_VALUE = 9,22E18).
+
+Cuando el tipo de datos de los datos ingresados ​​por el usuario en el sistema no se corresponde con el tipo de datos de la serie de tiempo, el sistema informará errores de tipo. Como se muestra a continuación, la codificación de diferencia de segundo orden no admite el tipo booleano:
+
+[source]
+----
+IoTDB> create timeseries root.ln.wf02.wt02.status WITH DATATYPE=BOOLEAN, ENCODING=TS_2DIFF
+error: encoding TS_2DIFF does not support BOOLEAN
+----

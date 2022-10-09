@@ -1,0 +1,95 @@
+= Inspeccionar un panel
+
+[NOTE]
+====
+Esta documentación se refiere a una función que solo está disponible en Grafana 7.0+.
+====
+
+El inspector de paneles lo ayuda a comprender y solucionar problemas de sus paneles. Puede inspeccionar los datos sin procesar de cualquier panel de Grafana, exportar esos datos a un archivo de valores separados por comas (CSV), ver solicitudes de consulta y exportar paneles y datos JSON.
+
+== Interfaz de usuario del inspector de paneles
+
+El inspector del panel muestra Inspeccionar: en la parte superior del panel. Haga clic en la flecha de la esquina superior derecha para expandir o reducir el panel.
+
+El inspector del panel consta de cuatro pestañas:
+
+* *Pestaña Datos:* muestra los datos sin procesar devueltos por la consulta con las transformaciones aplicadas. Las opciones de campo, como anulaciones y asignaciones de valores, no se aplican de forma predeterminada.
+* *Pestaña Estadísticas:* muestra cuánto tiempo tarda la consulta y cuánto devuelve.
+* *Pestaña JSON:* le permite ver y copiar el JSON del panel, el JSON de datos del panel y el JSON de estructura del marco de datos. Esto es útil si está aprovisionando o administrando Grafana.
+* *Pestaña Consulta:* muestra las solicitudes enviadas al servidor cuando Grafana consulta la fuente de datos.
+
+[NOTE]
+====
+No todos los tipos de paneles incluyen las cuatro pestañas. Por ejemplo, los paneles de lista del tablero no tienen datos sin procesar para inspeccionar, por lo que no muestran las pestañas Estadísticas, Datos o Consulta.
+====
+
+== Tareas del inspector de paneles
+
+Las tareas que puede realizar en el inspector de paneles se describen a continuación.
+
+=== Abra el inspector del panel
+
+Puede inspeccionar cualquier panel que pueda ver.
+
+[arabic]
+. En Grafana, navegue hasta el tablero que contiene el panel que desea inspeccionar.
+. Haga clic en el título del panel que desea inspeccionar y luego haga clic en *Inspeccionar*. O bien, coloque el cursor sobre el título del panel y luego presione *i*.
+
+El panel del inspector del panel se abre en el lado derecho de la pantalla.
+
+=== Inspeccionar los resultados de la consulta sin procesar
+
+Vea los resultados de la consulta sin procesar en una tabla. Estos son los datos devueltos por la consulta con las transformaciones aplicadas y antes de que el panel aplique opciones de campo o anulaciones de opciones de campo.
+
+[arabic]
+. Abra el inspector del panel y luego haga clic en la pestaña *Datos* o en el menú del panel haga clic en *Inspeccionar > Datos*.
+. Si su panel contiene múltiples consultas o consultas múltiples nodos, entonces tiene opciones adicionales.
+** *Seleccionar resultado:* elija qué datos del conjunto de resultados desea ver.
+** *Transformar datos*
+*** *Únir por tiempo:* vea los datos sin procesar de todas sus consultas a la vez, un conjunto de resultados por columna. Haga clic en el encabezado de una columna para reordenar los datos.
+** Vea los resultados de la consulta sin procesar en una tabla con opciones de campo y anulaciones de opciones aplicadas:
+
+... Abra la pestaña *Datos* en el inspector de paneles.
+... Haga clic en *Opciones de visualización de datos* encima de la tabla.
+... Haga clic en el botón de alternancia *Aplicar configuración de campo*.
+
+=== Descargar resultados de consultas sin procesar como CSV
+
+Grafana genera un archivo CSV en la ubicación de descarga predeterminada de su navegador. Puede abrirlo en el visor de su elección.
+
+[arabic]
+. Abra el inspector de paneles.
+. Inspeccione los resultados de la consulta sin procesar como se describe arriba. Ajuste la configuración hasta que vea los datos sin procesar que desea exportar.
+. Haga clic en *Descargar CSV*.
+
+Para descargar un archivo CSV específicamente formateado para Excel, expanda el panel de *Opciones de datos* y habilite la opción *Descargar para Excel* antes de hacer clic en *Descargar CSV*.
+
+=== Inspeccionar el rendimiento de las consultas
+
+La pestaña Estadísticas muestra estadísticas que le indican cuánto tiempo tarda su consulta, cuántas consultas envía y la cantidad de filas devueltas. Esta información puede ayudarlo a solucionar problemas con sus consultas, especialmente si alguno de los números es inesperadamente alto o bajo.
+
+[arabic]
+. Abra el inspector de paneles.
+. Navega a la pestaña Estadísticas.
+
+Las estadísticas se muestran en formato de solo lectura.
+
+=== Ver modelo JSON del panel
+
+Explore y exporte paneles, datos de panel y modelos JSON de marco de datos.
+
+[arabic]
+. Abra el inspector del panel y luego haga clic en la pestaña *JSON* o en el menú del panel haga clic en *Inspeccionar > Panel JSON*.
+. En Seleccionar fuente, elija una de las siguientes opciones:
+** *Panel JSON:* muestra un objeto JSON que representa el panel.
+** *Datos del panel:* muestra un objeto JSON que representa los datos que se pasaron al panel.
+** *Estructura de DataFrame*: muestra el conjunto de resultados sin procesar con las transformaciones, la configuración de campo y la configuración de anulaciones aplicadas.
+. Puede expandir o contraer partes del JSON para explorarlo, o puede hacer clic en *Copiar al portapapeles y* pegar el JSON en otra aplicación.
+
+=== Ver solicitud y respuesta sin procesar a la fuente de datos
+
+[arabic]
+. Abra el inspector del panel y luego haga clic en la pestaña *Consulta* o, en el menú del panel, haga clic en *Inspeccionar > Consulta*.
+. Haga clic en *Actualizar*.
+
+Grafana envía una consulta al servidor para recopilar información y luego muestra el resultado. Ahora puede profundizar en partes específicas de la consulta, expandirla o contraerla, o copiar los datos al portapapeles para usarlos en otras aplicaciones.

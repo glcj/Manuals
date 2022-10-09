@@ -1,0 +1,64 @@
+= Panel de estadísticas
+
+El Panel de estadísticas muestra un valor de estadística grande con un minigráfico de gráficos opcional. Puede controlar el color de fondo o el valor mediante umbrales.
+
+image::image78.png[Stat panel,width=624,height=95]
+
+[NOTE]
+====
+Este panel reemplaza al panel Singlestat, que quedó obsoleto en Grafana 7.0.
+====
+
+De forma predeterminada, el Panel de estadísticas muestra uno de los siguientes:
+
+* Solo el valor de una sola serie o campo.
+* Tanto el valor como el nombre de varias series o campos.
+
+Puede utilizar el *Modo texto* para controlar si el texto se muestra o no.
+
+Captura de pantalla de ejemplo:
+
+image::image79.png[Stat panel,width=624,height=277]
+
+== Opciones de campo y datos
+
+Las visualizaciones de estadísticas le permiten aplicar:
+
+* xref:paneles/transformaciones.adoc[Transformaciones de datos]
+* xref:paneles/opciones-de-campo-y-anulaciones.adoc[Opciones de campo y anulaciones]
+* xref:paneles/umbrales.adoc[Umbrales]
+
+== Ajuste de diseño automático
+
+El panel ajusta automáticamente el diseño según el ancho y la altura disponibles en el tablero. Oculta automáticamente el gráfico (minigráfico) si el panel se vuelve demasiado pequeño.
+
+== Opciones de pantalla
+
+Utilice las siguientes opciones para refinar su visualización:
+
+* *Mostrar:* elija cómo Grafana muestra sus datos.
+** *Calcular:* muestra un valor calculado basado en todas las filas.
+*** *Cálculo:* seleccione un cálculo para aplicar. Para obtener información sobre los cálculos disponibles, consulte la Lista de cálculos.
+** *Todos los valores:* muestra una estadística separada para cada fila.
+*** *Límite:* el número máximo de filas que se mostrarán.
+* *Campos:* seleccione un nombre de campo o tipo de campo (incluidos *Todos los campos* o *Campos numéricos*) para incluirlo en este panel.
+* *Valor:* seleccione una función de reducción que Grafana utilizará para reducir muchos campos a un solo valor. Haga clic en la lista *Valor* para ver las funciones y descripciones breves.
+* *Orientación:* elija una dirección de apilamiento.
+** *Auto:* Grafana selecciona lo que cree que es la mejor orientación.
+** *Horizontal:* las barras se estiran horizontalmente, de izquierda a derecha.
+** *Vertical:* las barras se estiran verticalmente, de arriba hacia abajo.
+* *Modo de texto:* (solo disponible en Grafana 7.1+). Puede usar la opción Modo de texto para controlar qué texto muestra el panel. Si el valor no es importante, solo el nombre y el color lo son, cambie el *Modo de texto* a *Nombre*. El valor se seguirá utilizando para determinar el color y se muestra en una información sobre herramientas.
+** *Automático:* si los datos contienen varias series o campos, muestra tanto el nombre como el valor.
+** *Valor:* muestra solo el valor, nunca el nombre. En su lugar, el nombre se muestra en la información sobre herramientas flotante.
+** *Valor y nombre:* muestre siempre el valor y el nombre.
+** *Nombre:* muestra el nombre en lugar del valor. El valor se muestra en la información sobre herramientas flotante.
+** *Ninguno:* no muestra nada (vacío). El nombre y el valor se muestran en la información sobre herramientas flotante.
+* *Modo de color*
+** *Valor:* colorea solo el valor y el área del gráfico.
+** *Fondo:* también colorea el fondo.
+* *Modo gráfico*
+** *Ninguno:* oculta el gráfico y solo muestra el valor.
+** *Área:* muestra el gráfico de área debajo del valor. Esto requiere que su consulta devuelva una columna de tiempo.
+* *Modo de alineación:* elija un modo de alineación.
+** *Automático:* si solo se muestra un valor único (sin repetición), el valor está centrado. Si se muestran varias series o filas, el valor se alinea a la izquierda.
+** *Centro:* el valor de estadística está centrado.

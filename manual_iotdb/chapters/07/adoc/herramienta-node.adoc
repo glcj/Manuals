@@ -1,0 +1,339 @@
+= Herramienta Node
+
+== Introducción
+
+La versión del clúster de IoTDB proporciona nodetool, una herramienta de shell para que los usuarios supervisen el estado de funcionamiento del clúster especificado. Los usuarios pueden obtener el estado del clúster ejecutando una variedad de instrucciones.
+
+A continuación se describe el uso y ejemplos de cada instrucción, donde `$IOTDB_CLUSTER_HOME` indica la ruta del directorio de instalación de IoTDB distribuido.
+
+== Prerrequisitos
+
+Para utilizar la herramienta de nodo, debe habilitar el servicio JMX. Consulte la [herramienta JMX] para obtener más detalles.
+
+== Instrucciones
+
+=== Empezar
+
+El script de inicio de la herramienta de shell de nodetool se encuentra en la carpeta `$IOTDB_CLUSTER_HOME/sbin`, puede especificar la dirección IP y el puerto del clúster durante el inicio.
+
+IP es la IP (o nombre de host) del nodo al que espera conectarse y el puerto es el puerto de servicio JMX especificado cuando se inicia el clúster de IoTDB.
+
+Los valores predeterminados son `127.0.0.1` y `31999`, respectivamente.
+
+Si necesita monitorear el clúster remoto o modificar el número de puerto del servicio JMX, configure la IP y el puerto reales con las opciones `-h` y `-p`.
+
+Cuando el servicio de autenticación JMX está habilitado, se debe especificar el nombre de usuario y la contraseña del servicio JMX. Los valores predeterminados son `iotdb` y `passw!d`, respectivamente. Utilice los parámetros de inicio `-u` y `-pw` para especificar el nombre de usuario y la contraseña del servicio JMX.
+
+=== Explicaciones
+
+En un sistema distribuido, un nodo se identifica por IP de nodo, puerto de metadatos, puerto de datos y puerto de clúster `<IP:METAPORT:DATAPORT:CLUSTERPORT>`.
+
+==== Mostrar el Anillo de Nodo
+
+IoTDB distribuido utiliza hash coherente para respaldar la distribución de datos.
+
+Puede conocer cada nodo del clúster mediante el comando `ring`, que imprime la información del anillo de nodos.
+
+1.Entrada
+
+    `ring`
+
+2.Salida
+
+    La salida es una cadena de varias líneas, y cada línea de cadena es un par clave-valor, donde la clave representa el identificador del nodo y el valor representa el nodo (`IP:METAPORT:DATAPORT:CLUSTERPORT`), el formato es `<clave- > valor>`.
+
+3.Ejemplos
+
+    Suponga que el clúster actual se ejecuta en tres nodos: `127.0.0.1:9003:40010:6667`, 127.0.0.1:9005:40012:6668 y `127.0.0.1:9007:40014:6669`.
+
+Los ejemplos de instrucciones de entrada para diferentes sistemas son los siguientes:
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 ring
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 ring
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+Node Identifier                                 Node 
+330411070           ->          127.0.0.1:9003:40010:6667
+330454032           ->          127.0.0.1:9005:40012:6668 
+330496472           ->          127.0.0.1:9007:40014:6669
+----
+
+La salida anterior muestra que hay tres nodos en el clúster actual, y los resultados de la salida están ordenados por su identificador ascendente.
+
+==== Consultar Partición de Datos y Partición de Metadatos
+
+Los metadatos de la serie temporal de iotdb distribuido se dividen en varios grupos de datos según sus grupos de almacenamiento, en los que el grupo de almacenamiento y la partición de datos tienen una relación de muchos a uno.
+
+Es decir, todos los metadatos de un grupo de almacenamiento solo existen en el mismo grupo de datos y un grupo de datos puede contener varios grupos de almacenamiento.
+
+Los datos se dividen en varios grupos de datos según su grupo de almacenamiento y marca de tiempo, y la granularidad de la partición de tiempo se decide mediante una configuración (actualmente no disponible).
+
+La partición de datos se compone de varios nodos de réplica para garantizar una alta disponibilidad de datos, y uno de los nodos desempeña el papel de líder.
+
+A través de esta instrucción, el usuario puede conocer los metadatos de una determinada ruta y los nodos en los que se almacenan los datos.
+
+1.Entrada
+
+    La instrucción para consultar la información de la partición de datos es `partition`. Los parámetros se describen a continuación:
+
+[cols="1,1,1"]
+|===
+|Parámetro
+|Descripción
+|Ejemplos
+
+|`-m`
+|`--metadata` Partición de metadatos de consulta, de forma predeterminada solo partición de datos de consulta
+|`-m`
+
+|`-path`
+|`--path` Parámetro obligatorio, la ruta a consultar. Si la ruta no tiene un grupo de almacenamiento correspondiente, la consulta falla
+|`-path root.guangzhou.d1`
+
+|`-st`
+|`--StartTime` El sistema usa el tiempo de partición actual de forma predeterminada
+|`-st 1576724778159`
+
+|`-et`
+|`--EndTime` Se utiliza al consultar la partición de datos.
+La hora de finalización es la hora actual del sistema de forma predeterminada.
+Si la hora de finalización es menor que la hora de inicio, la hora de finalización es la hora de inicio por defecto
+|`-et 1576724778159`
+|===
+
+2.Salida
+
+    La salida es una cadena de varias líneas, y cada línea de cadena es un par clave-valor, donde la clave representa la partición y el valor representa el grupo de datos en el formato de <clave -> valor>.
+
+3.Ejemplos
+
+    Suponga que el clúster actual se ejecuta en tres nodos: `127.0.0.1:9003:40010:6667`, 127.0.0.1:9005:40012:6668 y `127.0.0.1:9007:40014:6669`.
+
+    El número de copias es 2 y hay 3 grupos de almacenamiento: `{root.beijing, root.shanghai, root.guangzhou}`.
+
+* Partición de los datos de la consulta (intervalo de tiempo predeterminado, el intervalo de partición de tiempo es un día)
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1
+----
+
+Presione enter para ejecutar the comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+DATA<root.guangzhou.d1, 1576723735188, 1576723735188>	->	[127.0.0.1:9003:40010:6667, 127.0.0.1:9005:40012:6668]
+----
+
+* Partición de los datos de la consulta (intervalo de tiempo especificado, el intervalo de partición de tiempo es un día)
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1 -st 1576624778159 -et 1576724778159
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1 -st 1576624778159 -et 1576724778159
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+DATA<root.guangzhou.d1, 1576627200000, 1576713599999>	->	[127.0.0.1:9007:40014:6669, 127.0.0.1:9003:40010:6667] 
+DATA<root.guangzhou.d1, 1576713600000, 1576724778159>	->	[127.0.0.1:9003:40010:6667, 127.0.0.1:9005:40012:6668] 
+DATA<root.guangzhou.d1, 1576624778159, 1576627199999>	->	[127.0.0.1:9005:40012:6668, 127.0.0.1:9007:40014:6669]
+----
+
+* Partición de metadatos de consulta
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1 -m
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 partition -path root.guangzhou.d1 -m
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+DATA<root.guangzhou.d1, 1576723735188, 1576723735188>	->	[127.0.0.1:9003:40010, 127.0.0.1:9004:40011]
+----
+
+El resultado anterior muestra que el grupo de datos al que pertenece `root.guangzhou.d1` contiene dos nodos, de los cuales `127.0.0.1:9003:40010` es el nodo de encabezado.
+
+==== Consultar el Número de Slots Gestionados por el Nodo
+
+IoTDB distribuido divide los datos en un número fijo de (`10000` por defecto) ranuras, y el líder del grupo de administración del clúster divide las ranuras entre los grupos de datos.
+
+A través de esta instrucción, puede conocer la cantidad de ranuras administradas por cada grupo de datos.
+
+. Aporte
+
+    El comando para consultar la información de la partición de datos correspondiente al nodo es `host`.
+
+    Los parámetros se describen a continuación:
+
+[cols="1,1,1"]
+|===
+|Parámetro
+|Descripción
+|Ejemplos
+
+|`-a`
+|`--all` Consulta la cantidad de ranuras administradas por todos los grupos de datos. De forma predeterminada, solo se muestran los grupos de datos del nodo de consulta
+|`-a`
+|=== 
+
+. Salida
+
+    La salida es una cadena de varias líneas, en la que cada línea es un par clave-valor, donde la clave representa el grupo de datos y el valor representa el número de ranuras administradas, y el formato es <clave -> valor>.
+
+. Ejemplos
+
+    Suponga que el clúster actual se ejecuta en tres nodos: `127.0.0.1:9003:40010:6667`, `127.0.0.1:9005:40012:6668` y `127.0.0.1:9007:40014:6669`, y el número de copias es 2.
+
+* Grupo de Particiones Predeterminado
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 host
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 host
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+Raft group                                                 Slot Number
+(127.0.0.1:9003:40010:6667, 127.0.0.1:9005:40012:6668)      ->                3333
+(127.0.0.1:9007:40014:6669, 127.0.0.1:9003:40010:6667)      ->                3334
+----
+
+* Todos los Grupos de Particiones
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 host -a
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 host -a
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+Raft group                                                 Slot Number
+(127.0.0.1:9003:40010:6667, 127.0.0.1:9005:40012:6668)      ->                3333
+(127.0.0.1:9005:40012:6668, 127.0.0.1:9007:40014:6669)      ->                3333
+(127.0.0.1:9007:40014:6669, 127.0.0.1:9003:40010:6667)      ->                3334 
+----
+
+==== Consultar Estado del Nodo
+
+IoTDB distribuido contiene varios nodos. Para cualquier nodo, existe la posibilidad de que no pueda proporcionar servicios normalmente debido a problemas de red o hardware.
+
+A través de esta instrucción, puede conocer el estado actual de todos los nodos del clúster.
+
+. Entrada
+
+    status
+
+. Salida
+
+    La salida es una cadena de varias líneas, donde cada línea es un par clave-valor, donde la clave representa el nodo (`IP: METAPORT:DATAPORT`), el valor indica el estado del nodo, "`on`" es normal, "`off`" es anormal y el formato es <clave -> valor>.
+
+. Ejemplos
+
+    Suponga que el clúster actual se ejecuta en tres nodos: `127.0.0.1:9003:40010:6667`, 127.0.0.1:9005:40012:6668 y `127.0.0.1:9007:40014:6669`, y el número de copias es 2.
+
+Linux y MacOS:
+
+[source,Shell]
+----
+Shell > ./sbin/nodetool.sh -h 127.0.0.1 -p 31999 status
+----
+
+Windows:
+
+[source,Shell]
+----
+Shell > .\sbin\nodetool.bat -h 127.0.0.1 -p 31999 status
+----
+
+Presione enter para ejecutar el comando.
+
+El resultado de la instrucción de ejemplo es el siguiente:
+
+[source,Shell]
+----
+Node                                Status 
+127.0.0.1:9003:40010:6667          ->        on 
+127.0.0.1:9005:40012:6668          ->        off
+127.0.0.1:9007:40014:6669          ->        on 
+----
+
+El resultado anterior indica que los nodos `127.0.0.1:9003:40010:6667` y los nodos `127.0.0.1:9007:40014:6669` están en estado normal, y los nodos `127.0.0.1:9005:40012:6668` no pueden proporcionar servicios.

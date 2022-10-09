@@ -1,0 +1,1800 @@
+= DML (lenguaje de manipulación de datos)
+
+== INSERT
+
+=== Insertar Datos en Tiempo Real
+
+IoTDB proporciona a los usuarios una variedad de formas de insertar datos en tiempo real, como ingresar directamente la [declaración INSERT SQL] en las [herramientas Cliente/Shell], o usar [Java JDBC] para realizar una ejecución única o por lotes de la [declaración INSERT SQL].
+
+Esta sección presenta principalmente el uso de la [declaración INSERT SQL] para la importación de datos en tiempo real en el escenario.
+
+==== Uso de Declaraciones INSERT
+
+La declaración de [declaración INSERT SQL] se utiliza para insertar datos en una o más series de tiempo especificadas creadas. Para cada punto de datos insertado, consta de una [marca de tiempo] y un valor de adquisición de sensor (consulte [Tipo de Datos]).
+
+En el escenario de esta sección, tome dos series temporales `root.ln.wf02.wt02.status` y `root.ln.wf02.wt02.hardware` como ejemplo, y sus tipos de datos son BOOLEAN y TEXT, respectivamente.
+
+El código de muestra para la inserción de datos de una sola columna es el siguiente:
+
+[source]
+----
+IoTDB > insert into root.ln.wf02.wt02(timestamp,status) values(1,true)
+IoTDB > insert into root.ln.wf02.wt02(timestamp,hardware) values(1, "v1")
+----
+
+El código de ejemplo anterior inserta la marca de tiempo entera larga y el valor "true" en la serie temporal `root.ln.wf02.wt02.status` e inserta la marca de tiempo entera larga y el valor "v1" en la serie temporal `root.ln.wf02.wt02.hardware`. Cuando la ejecución es exitosa, se muestra el tiempo de costo para indicar que se completó la inserción de datos.
+
+[NOTE]
+====
+En IoTDB, los datos de tipo TEXT se pueden representar mediante comillas simples y dobles. La declaración de inserción anterior utiliza comillas dobles para los datos de tipo TEXTO. El siguiente ejemplo utilizará comillas simples para datos de tipo TEXT.
+====
+
+La declaración INSERT también puede admitir la inserción de datos de varias columnas en el mismo momento. El código de muestra para insertar los valores de las dos series temporales en el mismo punto de tiempo '2' es el siguiente:
+
+[source]
+----
+IoTDB > insert into root.ln.wf02.wt02(timestamp, status, hardware) VALUES (2, false, 'v2')
+----
+
+Después de insertar los datos, simplemente podemos consultar los datos insertados usando la declaración SELECT:
+
+[source]
+----
+IoTDB > select * from root.ln.wf02 where time < 3
+----
+
+El resultado se muestra a continuación. El resultado de la consulta muestra que las declaraciones de inserción de datos de una sola columna y de varias columnas se realizan correctamente.
+
+[source]
+----
++-----------------------------+--------------------------+------------------------+
+|                         Time|root.ln.wf02.wt02.hardware|root.ln.wf02.wt02.status|
++-----------------------------+--------------------------+------------------------+
+|1970-01-01T08:00:00.001+08:00|                        v1|                    true|
+|1970-01-01T08:00:00.002+08:00|                        v2|                   false|
++-----------------------------+--------------------------+------------------------+
+Total line number = 2
+It costs 0.170s
+----
+
+== SELECT
+
+=== Consulta de Segmento de Tiempo
+
+Este capítulo presenta principalmente los ejemplos relevantes de consultas de intervalos de tiempo utilizando declaraciones SELECT de IoTDB. La sintaxis SQL detallada y las especificaciones de uso se pueden encontrar en la [Documentación SQL]. También puede utilizar la interfaz estándar de [Java JDBC] para ejecutar consultas relacionadas.
+
+==== Seleccionar una Columna de Datos Según un Intervalo de Tiempo
+
+La declaración SQL es:
+
+[source]
+----
+select temperature from root.ln.wf01.wt01 where time < 2017-11-01T00:08:00.000
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es el sensor de temperatura (temperature). La declaración SQL requiere que se seleccionen todos los valores del sensor de temperatura antes del punto de tiempo "2017-11-01T00:08:00.000".
+
+El resultado de la ejecución de esta declaración SQL es el siguiente:
+
+[source]
+----
++-----------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.temperature|
++-----------------------------+-----------------------------+
+|2017-11-01T00:00:00.000+08:00|                        25.96|
+|2017-11-01T00:01:00.000+08:00|                        24.36|
+|2017-11-01T00:02:00.000+08:00|                        20.09|
+|2017-11-01T00:03:00.000+08:00|                        20.18|
+|2017-11-01T00:04:00.000+08:00|                        21.13|
+|2017-11-01T00:05:00.000+08:00|                        22.72|
+|2017-11-01T00:06:00.000+08:00|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                        21.45|
++-----------------------------+-----------------------------+
+Total line number = 8
+It costs 0.026s
+----
+
+==== Seleccionar Varias Columnas de Datos Según un Intervalo de Tiempo
+
+La declaración SQL es:
+
+[source]
+----
+select status, temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000;
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es "status" y "temperature". La declaración SQL requiere que se seleccionen los valores del sensor de temperatura y estado entre el punto de tiempo "2017-11-01T00:05:00.000" y "2017-11-01T00:12:00.000".
+
+El resultado de la ejecución de esta declaración SQL es el siguiente:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
+|2017-11-01T00:08:00.000+08:00|                   false|                        22.58|
+|2017-11-01T00:09:00.000+08:00|                   false|                        20.98|
+|2017-11-01T00:10:00.000+08:00|                    true|                        25.52|
+|2017-11-01T00:11:00.000+08:00|                   false|                        22.91|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 6
+It costs 0.018s
+----
+
+==== Seleccionar Varias Columnas de Datos para el Mismo Dispositivo Según Varios Intervalos de Tiempo
+
+IoTDB admite la especificación de múltiples condiciones de intervalo de tiempo en una consulta. Los usuarios pueden combinar condiciones de intervalo de tiempo a voluntad según sus necesidades. Por ejemplo, la declaración SQL es:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where (time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000) or (time >= 2017-11-01T16:35:00.000 and time <= 2017-11-01T16:37:00.000);
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es "status" y "temperature"; la declaración especifica dos intervalos de tiempo diferentes, a saber, "2017-11-01T00:05:00.000 to 2017-11-01T00:12:00.000" y "2017-11-01T16:35:00.000 to 2017-11-01T16:37:00.000". La declaración SQL requiere que se seleccionen los valores de las series temporales seleccionadas que satisfacen cualquier intervalo de tiempo.
+
+El resultado de la ejecución de esta declaración SQL es el siguiente:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
+|2017-11-01T00:08:00.000+08:00|                   false|                        22.58|
+|2017-11-01T00:09:00.000+08:00|                   false|                        20.98|
+|2017-11-01T00:10:00.000+08:00|                    true|                        25.52|
+|2017-11-01T00:11:00.000+08:00|                   false|                        22.91|
+|2017-11-01T16:35:00.000+08:00|                    true|                        23.44|
+|2017-11-01T16:36:00.000+08:00|                   false|                        21.98|
+|2017-11-01T16:37:00.000+08:00|                   false|                        21.93|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 9
+It costs 0.018s
+----
+
+==== Elegir Varias Columnas de Datos para Diferentes Dispositivos Según Múltiples Intervalos de Tiempo
+
+El sistema admite la selección de datos en cualquier columna de una consulta, es decir, las columnas seleccionadas pueden provenir de diferentes dispositivos. Por ejemplo, la declaración SQL es:
+
+[source]
+----
+select wf01.wt01.status,wf02.wt02.hardware from root.ln where (time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000) or (time >= 2017-11-01T16:35:00.000 and time <= 2017-11-01T16:37:00.000);
+----
+
+Lo que significa:
+
+Las series de tiempo seleccionadas son "el estado de la fuente de alimentación del dispositivo ln group wf01 plant wt01" y "la versión de hardware del dispositivo ln group wf02 plant wt02"; la declaración especifica dos intervalos de tiempo diferentes, a saber, "2017-11-01T00:05:00.000 to 2017-11-01T00:12:00.000" y "2017-11-01T16:35:00.000 to 2017-11-01T16:37:00.000". La declaración SQL requiere que se seleccionen los valores de las series temporales seleccionadas que satisfacen cualquier intervalo de tiempo.
+
+El resultado de la ejecución de esta declaración SQL es el siguiente:
+
+[source]
+----
++-----------------------------+------------------------+--------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf02.wt02.hardware|
++-----------------------------+------------------------+--------------------------+
+|2017-11-01T00:06:00.000+08:00|                   false|                        v1|
+|2017-11-01T00:07:00.000+08:00|                   false|                        v1|
+|2017-11-01T00:08:00.000+08:00|                   false|                        v1|
+|2017-11-01T00:09:00.000+08:00|                   false|                        v1|
+|2017-11-01T00:10:00.000+08:00|                    true|                        v2|
+|2017-11-01T00:11:00.000+08:00|                   false|                        v1|
+|2017-11-01T16:35:00.000+08:00|                    true|                        v2|
+|2017-11-01T16:36:00.000+08:00|                   false|                        v1|
+|2017-11-01T16:37:00.000+08:00|                   false|                        v1|
++-----------------------------+------------------------+--------------------------+
+Total line number = 9
+It costs 0.014s
+----
+
+==== Ordenar por Hora de Consulta
+
+IoTDB admite la declaración 'order by time' desde 0.11, se usa para mostrar los resultados en orden descendente por tiempo. Por ejemplo, la declaración SQL es:
+
+[source]
+----
+select * from root.ln where time > 1 order by time desc limit 10;
+----
+
+El resultado de la ejecución de esta declaración SQL es el siguiente:
+
+[source]
+----
++-----------------------------+--------------------------+------------------------+-----------------------------+------------------------+
+|                         Time|root.ln.wf02.wt02.hardware|root.ln.wf02.wt02.status|root.ln.wf01.wt01.temperature|root.ln.wf01.wt01.status|
++-----------------------------+--------------------------+------------------------+-----------------------------+------------------------+
+|2017-11-07T23:59:00.000+08:00|                        v1|                   false|                        21.07|                   false|
+|2017-11-07T23:58:00.000+08:00|                        v1|                   false|                        22.93|                   false|
+|2017-11-07T23:57:00.000+08:00|                        v2|                    true|                        24.39|                    true|
+|2017-11-07T23:56:00.000+08:00|                        v2|                    true|                        24.44|                    true|
+|2017-11-07T23:55:00.000+08:00|                        v2|                    true|                         25.9|                    true|
+|2017-11-07T23:54:00.000+08:00|                        v1|                   false|                        22.52|                   false|
+|2017-11-07T23:53:00.000+08:00|                        v2|                    true|                        24.58|                    true|
+|2017-11-07T23:52:00.000+08:00|                        v1|                   false|                        20.18|                   false|
+|2017-11-07T23:51:00.000+08:00|                        v1|                   false|                        22.24|                   false|
+|2017-11-07T23:50:00.000+08:00|                        v2|                    true|                         23.7|                    true|
++-----------------------------+--------------------------+------------------------+-----------------------------+------------------------+
+Total line number = 10
+It costs 0.016s
+----
+
+==== Funciones de Generación de Series Temporales
+
+La función de generación de series de tiempo toma varias series de tiempo como entrada y genera una serie de tiempo. A diferencia de la función de agregación, el conjunto de resultados de la función de generación de series de tiempo tiene una columna de marca de tiempo.
+
+Todas las funciones de generación de series de tiempo pueden aceptar * como entrada.
+
+IoTDB admite consultas híbridas de series de tiempo que generan consultas de funciones y consultas de datos sin procesar.
+
+===== Funciones Matemáticas
+
+Actualmente, IoTDB admite las siguientes funciones matemáticas. El comportamiento de estas funciones matemáticas es coherente con el comportamiento de estas funciones en la biblioteca estándar Java Math.
+
+[cols="1,1,1,1"]
+|===
+|Nombre de la Función 
+|Tipos de Datos de Series de Entrada Permitidos
+|Tipos de Datos de Series de Salida
+|Implementación Correspondiente en la Biblioteca Estándar de Java
+
+|SIN
+|INT32 / INT64 / FLOAT / DOUBLE
+|DOUBLE	
+|Math#sin(double)
+
+
+|COS
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#cos(double)
+
+|TAN
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#tan(double)
+
+|ASIN
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#asin(double)
+
+|ACOS
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#acos(double)
+
+|ATAN
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#atan(double)
+
+|DEGREES
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#toDegrees(double)
+
+|RADIANS
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#toRadians(double)
+
+|ABS
+|INT32 / INT64 / FLOAT / DOUBLE	
+|Igual que la serie de entrada
+|Math#abs(int) / Math#abs(long) /Math#abs(float) /Math#abs(double)
+
+|SIGN
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE	
+|Math#signum(double)
+
+|CEIL
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#ceil(double)
+
+|FLOOR
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#floor(double)
+
+|ROUND
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE	
+|Math#rint(double)
+
+|EXP	
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE	
+|Math#exp(double)
+
+|LN	
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE	
+|Math#log(double)
+
+|LOG10	
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE	
+|Math#log10(double)
+
+|SQRT
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Math#sqrt(double)
+|===
+
+Ejemplo:
+
+[source]
+----
+select s1, sin(s1), cos(s1), tan(s1) from root.sg1.d1 limit 5 offset 1000;
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+-------------------+-------------------+--------------------+-------------------+
+|                         Time|     root.sg1.d1.s1|sin(root.sg1.d1.s1)| cos(root.sg1.d1.s1)|tan(root.sg1.d1.s1)|
++-----------------------------+-------------------+-------------------+--------------------+-------------------+
+|2020-12-10T17:11:49.037+08:00|7360723084922759782| 0.8133527237573284|  0.5817708713544664| 1.3980636773094157|
+|2020-12-10T17:11:49.038+08:00|4377791063319964531|-0.8938962705202537|  0.4482738644511651| -1.994085181866842|
+|2020-12-10T17:11:49.039+08:00|7972485567734642915| 0.9627757585308978|-0.27030138509681073|-3.5618602479083545|
+|2020-12-10T17:11:49.040+08:00|2508858212791964081|-0.6073417341629443| -0.7944406950452296| 0.7644897069734913|
+|2020-12-10T17:11:49.041+08:00|2817297431185141819|-0.8419358900502509| -0.5395775727782725| 1.5603611649667768|
++-----------------------------+-------------------+-------------------+--------------------+-------------------+
+Total line number = 5
+It costs 0.008s
+----
+
+===== Funciones de Procesamiento de Cadenas
+
+Actualmente, IoTDB admite las siguientes funciones de procesamiento de cadenas:
+
+[cols="1,1,1,1,1"]
+|===
+|Nombre de la Función 
+|Tipos de Datos de las Series de Entrada Permitidos
+|Atributos Requeridos 
+|Tipos de Datos de las Series de Salida
+|Descripción
+
+|STRING_CONTAINS 
+|TEXT 
+|`s`: la secuencia a buscar 
+|BOOLEAN 
+|Determinar si `s` está en la cadena
+
+|STRING_MATCHES 
+|TEXT 
+|`regex`: la expresión regular con la que debe coincidir la cadena 
+|BOOLEAN 
+|Determinar si la cadena puede coincidir con `regex`
+|===
+
+Ejemplo:
+
+[source]
+----
+select s1, string_contains(s1, "s"="warn"), string_matches(s1, "regex"="[^\\s]+37229") from root.sg1.d4;
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+--------------+-------------------------------------------+------------------------------------------------------+
+|                         Time|root.sg1.d4.s1|string_contains(root.sg1.d4.s1, "s"="warn")|string_matches(root.sg1.d4.s1, "regex"="[^\\s]+37229")|
++-----------------------------+--------------+-------------------------------------------+------------------------------------------------------+
+|1970-01-01T08:00:00.001+08:00|    warn:-8721|                                       true|                                                 false|
+|1970-01-01T08:00:00.002+08:00|  error:-37229|                                      false|                                                  true|
+|1970-01-01T08:00:00.003+08:00|     warn:1731|                                       true|                                                 false|
++-----------------------------+--------------+-------------------------------------------+------------------------------------------------------+
+Total line number = 3
+It costs 0.007s
+----
+
+===== Funciones de Selector
+
+Actualmente, IoTDB admite las siguientes funciones de selector:
+
+[cols="1,1,1,1,1"]
+|===
+|Nombre de la Función 
+|Tipos de Datos de las Series de Entrada Permitidos
+|Atributos Requeridos 
+|Tipos de Datos de las Series de Salida
+|Descripción
+
+|TOP_K	
+|INT32 / INT64 / FLOAT / DOUBLE / TEXT	
+|`k`: el número máximo de puntos de datos seleccionados, debe ser mayor que 0 y menor o igual que 1000
+|El mismo tipo que la serie de entrada
+|Devuelve `k` puntos de datos con los valores más grandes en una serie de tiempo
+
+|BOTTOM_K	
+|INT32 / INT64 / FLOAT / DOUBLE / TEXT	
+|`k`: el número máximo de puntos de datos seleccionados, debe ser mayor que 0 y menor o igual que 1000
+|Mismo tipo que la serie de entrada
+|Devuelve `k` puntos de datos con los valores más pequeños en una serie de tiempo
+|===
+
+Ejemplo:
+
+[source]
+----
+select s1, top_k(s1, "k"="2"), bottom_k(s1, "k"="2") from root.sg1.d2 where time > 2020-12-10T20:36:15.530+08:00;
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+--------------------+------------------------------+---------------------------------+
+|                         Time|      root.sg1.d2.s1|top_k(root.sg1.d2.s1, "k"="2")|bottom_k(root.sg1.d2.s1, "k"="2")|
++-----------------------------+--------------------+------------------------------+---------------------------------+
+|2020-12-10T20:36:15.531+08:00| 1531604122307244742|           1531604122307244742|                             null|
+|2020-12-10T20:36:15.532+08:00|-7426070874923281101|                          null|                             null|
+|2020-12-10T20:36:15.533+08:00|-7162825364312197604|          -7162825364312197604|                             null|
+|2020-12-10T20:36:15.534+08:00|-8581625725655917595|                          null|             -8581625725655917595|
+|2020-12-10T20:36:15.535+08:00|-7667364751255535391|                          null|             -7667364751255535391|
++-----------------------------+--------------------+------------------------------+---------------------------------+
+Total line number = 5
+It costs 0.006s
+----
+
+===== Funciones de Cálculo de Tendencia de Variación
+
+Actualmente, IoTDB admite las siguientes funciones de cálculo de tendencias de variación:
+
+[cols="1,1,1,1,1"]
+|===
+|Nombre de la Función 
+|Tipos de Datos de las Series de Entrada Permitidos
+|Atributos Requeridos 
+|Tipos de Datos de las Series de Salida
+|Descripción
+
+|TIME_DIFFERENCE	
+|INT32 / INT64 / FLOAT / DOUBLE / BOOLEAN / TEXT	
+|INT64
+|Calcula la diferencia entre la marca de tiempo de un punto de datos y la marca de tiempo del punto de datos anterior. No hay una salida correspondiente para el primer punto de datos.
+
+|DIFFERENCE
+|INT32 / INT64 / FLOAT / DOUBLE	
+|Mismo tipo que la serie de entrada
+|Calcula la diferencia entre el valor de un punto de datos y el valor del punto de datos anterior. No hay una salida correspondiente para el primer punto de datos.
+
+|NON_NEGATIVE_DIFFERENCE	
+|INT32 / INT64 / FLOAT / DOUBLE	
+|Mismo tipo que la serie de entrada
+|Calcula el valor absoluto de la diferencia entre el valor de un punto de datos y el valor del punto de datos anterior. No hay una salida correspondiente para el primer punto de datos.
+
+|DERIVATIVE
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Calcula la tasa de cambio de un punto de datos en comparación con el punto de datos anterior, el resultado es igual a DIFFERENCE/TIME_DIFFERENCE. No hay una salida correspondiente para el primer punto de datos.
+
+|NON_NEGATIVE_DERIVATIVE	
+|INT32 / INT64 / FLOAT / DOUBLE	
+|DOUBLE
+|Calcula el valor absoluto de la tasa de cambio de un punto de datos en comparación con el punto de datos anterior, el resultado es igual a NON_NEGATIVE_DIFFERENCE/TIME_DIFFERENCE. No hay una salida correspondiente para el primer punto de datos.
+|===
+
+Ejemplo:
+
+[source]
+----
+Calcula el valor absoluto de la tasa de cambio de un punto de datos en comparación con el punto de datos anterior, el resultado es igual a NON_NEGATIVE_DIFFERENCE/TIME_DIFFERENCE. No hay una salida correspondiente para el primer punto de datos.
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+-------------------+-------------------------------+--------------------------+---------------------------------------+--------------------------+---------------------------------------+
+|                         Time|     root.sg1.d1.s1|time_difference(root.sg1.d1.s1)|difference(root.sg1.d1.s1)|non_negative_difference(root.sg1.d1.s1)|derivative(root.sg1.d1.s1)|non_negative_derivative(root.sg1.d1.s1)|
++-----------------------------+-------------------+-------------------------------+--------------------------+---------------------------------------+--------------------------+---------------------------------------+
+|2020-12-10T17:11:49.037+08:00|7360723084922759782|                              1|      -8431715764844238876|                    8431715764844238876|    -8.4317157648442388E18|                  8.4317157648442388E18|
+|2020-12-10T17:11:49.038+08:00|4377791063319964531|                              1|      -2982932021602795251|                    2982932021602795251|     -2.982932021602795E18|                   2.982932021602795E18|
+|2020-12-10T17:11:49.039+08:00|7972485567734642915|                              1|       3594694504414678384|                    3594694504414678384|     3.5946945044146785E18|                  3.5946945044146785E18|
+|2020-12-10T17:11:49.040+08:00|2508858212791964081|                              1|      -5463627354942678834|                    5463627354942678834|     -5.463627354942679E18|                   5.463627354942679E18|
+|2020-12-10T17:11:49.041+08:00|2817297431185141819|                              1|        308439218393177738|                     308439218393177738|     3.0843921839317773E17|                  3.0843921839317773E17|
++-----------------------------+-------------------+-------------------------------+--------------------------+---------------------------------------+--------------------------+---------------------------------------+
+Total line number = 5
+It costs 0.014s
+----
+
+===== Funciones de Generación de Series Temporales Definidas por el Usuario
+
+Consulte [UDF (Función Definida por el Usuario)].
+
+==== Consulta Agregada
+
+Esta sección presenta principalmente los ejemplos relacionados de consulta agregada.
+
+===== Contar Puntos
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01;
+----
+
+
+Resultado:
+
+[source]
+----
++-------------------------------+
+|count(root.ln.wf01.wt01.status)|
++-------------------------------+
+|                          10080|
++-------------------------------+
+Total line number = 1
+It costs 0.016s
+----
+
+====== Agregación por Nivel
+
+La *declaración de agregación por nivel* se utiliza para agregar en un nivel jerárquico específico de la ruta de la serie temporal. Para todas las rutas de series temporales, por convención, "level=0" representa el nivel raíz. Es decir, para contar los puntos de cualquier medición en "root.ln", el nivel debe establecerse en 1.
+
+Por ejemplo, hay varias series en "root.ln.wf01", como "root.ln.wf01.wt01.status", "root.ln.wf01.wt02.status", "root.ln.wf01.wt03.status". Para contar el número de puntos de "status" de todas estas series, utilice la consulta:
+
+[source]
+----
+select count(status) from root.ln.wf01.* group by level=2
+----
+
+Resultado:
+
+[source]
+----
++----------------------------+
+|COUNT(root.ln.wf01.*.status)|
++----------------------------+
+|                       10080|
++----------------------------+
+Total line number = 1
+It costs 0.003s
+----
+
+Supongamos que agregamos otras dos series temporales, "root.ln.wf01.wt01.temperature" y "root.ln.wf02.wt01.temperature". Para consultar el recuento y la suma de "temperature" en la ruta "root.ln..", agregando en el level=2, utilice la siguiente declaración:
+
+[source]
+----
+select count(temperature), sum(temperature) from root.ln.*.* group by level=2
+----
+
+Resultado:
+
+[source]
+----
++---------------------------------+---------------------------------+-------------------------------+-------------------------------+
+|count(root.ln.wf02.*.temperature)|count(root.ln.wf01.*.temperature)|sum(root.ln.wf02.*.temperature)|sum(root.ln.wf01.*.temperature)|
++---------------------------------+---------------------------------+-------------------------------+-------------------------------+
+|                                8|                                4|                          228.0|              91.83000183105469|
++---------------------------------+---------------------------------+-------------------------------+-------------------------------+
+Total line number = 1
+It costs 0.013s
+----
+
+Para consultar el recuento y la suma de la ruta "root.ln.*.*.temperature" agregando en el nivel "root.ln", simplemente establezca level=1
+
+[source]
+----
+select count(temperature), sum(temperature) from root.ln.*.* group by level=1
+----
+
+Resultado:
+
+[source]
+----
++------------------------------+----------------------------+
+|count(root.ln.*.*.temperature)|sum(root.ln.*.*.temperature)|
++------------------------------+----------------------------+
+|                            12|           319.8300018310547|
++------------------------------+----------------------------+
+Total line number = 1
+It costs 0.013s
+----
+
+Todas las funciones de agregación admitidas son: count, sum, avg, last_value, first_value, min_time, max_time, min_value, max_value. Cuando utilice cuatro agregaciones: sum, avg, min_value y max_value, asegúrese de que todas las series agregadas tengan exactamente el mismo tipo de datos. De lo contrario, generará un error de sintaxis.
+
+==== Consulta Agregada de Frecuencia Descendente
+
+Esta sección presenta principalmente los ejemplos relacionados de consultas de agregación de frecuencia descendente, utilizando la [cláusula GROUP BY], que se usa para dividir el conjunto de resultados de acuerdo con las condiciones de particionamiento dadas por el usuario y agregar el conjunto de resultados particionado. IoTDB admite el particionamiento de conjuntos de resultados de acuerdo con el intervalo de tiempo y el paso deslizante personalizado que no debe ser más pequeño que el intervalo de tiempo y por defecto es igual al intervalo de tiempo si no se establece. Y, de forma predeterminada, los resultados se ordenan por tiempo en orden ascendente. También puede utilizar la interfaz estándar de [Java JDBC] para ejecutar consultas relacionadas.
+
+La declaración GROUP BY proporciona a los usuarios tres tipos de parámetros especificados:
+
+. Parámetro 1: la ventana de visualización en el eje del tiempo
+
+. Parámetro 2: intervalo de tiempo para dividir el eje de tiempo (debe ser positivo)
+
+. Parámetro 3: paso deslizante de tiempo (opcional y no debe ser menor que el intervalo de tiempo y el valor predeterminado es igual al intervalo de tiempo si no se establece)
+
+Los significados reales de los tres tipos de parámetros se muestran en la Figura 5.2 a continuación. Entre ellos, el parámetro 3 es opcional. Hay tres ejemplos típicos de agregación de reducción de frecuencia: parámetro 3 no especificado, parámetro 3 especificado y condiciones de filtrado de valores especificadas.
+
+.Los significados reales de los tres tipos de parámetros
+image::imagen-11.png[]
+
+===== Consulta Agregada de Frecuencia Descendente sin Especificar la Longitud del Paso Deslizante
+
+La declaración SQL es:
+
+[source]
+----
+select count(status), max_value(temperature) from root.ln.wf01.wt01 group by ([2017-11-01T00:00:00, 2017-11-07T23:00:00),1d);
+----
+
+Lo que significa:
+
+Dado que la longitud del paso de deslizamiento no está especificada, la declaración GROUP BY por defecto establece el paso de deslizamiento igual que el intervalo de tiempo que es `1d`.
+
+El primer parámetro de la declaración GROUP BY anterior es el parámetro de la ventana de visualización, que determina que el rango de visualización final es [2017-11-01T00:00:00, 2017-11-07T23:00:00).
+
+El segundo parámetro de la declaración GROUP BY anterior es el intervalo de tiempo para dividir el eje de tiempo. Tomando este parámetro (1d) como intervalo de tiempo y startTime de la ventana de visualización como origen de división, el eje de tiempo se divide en varios intervalos continuos, que son  [0,1d), [1d, 2d), [2d, 3d), etc.
+
+Luego, el sistema usará la condición de filtrado de tiempo y valor en la cláusula WHERE y el primer parámetro de la declaración GROUP BY como condición de filtrado de datos para obtener los datos que satisfacen la condición de filtrado (que en este caso son los datos en el rango de [2017-11-01T00:00:00, 2017-11-07 T23:00:00]), y mapee estos datos al eje de tiempo previamente segmentado (en este caso, hay datos mapeados en cada período de 1 día desde 2017-11-01T00:00:00 a 2017-11-07T23:00:00:00).
+
+Dado que hay datos para cada período de tiempo en el rango de resultados que se mostrarán, el resultado de la ejecución de la declaración SQL se muestra a continuación:
+
+[source]
+----
++-----------------------------+-------------------------------+----------------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|max_value(root.ln.wf01.wt01.temperature)|
++-----------------------------+-------------------------------+----------------------------------------+
+|2017-11-01T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-02T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-03T00:00:00.000+08:00|                           1440|                                   25.99|
+|2017-11-04T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-05T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-06T00:00:00.000+08:00|                           1440|                                   25.99|
+|2017-11-07T00:00:00.000+08:00|                           1380|                                    26.0|
++-----------------------------+-------------------------------+----------------------------------------+
+Total line number = 7
+It costs 0.024s
+----
+
+===== Consulta Agregada de Frecuencia Descendente que Especifica la Longitud del Paso Deslizante
+
+La declaración SQL es:
+
+[source]
+----
+select count(status), max_value(temperature) from root.ln.wf01.wt01 group by ([2017-11-01 00:00:00, 2017-11-07 23:00:00), 3h, 1d);
+----
+
+Lo que significa:
+
+Dado que el usuario especifica el parámetro de paso deslizante como 1d, la declaración GROUP BY moverá el intervalo de tiempo `1 day` en lugar de `3 hours` como predeterminado.
+
+Eso significa que queremos recuperar todos los datos de 00:00:00 a 02:59:59 todos los días desde 2017-11-01 hasta 2017-11-07.
+
+El primer parámetro de la declaración GROUP BY anterior es el parámetro de la ventana de visualización, que determina que el rango de visualización final es [2017-11-01T00:00:00, 2017-11-07T23:00:00).
+
+El segundo parámetro de la declaración GROUP BY anterior es el intervalo de tiempo para dividir el eje de tiempo. Tomando este parámetro (3h) como intervalo de tiempo y el startTime de la ventana de visualización como origen de división, el eje de tiempo se divide en varios intervalos continuos, que son [2017-11-01T00:00:00, 2017-11-01T03:00:00), [2017-11-02T00:00:00, 2017-11-02T03:00:00), [2017-11-03T00:00:00, 2017-11-03T03:00:00), etc.
+
+El tercer parámetro de la declaración GROUP BY anterior es el paso deslizante para cada intervalo de tiempo que se mueve.
+
+Luego, el sistema usará la condición de filtrado de tiempo y valor en la cláusula WHERE y el primer parámetro de la declaración GROUP BY como condición de filtrado de datos para obtener los datos que satisfacen la condición de filtrado (que en este caso son los datos en el rango de [2017-11-01T00:00:00, 2017-11-07T23:00:00]), y mapee estos datos al eje de tiempo previamente segmentado (en este caso, hay datos mapeados en cada período de 3 horas para cada día desde 2017-11-01T00:00:00 a 2017-11-07T23:00:00:00).
+
+Dado que hay datos para cada período de tiempo en el rango de resultados que se mostrarán, el resultado de la ejecución de la declaración SQL se muestra a continuación:
+
+[source]
+----
++-----------------------------+-------------------------------+----------------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|max_value(root.ln.wf01.wt01.temperature)|
++-----------------------------+-------------------------------+----------------------------------------+
+|2017-11-01T00:00:00.000+08:00|                            180|                                   25.98|
+|2017-11-02T00:00:00.000+08:00|                            180|                                   25.98|
+|2017-11-03T00:00:00.000+08:00|                            180|                                   25.96|
+|2017-11-04T00:00:00.000+08:00|                            180|                                   25.96|
+|2017-11-05T00:00:00.000+08:00|                            180|                                    26.0|
+|2017-11-06T00:00:00.000+08:00|                            180|                                   25.85|
+|2017-11-07T00:00:00.000+08:00|                            180|                                   25.99|
++-----------------------------+-------------------------------+----------------------------------------+
+Total line number = 7
+It costs 0.006s
+----
+
+===== Consulta Agregada de Frecuencia Descendente por Mes Natural
+
+La declaración SQL es:
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01 group by([2017-11-01T00:00:00, 2019-11-07T23:00:00), 1mo, 2mo);
+----
+
+Lo que significa:
+
+Dado que el usuario especifica el parámetro de paso deslizante como `2mo`, la declaración GROUP BY moverá el intervalo de tiempo a 2 `months` en lugar de `1 month` como predeterminado.
+
+El primer parámetro de la declaración GROUP BY anterior es el parámetro de la ventana de visualización, que determina que el rango de visualización final es [2017-11-01T00:00:00, 2019-11-07T23:00:00).
+
+La hora de inicio es 2017-11-01T00:00:00. El paso deslizante aumentará mensualmente en función de la fecha de inicio, y el primer día del mes se utilizará como hora de inicio del intervalo de tiempo.
+
+El segundo parámetro de la declaración GROUP BY anterior es el intervalo de tiempo para dividir el eje de tiempo. Tomando este parámetro (1mos) como intervalo de tiempo y el startTime de la ventana de visualización como origen de división, el eje de tiempo se divide en varios intervalos continuos, que son [2017-11-01T00:00:00, 2017-12-01T00:00:00), [2018-02-01T00:00:00, 2018-03-01T00:00:00), [2018-05-03T00:00:00, 2018-06-01T00:00:00)), etc.
+
+El tercer parámetro de la declaración GROUP BY anterior es el paso deslizante para cada intervalo de tiempo que se mueve.
+
+Luego, el sistema usará la condición de filtrado de tiempo y valor en la cláusula WHERE y el primer parámetro de la declaración GROUP BY como condición de filtrado de datos para obtener los datos que satisfacen la condición de filtrado (que en este caso son los datos en el rango de (2017-11-01T00:00:00, 2019-11-07T23:00:00], y mapee estos datos al eje de tiempo previamente segmentado (en este caso, hay datos mapeados del primer mes en cada período de dos meses desde 2017-11-01T00:00:00 a 2019-11-07T23:00:00).
+
+El resultado de la ejecución de SQL es:
+
+[source]
+----
++-----------------------------+-------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|
++-----------------------------+-------------------------------+
+|2017-11-01T00:00:00.000+08:00|                            259|
+|2018-01-01T00:00:00.000+08:00|                            250|
+|2018-03-01T00:00:00.000+08:00|                            259|
+|2018-05-01T00:00:00.000+08:00|                            251|
+|2018-07-01T00:00:00.000+08:00|                            242|
+|2018-09-01T00:00:00.000+08:00|                            225|
+|2018-11-01T00:00:00.000+08:00|                            216|
+|2019-01-01T00:00:00.000+08:00|                            207|
+|2019-03-01T00:00:00.000+08:00|                            216|
+|2019-05-01T00:00:00.000+08:00|                            207|
+|2019-07-01T00:00:00.000+08:00|                            199|
+|2019-09-01T00:00:00.000+08:00|                            181|
+|2019-11-01T00:00:00.000+08:00|                             60|
++-----------------------------+-------------------------------+
+----
+
+La declaración SQL es:
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01 group by([2017-10-31T00:00:00, 2019-11-07T23:00:00), 1mo, 2mo);
+----
+
+Lo que significa:
+
+Dado que el usuario especifica el parámetro de paso deslizante como 2mo, la declaración GROUP BY moverá el intervalo de tiempo a 2 months en lugar de 1 month como predeterminado.
+
+El primer parámetro de la declaración GROUP BY anterior es el parámetro de la ventana de visualización, que determina que el rango de visualización final es [2017-10-31T00:00:00, 2019-11-07T23:00:00).
+
+A diferencia del ejemplo anterior, la hora de inicio se establece en 2017-10-31T00:00:00. El paso deslizante aumentará mensualmente según la fecha de inicio, y el día 31 del mes, lo que significa que el último día del mes se utilizará como la hora de inicio del intervalo de tiempo. Si la hora de inicio se establece en el día 30, el paso deslizante utilizará el día 30 o el último del mes.
+
+La hora de inicio es 2017-10-31T00:00:00. El paso deslizante aumentará mensualmente según la hora de inicio, y el primer día del mes se utilizará como hora de inicio del intervalo de tiempo.
+
+El segundo parámetro de la declaración GROUP BY anterior es el intervalo de tiempo para dividir el eje de tiempo. Tomando este parámetro (1mo) como intervalo de tiempo y el startTime de la ventana de visualización como origen de división, el eje de tiempo se divide en varios intervalos continuos, que son [2017-10-31T00:00:00, 2017-11-31T00:00:00), [2018-02-31T00:00:00, 2018-03-31T00:00:00), [2018-05-31T00:00:00, 2018-06-31T00:00:00), etc.
+
+El tercer parámetro de la declaración GROUP BY anterior es el paso deslizante para cada intervalo de tiempo que se mueve.
+
+Luego, el sistema usará la condición de filtrado de tiempo y valor en la cláusula WHERE y el primer parámetro de la declaración GROUP BY como condición de filtrado de datos para obtener los datos que satisfacen la condición de filtrado (que en este caso son los datos en el rango de [2017-10-31T00:00:00, 2019-11-07T23:00:00) y mapee estos datos al eje de tiempo previamente segmentado (en este caso, hay datos mapeados del primer mes en cada período de dos meses desde 2017-10-31T00:00:00 a 2019-11-07T23:00:00).
+
+El resultado de la ejecución de SQL es:
+
+[source]
+----
++-----------------------------+-------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|
++-----------------------------+-------------------------------+
+|2017-10-31T00:00:00.000+08:00|                            251|
+|2017-12-31T00:00:00.000+08:00|                            250|
+|2018-02-28T00:00:00.000+08:00|                            259|
+|2018-04-30T00:00:00.000+08:00|                            250|
+|2018-06-30T00:00:00.000+08:00|                            242|
+|2018-08-31T00:00:00.000+08:00|                            225|
+|2018-10-31T00:00:00.000+08:00|                            216|
+|2018-12-31T00:00:00.000+08:00|                            208|
+|2019-02-28T00:00:00.000+08:00|                            216|
+|2019-04-30T00:00:00.000+08:00|                            208|
+|2019-06-30T00:00:00.000+08:00|                            199|
+|2019-08-31T00:00:00.000+08:00|                            181|
+|2019-10-31T00:00:00.000+08:00|                             69|
++-----------------------------+-------------------------------+
+----
+
+===== Rango Abierto Izquierdo y Cerrado Derecho
+
+La declaración SQL es:
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01 group by ((2017-11-01T00:00:00, 2017-11-07T23:00:00],1d);
+----
+
+En este sql, el intervalo de tiempo se deja abierto y se cierra a la derecha, por lo que no incluiremos el valor de la marca de tiempo 2017-11-01T00:00:00 y en su lugar incluiremos el valor de la marca de tiempo 2017-11-07T23:00:00.
+
+Obtendremos el resultado de la siguiente manera:
+
+[source]
+----
++-----------------------------+-------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|
++-----------------------------+-------------------------------+
+|2017-11-02T00:00:00.000+08:00|                           1440|
+|2017-11-03T00:00:00.000+08:00|                           1440|
+|2017-11-04T00:00:00.000+08:00|                           1440|
+|2017-11-05T00:00:00.000+08:00|                           1440|
+|2017-11-06T00:00:00.000+08:00|                           1440|
+|2017-11-07T00:00:00.000+08:00|                           1440|
+|2017-11-07T23:00:00.000+08:00|                           1380|
++-----------------------------+-------------------------------+
+Total line number = 7
+It costs 0.004s
+----
+
+===== Consulta Agregada de Frecuencia Descendente con Cláusula de Nivel
+
+El nivel podría definirse para mostrar el recuento del número de puntos de cada nodo en el nivel dado en el árbol de metadatos actual.
+
+Esto podría usarse para consultar el número de puntos debajo de cada dispositivo.
+
+La declaración SQL es:
+
+Obtenga consultas agregadas de frecuencia descendente por nivel.
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01 group by ((2017-11-01T00:00:00, 2017-11-07T23:00:00],1d), level=1;
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+-------------------------+
+|                         Time|COUNT(root.ln.*.*.status)|
++-----------------------------+-------------------------+
+|2017-11-02T00:00:00.000+08:00|                     1440|
+|2017-11-03T00:00:00.000+08:00|                     1440|
+|2017-11-04T00:00:00.000+08:00|                     1440|
+|2017-11-05T00:00:00.000+08:00|                     1440|
+|2017-11-06T00:00:00.000+08:00|                     1440|
+|2017-11-07T00:00:00.000+08:00|                     1440|
+|2017-11-07T23:00:00.000+08:00|                     1380|
++-----------------------------+-------------------------+
+Total line number = 7
+It costs 0.006s
+----
+
+Consulta agregada de frecuencia descendente con paso deslizante y por nivel.
+
+[source]
+----
+select count(status) from root.ln.wf01.wt01 group by ([2017-11-01 00:00:00, 2017-11-07 23:00:00), 3h, 1d), level=1;
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+-------------------------+
+|                         Time|COUNT(root.ln.*.*.status)|
++-----------------------------+-------------------------+
+|2017-11-01T00:00:00.000+08:00|                      180|
+|2017-11-02T00:00:00.000+08:00|                      180|
+|2017-11-03T00:00:00.000+08:00|                      180|
+|2017-11-04T00:00:00.000+08:00|                      180|
+|2017-11-05T00:00:00.000+08:00|                      180|
+|2017-11-06T00:00:00.000+08:00|                      180|
+|2017-11-07T00:00:00.000+08:00|                      180|
++-----------------------------+-------------------------+
+Total line number = 7
+It costs 0.004s
+----
+
+===== Consulta Agregada de Frecuencia Descendente con Cláusula de Relleno
+
+En grupo por relleno, el paso deslizante no se admite e grupo por la claúsula.
+
+Ahora, solo la función de agregación last_value es compatible en grupo por relleno.
+
+El relleno lineal no se admite en el grupo por relleno.
+
+====== Diferencia Entre PREVIOUSUNTILLAST y PREVIOUS
+
+. PREVIOUS llenará cualquier valor nulo siempre que el valor existente no sea nulo antes.
+
+. PREVIOUSUNTILLAST no completará el resultado cuya hora sea posterior a la última hora de esa serie temporal.
+
+Primero, verificamos el valor root.ln.wf01.wt01.temperature cuando el tiempo después de 2017-11-07T23:50:00.
+
+[source]
+----
+IoTDB> SELECT temperature FROM root.ln.wf01.wt01 where time >= 2017-11-07T23:50:00
++-----------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.temperature|
++-----------------------------+-----------------------------+
+|2017-11-07T23:50:00.000+08:00|                         23.7|
+|2017-11-07T23:51:00.000+08:00|                        22.24|
+|2017-11-07T23:52:00.000+08:00|                        20.18|
+|2017-11-07T23:53:00.000+08:00|                        24.58|
+|2017-11-07T23:54:00.000+08:00|                        22.52|
+|2017-11-07T23:55:00.000+08:00|                         25.9|
+|2017-11-07T23:56:00.000+08:00|                        24.44|
+|2017-11-07T23:57:00.000+08:00|                        24.39|
+|2017-11-07T23:58:00.000+08:00|                        22.93|
+|2017-11-07T23:59:00.000+08:00|                        21.07|
++-----------------------------+-----------------------------+
+Total line number = 10
+It costs 0.002s
+----
+
+Encontraremos que la última hora y el valor de root.ln.wf01.wt01.temperature son 2017-11-07T23:59:00 y 21.07 respectivamente.
+
+Luego ejecute declaraciones SQL:
+
+[source]
+----
+SELECT last_value(temperature) FROM root.ln.wf01.wt01 GROUP BY([2017-11-07T23:50:00, 2017-11-08T00:01:00),1m) FILL (float[PREVIOUSUNTILLAST]);
+SELECT last_value(temperature) FROM root.ln.wf01.wt01 GROUP BY([2017-11-07T23:50:00, 2017-11-08T00:01:00),1m) FILL (float[PREVIOUS]);
+----
+
+Resultado:
+
+[source]
+----
++-----------------------------+-----------------------------------------+
+|                         Time|last_value(root.ln.wf01.wt01.temperature)|
++-----------------------------+-----------------------------------------+
+|2017-11-07T23:50:00.000+08:00|                                     23.7|
+|2017-11-07T23:51:00.000+08:00|                                    22.24|
+|2017-11-07T23:52:00.000+08:00|                                    20.18|
+|2017-11-07T23:53:00.000+08:00|                                    24.58|
+|2017-11-07T23:54:00.000+08:00|                                    22.52|
+|2017-11-07T23:55:00.000+08:00|                                     25.9|
+|2017-11-07T23:56:00.000+08:00|                                    24.44|
+|2017-11-07T23:57:00.000+08:00|                                    24.39|
+|2017-11-07T23:58:00.000+08:00|                                    22.93|
+|2017-11-07T23:59:00.000+08:00|                                    21.07|
+|2017-11-08T00:00:00.000+08:00|                                     null|
++-----------------------------+-----------------------------------------+
+Total line number = 11
+It costs 0.005s
+
++-----------------------------+-----------------------------------------+
+|                         Time|last_value(root.ln.wf01.wt01.temperature)|
++-----------------------------+-----------------------------------------+
+|2017-11-07T23:50:00.000+08:00|                                     23.7|
+|2017-11-07T23:51:00.000+08:00|                                    22.24|
+|2017-11-07T23:52:00.000+08:00|                                    20.18|
+|2017-11-07T23:53:00.000+08:00|                                    24.58|
+|2017-11-07T23:54:00.000+08:00|                                    22.52|
+|2017-11-07T23:55:00.000+08:00|                                     25.9|
+|2017-11-07T23:56:00.000+08:00|                                    24.44|
+|2017-11-07T23:57:00.000+08:00|                                    24.39|
+|2017-11-07T23:58:00.000+08:00|                                    22.93|
+|2017-11-07T23:59:00.000+08:00|                                    21.07|
+|2017-11-08T00:00:00.000+08:00|                                    21.07|
++-----------------------------+-----------------------------------------+
+Total line number = 11
+It costs 0.006s
+----
+
+Lo que significa:
+
+El uso de PREVIOUSUNTILLAST no llenará el tiempo después de 2017-11-07T23:59.
+
+# Consulta de Último Punto
+
+En escenarios en los que los dispositivos de IoT actualizan los datos de manera rápida, los usuarios están más interesados ​​en el punto más reciente de los dispositivos de IoT.
+
+La consulta del último punto es devolver el punto de datos más reciente de la serie temporal dada en un formato de tres columnas.
+
+La declaración SQL se define como:
+
+[source]
+----
+select last <Path> [COMMA <Path>]* from < PrefixPath > [COMMA < PrefixPath >]* <WhereClause>
+----
+
+Lo que significa: consulta y devuelve los últimos puntos de datos de la serie temporal prefixPath.path.
+
+Solo el filtro de tiempo con '>' o '>=' es compatible con <WhereClause>. Cualquier otro filtro dado en <WhereClause> dará una excepción.
+
+El resultado se devolverá en un formato de tabla de tres columnas.
+
+[source]
+----
+| Time | Path | Value |
+----
+
+Ejemplo 1: obtenga el último punto de root.ln.wf01.wt01.status:
+
+[source]
+----
+IoTDB> select last status from root.ln.wf01.wt01
++-----------------------------+------------------------+-----+
+|                         Time|              timeseries|value|
++-----------------------------+------------------------+-----+
+|2017-11-07T23:59:00.000+08:00|root.ln.wf01.wt01.status|false|
++-----------------------------+------------------------+-----+
+Total line number = 1
+It costs 0.000s
+----
+
+Ejemplo 2: obtenga los últimos puntos de estado y temperatura de root.ln.wf01.wt01, cuya marca de tiempo sea mayor o igual a 2017-11-07T23:50:00.
+
+[source]
+----
+IoTDB> select last status, temperature from root.ln.wf01.wt01 where time >= 2017-11-07T23:50:00
++-----------------------------+-----------------------------+---------+
+|                         Time|                   timeseries|    value|
++-----------------------------+-----------------------------+---------+
+|2017-11-07T23:59:00.000+08:00|     root.ln.wf01.wt01.status|    false|
+|2017-11-07T23:59:00.000+08:00|root.ln.wf01.wt01.temperature|21.067368|
++-----------------------------+-----------------------------+---------+
+Total line number = 2
+It costs 0.002s
+----
+
+==== Relleno Automatizado
+
+En el uso real de IoTDB, al realizar la operación de consulta de series temporales, pueden aparecer situaciones en las que el valor es nulo en algunos momentos, lo que obstaculizará el análisis posterior por parte de los usuarios. Para reflejar mejor el grado de cambio de datos, los usuarios esperan que los valores faltantes se completen automáticamente. Por lo tanto, el sistema IoTDB introduce la función de Relleno Automatizado.
+
+La función de relleno automatizado se refiere al relleno de valores vacíos de acuerdo con el método especificado por el usuario y el rango de tiempo efectivo al realizar consultas de series temporales para una o varias columnas. Si el valor del punto consultado no es nulo, la función de relleno no funcionará.
+
+[NOTE]
+====
+En la versión actual, IoTDB proporciona a los usuarios dos métodos: anterior y lineal. El método anterior llena los espacios en blanco con el valor anterior. El método lineal llena los espacios en blanco mediante un ajuste lineal. Y la función de relleno solo se puede utilizar cuando se realizan consultas en un momento determinado.
+====
+
+===== Función Fill
+
+====== Función Anterior
+
+Cuando el valor de la marca de tiempo consultada es nulo, el valor de la marca de tiempo anterior se usa para llenar el espacio en blanco. El método anterior formalizado es el siguiente (consulte la Sección 7.1.3.6 para ver la sintaxis detallada):
+
+[source]
+----
+select <path> from <prefixPath> where time = <T> fill(<data_type>[previous, <before_range>], …)
+----
+
+En la Tabla 3-4 se dan descripciones detalladas de todos los parámetros.
+
+.Tabla 3-4 Lista de parámetros de relleno anterior
+[cols="1,1"]
+|===
+|Nombre del parámetro (no distingue entre mayúsculas y minúsculas) |Interpretación
+
+path, prefixPath
+Ruta de consulta; campo obligatorio
+
+T 
+Marca de tiempo de la consulta (solo se puede especificar una); campo obligatorio
+
+data_type 
+El tipo de datos utilizados por el método de relleno. Los valores opcionales son int32, int64, float, double, boolean, text; campo opcional
+
+before_range 
+Representa el intervalo de tiempo válido del método anterior. El método anterior funciona cuando hay valores en el rango [T-before_range, T]. Cuando no se especifica before_range, before_range toma el valor predeterminado default_fill_interval; -1 representa infinito; campo opcional
+|===
+
+Aquí damos un ejemplo de relleno de valores nulos usando el método anterior. La declaración SQL escomo sigue:
+
+[source]
+----
+select temperature from root.sgcc.wf03.wt01 where time = 2017-11-01T16:37:50.000 fill(float[previous, 1s]) 
+----
+
+Lo que significa:
+
+Debido a que la serie temporal root.sgcc.wf03.wt01.temperature es nula en 2017-11-01T16:37:50.000, el sistema usa la marca de tiempo anterior 2017-11-01T16:37:00.000 (y la marca de tiempo está en el intervalo de tiempo [2017-11-01T16:36:50.000, 2017-11-01T16:37:50.000]) para relleno y visualización.
+
+En los [datos de muestra], el resultado de la ejecución de esta declaración se muestra a continuación:
+
+[source]
+----
++-----------------------------+-------------------------------+
+|                         Time|root.sgcc.wf03.wt01.temperature|
++-----------------------------+-------------------------------+
+|2017-11-01T16:37:50.000+08:00|                          21.93|
++-----------------------------+-------------------------------+
+Total line number = 1
+It costs 0.016s
+----
+
+Vale la pena señalar que si no hay ningún valor en el rango de tiempo válido especificado, el sistema no completará el valor nulo, como se muestra a continuación:
+
+[source]
+----
+IoTDB> select temperature from root.sgcc.wf03.wt01 where time = 2017-11-01T16:37:50.000 fill(float[previous, 1s]) 
++-----------------------------+-------------------------------+
+|                         Time|root.sgcc.wf03.wt01.temperature|
++-----------------------------+-------------------------------+
+|2017-11-01T16:37:50.000+08:00|                           null|
++-----------------------------+-------------------------------+
+Total line number = 1
+It costs 0.004s
+----
+
+====== Método Lineal
+
+Cuando el valor de la marca de tiempo consultada es nulo, el valor de la marca de tiempo anterior y siguiente se usa para llenar el espacio en blanco. El método lineal formalizado es el siguiente:
+
+[source]
+----
+select <path> from <prefixPath> where time = <T> fill(<data_type>[linear, <before_range>, <after_range>]…)
+----
+
+En la Tabla 3-5 se dan descripciones detalladas de todos los parámetros.
+
+.Tabla 3-5 Lista de parámetros de relleno lineal
+[cols="1,1"]
+|===
+|Nombre del parámetro (no distingue entre mayúsculas y minúsculas) 
+|Interpretación
+
+path, prefixPath 
+ruta de consulta; campo obligatorio
+
+|T
+|marca de tiempo de la consulta (solo se puede especificar una); campo obligatorio
+
+data_type 
+el tipo de datos utilizados por el método de relleno. Los valores opcionales son int32, int64, float, double, boolean, text; campo opcional
+
+before_range, after_range 
+representa el rango de tiempo válido del método lineal. El método anterior funciona cuando hay valores en el rango [T-before_range, T+after_range]. Cuando before_range y after_range no se especifican explícitamente, se utiliza default_fill_interval. -1 representa infinito; campo opcional
+|===
+
+Tenga en cuenta que si la serie temporal tiene un valor válido en la marca de tiempo de la consulta T, este valor se utilizará como valor de relleno lineal. De lo contrario, si no hay un valor de relleno válido en el rango [T-before_range，T] o [T,T + after_range], el método de relleno lineal devolverá un valor nulo.
+
+Aquí damos un ejemplo de relleno de valores nulos usando el método lineal. La declaración SQL es la siguiente:
+
+[source]
+----
+select temperature from root.sgcc.wf03.wt01 where time = 2017-11-01T16:37:50.000 fill(float [linear, 1m, 1m])
+----
+
+Lo que significa:
+
+Debido a que la serie temporal root.sgcc.wf03.wt01.temperature es nula en 2017-11-01T16:37:50.000, el sistema usa la marca de tiempo anterior 2017-11-01T16:37:00.000 (y la marca de tiempo está en el intervalo de tiempo [2017-11-01T16:36:50.000, 2017-11-01T16:37:50.000]) y su valor 21.927326, la siguiente marca de tiempo 2017-11-01T16: 38: 00.000 (y la marca de tiempo está en el  rango de tiempo [2017-11- 01T16: 37: 50.000, 2017-11-01T16: 38: 50.000]) y su valor 25.311783 para realizar el cálculo de ajuste lineal: 21.927326 + (25.311783-21.927326)/60s * 50s = 24.747707
+
+En los [datos de muestra], el resultado de la ejecución de esta declaración se muestra a continuación:
+
+[source]
+----
++-----------------------------+-------------------------------+
+|                         Time|root.sgcc.wf03.wt01.temperature|
++-----------------------------+-------------------------------+
+|2017-11-01T16:37:50.000+08:00|                      24.746666|
++-----------------------------+-------------------------------+
+Total line number = 1
+It costs 0.017s
+----
+
+===== Correspondencia Entre el Tipo de Datos y el Método de Relleno
+
+Los tipos de datos y los métodos de relleno admitidos se muestran en la Tabla 3-6.
+
+.Tabla 3-6 Tipos de datos y métodos de relleno admitidos
+[cols="1,1"]
+|===
+|Tipo de Datos
+|Métodos de Relleno Admitidos
+
+|boolean 
+|anterior
+
+|int32 
+|anterior, lineal
+
+|int64
+|anterior, lineal
+
+|flotar
+|anterior, lineal
+
+|doble 
+|anterior, lineal
+
+|texto 
+|anterior
+|===
+
+Cuando no se especifica el método de relleno, cada tipo de datos tiene sus propios métodos y parámetros de relleno predeterminados. La relación correspondiente se muestra en la Tabla 3-7.
+
+.Tabla 3-7 Métodos y parámetros de relleno predeterminados para varios tipos de datos
+[cols="1,1"]
+|===
+|Tipo de Datos 
+|Parámetros y Métodos de Relleno Predeterminados
+
+|boolean
+|anterior, 600000
+
+|int32 
+|anterior, 600000
+
+|int64 
+|anterior, 600000
+
+|flotador 
+|anterior, 600000
+
+|doble 
+|anterior, 600000
+
+|texto 
+|anterior, 600000
+|===
+
+[NOTE]
+====
+En la versión 0.7.0, se debe especificar al menos un método de relleno en la declaración de relleno.
+====
+
+==== Control de Filas y Columnas Sobre los Resultados de la Consulta
+
+IoTDB proporciona una cláusula [LIMIT/SLIMIT] y una cláusula [OFFSET/SOFFSET] para que los usuarios tengan más control sobre los resultados de las consultas. El uso de cláusulas LIMIT y SLIMIT permite a los usuarios controlar el número de filas y columnas de los resultados de la consulta, y el uso de cláusulas OFFSET y SOFSET permite a los usuarios establecer la posición inicial de los resultados para su visualización.
+
+Tenga en cuenta que LIMIT y OFFSET no se admiten en grupo por consulta.
+
+Este capítulo presenta principalmente ejemplos relacionados de control de filas y columnas de resultados de consultas. También puede utilizar la interfaz estándar de [Java JDBC] para ejecutar consultas.
+
+===== Control de Filas y Columnas Sobre los Resultados de la Consulta
+
+Mediante el uso de cláusulas LIMIT y OFFSET, los usuarios controlan los resultados de la consulta de una manera relacionada con las filas. Demostramos cómo usar las cláusulas LIMIT y OFFSET a través de los siguientes ejemplos.
+
+====== Ejemplo 1: cláusula LIMIT básica
+
+La declaración SQL es:
+
+[source]
+----
+select status, temperature from root.ln.wf01.wt01 limit 10
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es "status" y "temperature". La declaración SQL requiere las primeras 10 filas del resultado de la consulta.
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:00:00.000+08:00|                    true|                        25.96|
+|2017-11-01T00:01:00.000+08:00|                    true|                        24.36|
+|2017-11-01T00:02:00.000+08:00|                   false|                        20.09|
+|2017-11-01T00:03:00.000+08:00|                   false|                        20.18|
+|2017-11-01T00:04:00.000+08:00|                   false|                        21.13|
+|2017-11-01T00:05:00.000+08:00|                   false|                        22.72|
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
+|2017-11-01T00:08:00.000+08:00|                   false|                        22.58|
+|2017-11-01T00:09:00.000+08:00|                   false|                        20.98|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 10
+It costs 0.000s
+----
+
+====== Ejemplo 2: cláusula LIMIT con OFFSET
+
+La declaración SQL es:
+
+[source]
+----
+select status, temperature from root.ln.wf01.wt01 limit 5 offset 3
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es "status" y "temperaturw". La declaración SQL requiere que se devuelvan las filas 3 a 7 del resultado de la consulta (con la primera fila numerada como fila 0).
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:03:00.000+08:00|                   false|                        20.18|
+|2017-11-01T00:04:00.000+08:00|                   false|                        21.13|
+|2017-11-01T00:05:00.000+08:00|                   false|                        22.72|
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 5
+It costs 0.342s
+----
+
+====== Ejemplo 3: cláusula LIMIT combinada con cláusula WHERE
+
+La declaración SQL es:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time< 2017-11-01T00:12:00.000 limit 2 offset 3
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es "status" y "temperature". La declaración SQL requiere filas 3 a 4 de los valores del sensor de temperatura y estado entre el punto de tiempo de "2017-11-01T00:05:00.000" y "2017-11-01T00:12:00.000" (con la primera fila numerada como fila 0).
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:03:00.000+08:00|                   false|                        20.18|
+|2017-11-01T00:04:00.000+08:00|                   false|                        21.13|
+|2017-11-01T00:05:00.000+08:00|                   false|                        22.72|
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 5
+It costs 0.000s
+----
+
+====== Ejemplo 4: cláusula LIMIT combinada con cláusula GROUP BY
+
+La declaración SQL es:
+
+[source]
+----
+select count(status), max_value(temperature) from root.ln.wf01.wt01 group by ([2017-11-01T00:00:00, 2017-11-07T23:00:00),1d) limit 5 offset 3
+----
+
+Lo que significa:
+
+La cláusula de declaración SQL requiere que se devuelvan las filas 3 a 7 del resultado de la consulta (con la primera fila numerada como fila 0).
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+-------------------------------+----------------------------------------+
+|                         Time|count(root.ln.wf01.wt01.status)|max_value(root.ln.wf01.wt01.temperature)|
++-----------------------------+-------------------------------+----------------------------------------+
+|2017-11-04T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-05T00:00:00.000+08:00|                           1440|                                    26.0|
+|2017-11-06T00:00:00.000+08:00|                           1440|                                   25.99|
+|2017-11-07T00:00:00.000+08:00|                           1380|                                    26.0|
++-----------------------------+-------------------------------+----------------------------------------+
+Total line number = 4
+It costs 0.016s
+----
+
+Vale la pena señalar que debido a que la cláusula FILL actual solo puede completar el valor faltante de las series temporales en un momento determinado, es decir, el resultado de la ejecución de la cláusula FILL es exactamente una línea, por lo que no se espera que LIMIT y OFFSET sean utilizados en combinación con la cláusula FILL; de lo contrario, se generarán errores. Por ejemplo, ejecutando la siguiente declaración SQL:
+
+[source]
+----
+select temperature from root.sgcc.wf03.wt01 where time = 2017-11-01T16:37:50.000 fill(float[previous, 1m]) limit 10
+----
+
+La declaración SQL no se ejecutará y el mensaje de error correspondiente se proporciona de la siguiente manera:
+
+[source]
+----
+Msg: 401: line 1:107 mismatched input 'limit' expecting {<EOF>, SLIMIT, SOFFSET, GROUP, DISABLE, ALIGN}
+----
+
+===== Control de Columna Sobre los Resultados de la Consulta
+
+Mediante el uso de cláusulas SLIMIT y SOFFSET, los usuarios pueden controlar los resultados de la consulta de una manera relacionada con las columnas. Demostraremos cómo utilizar las cláusulas SLIMIT y SOFFSET a través de los siguientes ejemplos.
+
+====== Ejemplo 1: cláusula SLIMIT básica
+
+La declaración SQL es:
+
+[source]
+----
+select * from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 slimit 1
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada es la primera columna debajo de este dispositivo, es decir, el estado de la fuente de alimentación. La declaración SQL requiere que se seleccionen los valores del sensor de estado entre el punto de tiempo "2017-11-01T00:05:00.000" y "2017-11-01T00:12:00.000".
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.temperature|
++-----------------------------+-----------------------------+
+|2017-11-01T00:06:00.000+08:00|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                        21.45|
+|2017-11-01T00:08:00.000+08:00|                        22.58|
+|2017-11-01T00:09:00.000+08:00|                        20.98|
+|2017-11-01T00:10:00.000+08:00|                        25.52|
+|2017-11-01T00:11:00.000+08:00|                        22.91|
++-----------------------------+-----------------------------+
+Total line number = 6
+It costs 0.000s
+----
+
+====== Ejemplo 2: cláusula SLIMIT con SOFFSET
+
+La declaración SQL es:
+
+[source]
+----
+select * from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 slimit 1 soffset 1
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie temporal seleccionada es la segunda columna de este dispositivo, es decir, la temperatura. La declaración SQL requiere que se seleccionen los valores del sensor de temperatura entre el punto de tiempo "2017-11-01T00:05:00.000" y "2017-11-01T00:12:00.000".
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+------------------------+
+|                         Time|root.ln.wf01.wt01.status|
++-----------------------------+------------------------+
+|2017-11-01T00:06:00.000+08:00|                   false|
+|2017-11-01T00:07:00.000+08:00|                   false|
+|2017-11-01T00:08:00.000+08:00|                   false|
+|2017-11-01T00:09:00.000+08:00|                   false|
+|2017-11-01T00:10:00.000+08:00|                    true|
+|2017-11-01T00:11:00.000+08:00|                   false|
++-----------------------------+------------------------+
+Total line number = 6
+It costs 0.003s
+----
+
+====== Ejemplo 3: cláusula SLIMIT combinada con cláusula GROUP BY
+
+La declaración SQL es:
+
+[source]
+----
+select max_value(*) from root.ln.wf01.wt01 group by ([2017-11-01T00:00:00, 2017-11-07T23:00:00),1d) slimit 1 soffset 1
+----
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+-----------------------------------+
+|                         Time|max_value(root.ln.wf01.wt01.status)|
++-----------------------------+-----------------------------------+
+|2017-11-01T00:00:00.000+08:00|                               true|
+|2017-11-02T00:00:00.000+08:00|                               true|
+|2017-11-03T00:00:00.000+08:00|                               true|
+|2017-11-04T00:00:00.000+08:00|                               true|
+|2017-11-05T00:00:00.000+08:00|                               true|
+|2017-11-06T00:00:00.000+08:00|                               true|
+|2017-11-07T00:00:00.000+08:00|                               true|
++-----------------------------+-----------------------------------+
+Total line number = 7
+It costs 0.000s
+----
+
+====== Ejemplo 4: cláusula SLIMIT combinada con cláusula FILL
+
+La declaración SQL es:
+
+[source]
+----
+select * from root.sgcc.wf03.wt01 where time = 2017-11-01T16:35:00 fill(float[previous, 1m]) slimit 1 soffset 1
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie temporal seleccionada es la segunda columna de este dispositivo, es decir, la temperatura.
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+--------------------------+
+|                         Time|root.sgcc.wf03.wt01.status|
++-----------------------------+--------------------------+
+|2017-11-01T16:35:00.000+08:00|                      true|
++-----------------------------+--------------------------+
+Total line number = 1
+It costs 0.007s
+----
+
+===== Control de Filas y Columnas Sobre los Resultados de la Consulta
+
+Además del control de filas o columnas sobre los resultados de las consultas, IoTDB permite a los usuarios controlar tanto las filas como las columnas de los resultados de las consultas. Aquí hay un ejemplo completo con cláusulas LIMIT y cláusulas SLIMIT.
+
+La declaración SQL es:
+
+[source]
+----
+select * from root.ln.wf01.wt01 limit 10 offset 100 slimit 2 soffset 0
+----
+
+Lo que significa:
+
+El dispositivo seleccionado es en el grupo wf01 plant wt01 device; la serie de tiempo seleccionada son las columnas 0 a 1 bajo este dispositivo (con la primera columna numerada como columna 0). La cláusula de declaración SQL requiere que se devuelvan las filas 100 a 109 del resultado de la consulta (con la primera fila numerada como fila 0).
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+-----------------------------+------------------------+
+|                         Time|root.ln.wf01.wt01.temperature|root.ln.wf01.wt01.status|
++-----------------------------+-----------------------------+------------------------+
+|2017-11-01T01:40:00.000+08:00|                        21.19|                   false|
+|2017-11-01T01:41:00.000+08:00|                        22.79|                   false|
+|2017-11-01T01:42:00.000+08:00|                        22.98|                   false|
+|2017-11-01T01:43:00.000+08:00|                        21.52|                   false|
+|2017-11-01T01:44:00.000+08:00|                        23.45|                    true|
+|2017-11-01T01:45:00.000+08:00|                        24.06|                    true|
+|2017-11-01T01:46:00.000+08:00|                         22.6|                   false|
+|2017-11-01T01:47:00.000+08:00|                        23.78|                    true|
+|2017-11-01T01:48:00.000+08:00|                        24.72|                    true|
+|2017-11-01T01:49:00.000+08:00|                        24.68|                    true|
++-----------------------------+-----------------------------+------------------------+
+Total line number = 10
+It costs 0.009s
+----
+
+==== Utilizar Alias
+
+Dado que el modelo de datos único de IoTDB, se llevará mucha información adicional como dispositivo antes de cada sensor. A veces, queremos consultar solo un dispositivo específico, entonces esta información de prefijo que se muestra con frecuencia será redundante en esta situación, lo que influirá en el análisis del conjunto de resultados. En este momento, podemos usar la función `AS` proporcionada por IoTDB, asignar un alias a la serie de tiempo seleccionada en la consulta.
+
+Por ejemplo:
+
+[source]
+----
+select s1 as temperature, s2 as speed from root.ln.wf01.wt01;
+----
+
+El conjunto de resultados es:
+
+[cols="1,1,1"]
+|===
+|Tiempo
+|Temperatura
+|Velocidad
+
+|... 
+|... 
+|...
+|===
+
+===== Otro Formato ResultSet
+
+Además, IoTDB admite otros dos formatos de conjuntos de resultados: 'alinear por dispositivo' y 'deshabilitar alineación'.
+
+El 'alinear por dispositivo' indica que el deviceId se considera como una columna. Por lo tanto, hay columnas totalmente limitadas en el conjunto de datos.
+
+La declaración SQL es:
+
+[source]
+----
+select * from root.ln.* where time <= 2017-11-01T00:01:00 align by device
+----
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+-----------------+-----------+------+--------+
+|                         Time|           Device|temperature|status|hardware|
++-----------------------------+-----------------+-----------+------+--------+
+|2017-11-01T00:00:00.000+08:00|root.ln.wf01.wt01|      25.96|  true|    null|
+|2017-11-01T00:01:00.000+08:00|root.ln.wf01.wt01|      24.36|  true|    null|
+|1970-01-01T08:00:00.001+08:00|root.ln.wf02.wt02|       null|  true|      v1|
+|1970-01-01T08:00:00.002+08:00|root.ln.wf02.wt02|       null| false|      v2|
+|2017-11-01T00:00:00.000+08:00|root.ln.wf02.wt02|       null|  true|      v2|
+|2017-11-01T00:01:00.000+08:00|root.ln.wf02.wt02|       null|  true|      v2|
++-----------------------------+-----------------+-----------+------+--------+
+Total line number = 6
+It costs 0.012s
+----
+
+Para obtener más descripción de la sintaxis, lea [Referencia de SQL].
+
+La 'deshabilitar alineación' indica que hay 2 columnas para cada serie de tiempo en el conjunto de resultados. La Cláusula Deshabilitar Alineación solo se puede utilizar al final de una declaración de consulta. La Cláusula Deshabilitar Alineación no se puede usar con Agregación, Declaraciones de Relleno, Declaraciones de Agrupar Por o de Agrupar Por Dispositivo, pero sí con Declaraciones de Límite. El principio de visualización de la tabla de resultados es que solo cuando la columna (o fila) tenga datos existentes, se mostrará la columna (o fila), y las celdas inexistentes estarán vacías.
+
+La declaración SQL es:
+
+[souce]
+----
+select * from root.ln.* where time <= 2017-11-01T00:01:00 disable align
+----
+
+El resultado se muestra a continuación:
+
+[souce]
+----
++-----------------------------+--------------------------+-----------------------------+------------------------+-----------------------------+-----------------------------+-----------------------------+------------------------+
+|                         Time|root.ln.wf02.wt02.hardware|                         Time|root.ln.wf02.wt02.status|                         Time|root.ln.wf01.wt01.temperature|                         Time|root.ln.wf01.wt01.status|
++-----------------------------+--------------------------+-----------------------------+------------------------+-----------------------------+-----------------------------+-----------------------------+------------------------+
+|1970-01-01T08:00:00.001+08:00|                        v1|1970-01-01T08:00:00.001+08:00|                    true|2017-11-01T00:00:00.000+08:00|                        25.96|2017-11-01T00:00:00.000+08:00|                    true|
+|1970-01-01T08:00:00.002+08:00|                        v2|1970-01-01T08:00:00.002+08:00|                   false|2017-11-01T00:01:00.000+08:00|                        24.36|2017-11-01T00:01:00.000+08:00|                    true|
+|2017-11-01T00:00:00.000+08:00|                        v2|2017-11-01T00:00:00.000+08:00|                    true|                         null|                         null|                         null|                    null|
+|2017-11-01T00:01:00.000+08:00|                        v2|2017-11-01T00:01:00.000+08:00|                    true|                         null|                         null|                         null|                    null|
++-----------------------------+--------------------------+-----------------------------+------------------------+-----------------------------+-----------------------------+-----------------------------+------------------------+
+Total line number = 4
+It costs 0.018s
+----
+
+Para obtener más descripción de la sintaxis, lea [Referencia de SQL].
+
+===== Manejo de Errores
+
+Si el parámetro N/SN de LIMIT/SLIMIT excede el tamaño del conjunto de resultados, IoTDB devuelve todos los resultados como se esperaba. Por ejemplo, el resultado de la consulta de la declaración SQL original consta de seis filas, y seleccionamos las primeras 100 filas a través de la cláusula LIMIT:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 limit 100
+----
+
+El resultado se muestra a continuación:
+
+[source]
+----
++-----------------------------+------------------------+-----------------------------+
+|                         Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------------+------------------------+-----------------------------+
+|2017-11-01T00:06:00.000+08:00|                   false|                        20.71|
+|2017-11-01T00:07:00.000+08:00|                   false|                        21.45|
+|2017-11-01T00:08:00.000+08:00|                   false|                        22.58|
+|2017-11-01T00:09:00.000+08:00|                   false|                        20.98|
+|2017-11-01T00:10:00.000+08:00|                    true|                        25.52|
+|2017-11-01T00:11:00.000+08:00|                   false|                        22.91|
++-----------------------------+------------------------+-----------------------------+
+Total line number = 6
+It costs 0.005s
+----
+
+Si el parámetro N/SN de la cláusula LIMIT/SLIMIT excede el valor máximo permitido (N/SN es del tipo int32), el sistema muestra errores. Por ejemplo, ejecutando la siguiente declaración SQL:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 limit 1234567890123456789
+----
+
+La declaración SQL no se ejecutará y el mensaje de error correspondiente se proporciona de la siguiente manera:
+
+[source]
+----
+Msg: 303: check metadata error: Out of range. LIMIT <N>: N should be Int32.
+----
+
+Si el parámetro N/SN de la cláusula LIMIT/SLIMIT no es un número entero positivo, el sistema muestra errores. Por ejemplo, ejecutando la siguiente declaración SQL:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 limit 13.1
+----
+
+La declaración SQL no se ejecutará y el mensaje de error correspondiente se proporciona de la siguiente manera:
+
+[source]
+----
+Msg: 401: line 1:129 mismatched input '.' expecting {<EOF>, SLIMIT, OFFSET, SOFFSET, GROUP, DISABLE, ALIGN}
+----
+
+Si el parámetro OFFSET de la cláusula LIMIT excede el tamaño del conjunto de resultados, IoTDB devolverá un conjunto de resultados vacío. Por ejemplo, ejecutando la siguiente declaración SQL:
+
+[source]
+----
+select status,temperature from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 limit 2 offset 6
+----
+
+El resultado se muestra a continuación:
+
+[source]
+----
++----+------------------------+-----------------------------+
+|Time|root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++----+------------------------+-----------------------------+
++----+------------------------+-----------------------------+
+Empty set.
+It costs 0.005s
+----
+
+Si el parámetro SOFFSET de la cláusula SLIMIT no es menor que el número de series temporales disponibles, el sistema muestra errores. Por ejemplo, ejecutando la siguiente declaración SQL:
+
+[source]
+----
+select * from root.ln.wf01.wt01 where time > 2017-11-01T00:05:00.000 and time < 2017-11-01T00:12:00.000 slimit 1 soffset 2
+----
+
+La declaración SQL no se ejecutará y el mensaje de error correspondiente se proporciona de la siguiente manera:
+
+[source]
+----
+Msg: 411: Meet error in query process: The value of SOFFSET (2) is equal to or exceeds the number of sequences (2) that can actually be returned.
+----
+
+=== DELETE
+
+Los usuarios pueden eliminar los datos que cumplen la condición de eliminación en la serie temporal especificada mediante la [declaración DELETE]. Al eliminar datos, los usuarios pueden seleccionar una o más rutas de series temporales, rutas de prefijos o rutas con estrella para eliminar datos dentro de un cierto intervalo de tiempo.
+
+En un entorno de programación JAVA, puede utilizar [Java JDBC] para ejecutar sentencias UPDATE únicas o por lotes.
+
+==== Eliminar Series Temporales Únicas
+
+Tomando ln Group como ejemplo, existe un escenario de uso de este tipo:
+
+El dispositivo wt02 de la planta wf02 tiene muchos segmentos de errores en el estado de su fuente de alimentación antes de 2017-11-01 16:26:00, y los datos no se pueden analizar correctamente. Los datos erróneos afectaron el análisis de correlación con otros dispositivos. En este punto, los datos anteriores a este momento deben eliminarse. La declaración SQL para esta operación es
+
+[source]
+----
+delete from root.ln.wf02.wt02.status where time<=2017-11-01T16:26:00;
+----
+
+En caso de que esperemos simplemente eliminar los datos antes de 2017-11-01 16:26:00 en el año de 2017, la declaración SQL es:
+
+[source]
+----
+delete from root.ln.wf02.wt02.status where time>=2017-01-01T00:00:00 and time<=2017-11-01T16:26:00;
+----
+
+IoTDB admite la eliminación de un rango de puntos de series temporales. Los usuarios pueden escribir expresiones SQL de la siguiente manera para especificar el intervalo de eliminación:
+
+[source]
+----
+delete from root.ln.wf02.wt02.status where time < 10
+delete from root.ln.wf02.wt02.status where time <= 10
+delete from root.ln.wf02.wt02.status where time < 20 and time > 10
+delete from root.ln.wf02.wt02.status where time <= 20 and time >= 10
+delete from root.ln.wf02.wt02.status where time > 20
+delete from root.ln.wf02.wt02.status where time >= 20
+delete from root.ln.wf02.wt02.status where time = 20
+----
+
+Preste atención a que los intervalos múltiples conectados por la expresión "OR" no son compatibles con la declaración delete:
+
+[source]
+----
+delete from root.ln.wf02.wt02.status where time > 4 or time < 0
+Msg: 303: Check metadata error: For delete statement, where clause can only contain atomic
+expressions like : time > XXX, time <= XXX, or two atomic expressions connected by 'AND'
+----
+
+Si no se especifica una cláusula "where" en una declaración delete, se eliminarán todos los datos de una serie temporal.
+
+[source]
+----
+delete from root.ln.wf02.status
+----
+
+==== Eliminar Varias Series Temporales
+
+Si es necesario eliminar tanto el estado de la fuente de alimentación como la versión de hardware del dispositivo wt02 de la planta del grupo ln wf02 antes de 2017-11-01 16:26:00, se puede utilizar [la ruta del prefijo con un significado más amplio o la ruta con la estrella] para eliminar los datos. La declaración SQL para esta operación es:
+
+[source]
+----
+delete from root.ln.wf02.wt02 where time <= 2017-11-01T16:26:00;
+----
+
+o
+
+[source]
+----
+delete from root.ln.wf02.wt02.* where time <= 2017-11-01T16:26:00;
+----
+
+Cabe señalar que cuando la ruta eliminada no existe, IoTDB dará el mensaje de error correspondiente como se muestra a continuación:
+
+[source]
+----
+IoTDB> delete from root.ln.wf03.wt02.status where time < now()
+Msg: TimeSeries does not exist and its data cannot be deleted
+----
+
+==== Eliminar Partición de Tiempo (experimental)
+
+Puede eliminar todos los datos en una partición de tiempo de un grupo de almacenamiento utilizando la siguiente gramática:
+
+[source]
+----
+DELETE PARTITION root.ln 0,1,2
+----
+
+El `0,1,2` anterior es la identificación de la partición que se eliminará, puede encontrarla en las carpetas de datos de IoTDB o convertir una marca de tiempo manualmente en una identificación usando timestamp`/`partitionInterval` (piso), y `partitionInterval` debe estar en su configuración (si la partición de tiempo es compatible con su versión).
+
+Tenga en cuenta que esta función es experimental y principalmente para el desarrollo, utilícela con cuidado.

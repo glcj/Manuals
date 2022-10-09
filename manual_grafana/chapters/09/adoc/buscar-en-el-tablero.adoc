@@ -1,0 +1,40 @@
+= Buscar en el tablero
+
+Los tableros se pueden buscar por el nombre del tablero, filtrar por una (o muchas) etiquetas o filtrar por estado destacado. Se accede a la búsqueda del tablero a través del selector de tablero, disponible en el área de navegación superior del tablero. La búsqueda del tablero también se puede abrir usando el atajo `F`.
+
+image::image152.png[https://grafana.com/static/img/docs/v50/dashboard_search_annotated.png,width=624,height=474]
+
+[arabic]
+. `Search Bar`: la barra de búsqueda le permite ingresar cualquier cadena y buscar en la base de datos y en los tableros basados ​​en archivos en tiempo real.
+. `Starred`: aquí encontrará todos sus tableros destacados.
+. `Recent`: aquí encontrará los últimos tableros creados.
+. `Folders`: el filtro de etiquetas le permite filtrar la lista por etiquetas del tablero.
+. `Root`: la raíz contiene todos los tableros que no se colocan en una carpeta.
+. `Tags`: el filtro de etiquetas le permite filtrar la lista por etiquetas del tablero.
+
+Cuando solo usa un teclado, puede usar las teclas de flecha del teclado para navegar por los resultados, presione enter para abrir el tablero seleccionado.
+
+== Buscar por nombre de tablero
+
+Empiece a escribir cualquier parte de los nombres de los tableros deseados en la barra de búsqueda. La búsqueda devolverá resultados para cualquier coincidencia de cadena parcial en tiempo real, a medida que escribe.
+
+La búsqueda del tablero es:
+
+* Tiempo real
+* _No_ distingue entre mayúsculas y minúsculas
+* Funcional en tableros almacenados _y_ basados ​​en archivos.
+
+== Filtrar por etiqueta(s)
+
+Las etiquetas son una excelente manera de organizar sus tableros, especialmente a medida que aumenta el número de tableros. Las etiquetas se pueden agregar y administrar en la configuración del tablero.
+
+Para filtrar la lista del tablero por etiqueta, haga clic en cualquier etiqueta que aparezca en la columna de la derecha. La lista se puede filtrar aún más haciendo clic en etiquetas adicionales:
+
+Alternativamente, para ver una lista de todas las etiquetas disponibles, haga clic en el menú desplegable de etiquetas. Se mostrarán todas las etiquetas y, cuando se seleccione una etiqueta, la búsqueda del tablero se filtrará instantáneamente:
+
+Cuando se usa solo un teclado: `tab` para enfocarse en el enlace de _etiquetas_, `▼` tecla de flecha hacia abajo para buscar una etiqueta y seleccionar con la tecla `Enter`.
+
+[NOTE]
+====
+Cuando se seleccionan varias etiquetas, Grafana mostrará tableros que las incluyen todas.
+====

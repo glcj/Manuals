@@ -1,0 +1,18 @@
+= Arquitectura del Sistema
+
+Además del motor de IoTDB, también desarrollamos varios componentes para brindar un mejor servicio de IoT. Todos los componentes se denominan a continuación la suite IoTDB, y IoTDB se refiere específicamente al motor IoTDB.
+
+La suite IoTDB puede proporcionar una serie de funciones en la situación real, como la recopilación de datos, la escritura de datos, el almacenamiento de datos, la consulta de datos, la visualización de datos y el análisis de datos. La Figura 1.1 muestra la arquitectura general de la aplicación aportada por todos los componentes de la suite IoTDB.
+
+.{blank}
+image::imagen-01.png[]
+
+Como se muestra en la Figura 1.1, los usuarios pueden usar JDBC para importar datos de series temporales recopilados por el sensor en el dispositivo a IoTDB local/remoto. Estos datos de series temporales pueden ser datos de estado del sistema (como la carga del servidor y la memoria de la CPU, etc.), datos de la cola de mensajes, datos de series temporales de aplicaciones u otros datos de series temporales en la base de datos. Los usuarios también pueden escribir los datos directamente en TsFile (local o en HDFS).
+
+TsFile podría escribirse en el HDFS, implementando así tareas de procesamiento de datos como detección de anomalías y aprendizaje automático en la plataforma de procesamiento de datos Hadoop o Spark.
+
+Para los datos escritos en HDFS o TsFile local, los usuarios pueden usar TsFile-Hadoop-Connector o TsFile-Spark-Connector para permitir que Hadoop o Spark procesen datos.
+
+Los resultados del análisis se pueden volver a escribir en TsFile de la misma manera.
+
+Además, IoTDB y TsFile proporcionan herramientas de cliente para satisfacer las diversas necesidades de los usuarios al escribir y ver datos en forma SQL, forma de secuencia de comandos y forma gráfica.

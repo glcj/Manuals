@@ -1,0 +1,40 @@
+= Restringir el acceso
+
+El permiso más alto siempre gana, por lo que si, por ejemplo, desea ocultar una carpeta o un tablero de otros, debe eliminar el permiso basado en el *Rol de la organización* de la Lista de Control de Acceso (ACL).
+
+[arabic]
+. No puede anular los permisos de los usuarios con el rol de Administrador de Organización. Los Administradores siempre tienen acceso a todo.
+. Un permiso más específico con un nivel de permiso más bajo no tendrá ningún efecto si existe una regla más general con un nivel de permiso más alto. Debe eliminar o reducir el nivel de permiso de la regla más general.
+
+A continuación, se muestran algunos ejemplos de cómo Grafana resuelve varios permisos.
+
+== Ejemplo 1 (user1 tiene el Rol de Editor)
+
+Permisos para un tablero:
+
+[arabic]
+. Todos los que tengan el rol de Editor pueden editar
+. user1 puede ver
+
+Resultado: el `user1` tiene permiso de Edición, ya que siempre gana el permiso más alto.
+
+== Ejemplo 2 (user1 tiene el Rol de Espectador y es miembro del team1)
+
+Permisos para un tablero:
+
+[arabic]
+. Todos los que tengan el rol de Espectador pueden ver
+. user1 puede Editar
+. team1 puede Administrar
+
+Resultado: el `user1` tiene permiso de Administrador, ya que siempre gana el permiso más alto.
+
+== Ejemplo 3
+
+Permisos para un tablero:
+
+[arabic]
+. user1 puede administrar (heredado de la carpeta principal)
+. user1 puede editar
+
+Resultado: no puede anular a un permiso inferior. `user1` tiene permiso de Administrador, ya que siempre gana el permiso más alto.

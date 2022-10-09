@@ -1,0 +1,9 @@
+= Reportando
+
+La generación de informes le permite generar archivos PDF desde cualquiera de sus paneles y enviarlos a las partes interesadas según un cronograma.
+
+image::image156.png[https://grafana.com/static/img/docs/enterprise/reports_list.png,width=624,height=207]
+
+====
+Los informes solo están disponibles en Grafana Enterprise, v6.4 o posterior. Para obtener más información, consulte xref:grafana-enterprise/reportando.adoc[Reportes] en xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].
+====

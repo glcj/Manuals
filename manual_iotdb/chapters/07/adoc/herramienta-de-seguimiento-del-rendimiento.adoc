@@ -1,0 +1,53 @@
+= Herramienta de Seguimiento del Rendimiento
+
+IoTDB admite el uso de declaraciones `TRACING` para habilitar y deshabilitar el seguimiento del rendimiento de las declaraciones de consulta, que está deshabilitado de forma predeterminada. Los usuarios pueden utilizar la herramienta de seguimiento del rendimiento para analizar posibles problemas de rendimiento en algunas consultas. De forma predeterminada, los archivos de registro para el seguimiento del rendimiento se almacenan en el directorio `./data/tracing`.
+
+Encender el seguimiento:
+
+`IoTDB> SEGUIMIENTO`
+
+Desactivar seguimiento:
+
+`IoTDB> TRACING OFF`
+
+Dado que el costo de una consulta de IoTDB depende principalmente del número de series de tiempo consultadas, el número de archivos TsFile a los que se accede, el número total de fragmentos que se analizarán y el tamaño medio de cada fragmento (el número de puntos de datos contenidos en el fragmento ). Por tanto, el análisis de desempeño actual incluye los siguientes contenidos:
+
+* Hora de inicio
+
+* Declaración de consulta
+
+* Número de rutas de la serie
+
+* Número de archivos de secuencia
+
+* Estadísticas de cada archivo de secuencia
+
+* Número de archivos sin secuencia
+
+* Estadísticas de cada archivo unSequence
+
+* Número de trozos
+
+* Tamaño medio de los trozos
+
+* Tiempo total de costo
+
+== Ejemplo
+
+Por ejemplo, ejecute `select * from root`, el contenido del archivo de registro de seguimiento incluirá el siguiente contenido:
+
+[source]
+----
+Query Id: 2 - Start time: 2020-06-28 10:53:54.727
+Query Id: 2 - Query Statement: select * from root
+Query Id: 2 - Number of series paths: 3
+Query Id: 2 - Number of sequence files: 1
+Query Id: 2 - SeqFile_1603336100446-1-0.tsfile root.sg.d1[1, 10000]
+Query Id: 2 - Number of unsequence files: 1
+Query Id: 2 - UnSeqFile_1603354798303-2-0.tsfile root.sg.d1[9, 1000]
+Query Id: 2 - Number of chunks: 3
+Query Id: 2 - Average size of chunks: 4113
+Query Id: 2 - Total cost time: 11ms
+----
+
+Para evitar información de salida desordenada causada por la ejecución de varias consultas al mismo tiempo, el ID de consulta se agrega antes de cada información de salida. Los usuarios pueden utilizar `grep "Query ID: 2" tracing.txt` para extraer toda la información de seguimiento de una consulta.

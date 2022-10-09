@@ -1,0 +1,215 @@
+= Fuente de datos Prometheus
+
+Grafana incluye soporte integrado para Prometheus. Este tema explica opciones, variables, consultas y otras opciones específicas de la fuente de datos de Prometheus. Consulte xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[Agregar una fuente de datos] para obtener instrucciones sobre cómo agregar una fuente de datos a Grafana. Solo los usuarios con el rol de administrador de la organización pueden agregar fuentes de datos.
+
+== Configuración de Prometheus
+
+Para acceder a la configuración de Prometheus, coloque el mouse sobre el ícono de *Configuración* (engranaje), luego haga clic en *Fuentes de datos* y luego en la fuente de datos de Prometheus.
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`Name` |El nombre de la fuente de datos. Así es como se hace referencia a la fuente de datos en paneles y consultas.
+|`Default` |Fuente de datos predeterminada significa que se preseleccionará para nuevos paneles.
+|`Url` |La URL de su servidor Prometheus, p. Ej. `http://prometheus.example.org:9090`.
+|`Access` |Servidor de acceso (predeterminado) = URL debe ser accesible desde el servidor/backend de Grafana, Navegador = URL debe ser accesible desde el navegador.
+|`Basic Auth` |Active la autenticación básica en la fuente de datos de Prometheus.
+|`User` |Nombre de usuario para autenticación básica.
+|`Password` |Contraseña para autenticación básica.
+|`Scrape interval` |Ajústelo al intervalo típico de raspado y evaluación configurado en Prometheus. El valor predeterminado es 15 segundos.
+|`HTTP method` |Utilice el método HTTP POST o GET para consultar su fuente de datos. POST es el método recomendado y preseleccionado ya que permite consultas más grandes. Cámbielo a GET si tiene una versión de Prometheus anterior a la 2.1 o si las solicitudes POST están restringidas en su red.
+|`Disable metrics lookup` |Al marcar esta opción, se inhabilitará el selector de métricas y la compatibilidad con métricas / etiquetas en el autocompletado del campo de consulta. Esto ayuda si tiene problemas de rendimiento con instancias de Prometheus más grandes.
+|`Custom Query Parameters` |Agregue parámetros personalizados a la URL de consulta de Prometheus. Por ejemplo, `timeout`, `partial_response`, `dedup` o `max_source_resolution`. Se deben concatenar varios parámetros junto con un "&".
+|`Label name` |Agregue el nombre del campo en el objeto de etiqueta.
+|`URL` |Si el enlace es externo, introduzca la URL completa del enlace. Puede interpolar el valor del campo con el macro `${__value.raw }`.
+|`Internal link` |Seleccione si el enlace es interno o externo. En el caso de un enlace interno, un selector de fuente de datos le permite seleccionar la fuente de datos de destino. Solo admite el seguimiento de fuentes de datos.
+|===
+
+== Editor de consultas de Prometheus
+
+A continuación, puede encontrar información y opciones para el editor de consultas de Prometheus en el tablero y en Explorar.
+
+=== Editor de consultas en tableros
+
+Abra un gráfico en el modo de edición haciendo clic en el título > Editar (o presionando la tecla `e` mientras se desplaza sobre el panel).
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`Query expression` |Expresión de consulta de Prometheus, consulte la http://prometheus.io/docs/querying/basics/[Documentación de Prometheus].
+|`Legend format` |Controla el nombre de la serie temporal mediante el nombre o el patrón. Por ejemplo, `\{\{hostname}}` se reemplaza con el valor de la etiqueta para la etiqueta `hostname`.
+|`Min step` |Un límite inferior adicional para el parámetro `step` de las [consultas de rango de Prometheus] y para las variables `$__interval` y `$__rate_interval`. El límite es absoluto, no se puede modificar con la configuración de _Resolución_.
+|`Resolution` |`1/1` establece tanto la variable `$__interval` como el parámetro `step` de las https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries[consultas de rango de Prometheus] de modo que cada píxel corresponda a un punto de datos. Para un mejor rendimiento, se pueden elegir resoluciones más bajas. `1/2` solo recupera un punto de datos por cada dos píxeles y `1/10` recupera un punto de datos por cada 10 píxeles. Tenga en cuenta que tanto el _intervalo de tiempo mínimo_ como el _paso mínimo_ limitan el valor final de `$__interval` y `step`.
+|`Metric lookup` |Busque nombres de métricas en este campo de entrada.
+|`Format as` |Cambiar entre `Table`, `Time series` o `Heatmap`. `Table` solo funcionará en el panel Tabla. `Heatmap` es adecuado para mostrar métricas del tipo Histograma en un panel de Mapa de calor. Debajo del capó, convierte histogramas acumulativos en regulares y clasifica las series según el límite del cubo.
+|`Instant` |Realice una consulta “instantánea” para devolver solo el último valor que Prometheus ha extraído para la serie de tiempo solicitada. Las consultas instantáneas devuelven resultados mucho más rápido que las consultas de rango normales. Úselos para buscar conjuntos de etiquetas.
+|`Min time interval` |Este valor multiplicado por el denominador de la configuración de Resolution establece un límite inferior tanto para la variable `$__interval` como para el parámetro `step` de las [consultas de rango de Prometheus]. De forma predeterminada, el _Intervalo de extracción_ se establece en las opciones de origen de datos.
+|`Exemplars` |Ejecute y muestre ejemplos en el gráfico.
+|===
+
+[NOTE]
+====
+Grafana modifica las fechas de solicitud de consultas para alinearlas con el paso calculado dinámicamente. Esto asegura una visualización consistente de los datos de las métricas, pero puede resultar en una pequeña brecha de datos en el borde derecho de un gráfico.
+====
+
+=== Consultas instantáneas en tableros
+
+La fuente de datos de Prometheus le permite ejecutar consultas "instantáneas", que consultan solo el valor más reciente. Puede visualizar los resultados en un panel de tabla para ver todas las etiquetas disponibles de una serie temporal.
+
+Los resultados de las consultas instantáneas se componen de un solo punto de datos por serie, pero se pueden mostrar en el panel de gráficos con la ayuda de xref:paneles/visualizaciones/panel-de-graficos.adoc#_anulaciones_de_series[anulaciones de series]. Para mostrarlos en el gráfico como un último punto de valor, agregue una anulación de serie y seleccione `Points > true`. Para mostrar una línea horizontal a través del gráfico completo, agregue una anulación de serie y seleccione `Transforma > constant`.
+
+====
+El soporte para anulaciones de series constantes está disponible en Grafana v6.4
+====
+
+== Editor de consultas en Explorar
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`Query expression` |Expresión de consulta de Prometheus, consulte la http://prometheus.io/docs/querying/basics/[documentación de Prometheus].
+|`Step` |Parámetro `step` de las https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries[consultas de rango de Prometheus]. Las unidades de tiempo se pueden utilizar aquí, por ejemplo: 5s, 1m, 3h, 1d, 1y. La unidad predeterminada si ninguna unidad especificada es `s` (segundos).
+|`Query type` |`Range`, `Instant` o `Both`. Al ejecutar la *Consulta de rango*, el resultado de la consulta se muestra en un gráfico y una tabla. La consulta instantánea devuelve solo el último valor que Prometheus ha extraído para la serie de tiempo solicitada y se muestra en la tabla. Cuando se selecciona *Ambos*, se ejecutan tanto la consulta instantánea como la consulta de rango. El resultado de la consulta de rango se muestra en un gráfico y el resultado de la consulta instantánea se muestra en la tabla.
+|`Exemplars` |Ejecute y muestre ejemplares en el gráfico.
+|===
+
+== Plantillas
+
+En lugar de codificar cosas como el servidor, la aplicación y el nombre del sensor en sus consultas de métricas, puede usar variables en su lugar. Las variables se muestran como cuadros de selección desplegables en la parte superior del tablero. Estos menús desplegables facilitan el cambio de los datos que se muestran en su tablero.
+
+Consulte la documentación de creación de xref:plantillas-y-variables/plantillas-y-variables.adoc[Plantillas] para obtener una introducción a la función de creación de plantillas y los diferentes tipos de variables de plantilla.
+
+=== Variable de consulta
+
+La variable del tipo _Consulta_ le permite consultar a Prometheus para obtener una lista de métricas, etiquetas o valores de etiquetas. El complemento de fuente de datos de Prometheus proporciona las siguientes funciones que puede utilizar en el campo de entrada `Query`.
+
+[cols=",",options="header",]
+|===
+|Nombre |Descripción
+|`label_names()` |Devuelve una lista de nombres de etiquetas.
+|`label_values​​(label)` |Devuelve una lista de valores de etiqueta para `label` en cada métrica.
+|`label_values​​(metric, label)` |Devuelve una lista de valores de etiqueta para `label` en la métrica especificada.
+|`metrics(metric)` |Devuelve una lista de métricas que coinciden con la expresión regular de `metric` especificada.
+|`query_result(query)` |Devuelve una lista de los resultados de la consulta de Prometheus para la `query`.
+|===
+
+Para obtener detalles sobre los _nombres de las métricas_, los _nombres de las etiquetas_ y los _valores de las etiquetas_, consulte la http://prometheus.io/docs/concepts/data_model/#metric-names-and-labels[documentación de Prometheus].
+
+=== Usar variables de intervalo y rango
+
+====
+Soporte para `$__range`, `$__range_s` y `$__range_ms` solo disponible en Grafana v5.3
+====
+
+Puede utilizar algunas variables globales integradas en las variables de consulta; `$__interval`, `$__interval_ms`, `$__range`, `$__range_s` y `$__range_ms`, consulte [Variables integradas globales] para obtener más información. Estos pueden ser convenientes de usar junto con la función `query_result` cuando necesite filtrar consultas de variables, ya que la función `label_values` no admite consultas.
+
+Asegúrese de configurar el activador `refresh` de la variable en `On Time Range Change` para obtener las instancias correctas al cambiar el rango de tiempo en el tablero.
+
+*Uso de ejemplo:*
+
+Complete una variable0 con las 5 instancias de solicitud más ocupadas según el QPS promedio durante el rango de tiempo que se muestra en el tablero:
+
+----
+Query: query_result(topk(5, sum(rate(http_requests_total[$__range])) by (instance)))
+Regex: /"([^"]+)"/
+----
+
+Complete una variable con las instancias que tienen un estado determinado en el rango de tiempo que se muestra en el tablero, usando `$__range_s`:
+
+----
+Query: query_result(max_over_time(<metric>[${__range_s}s]) != <state>)
+Regex:
+----
+
+=== Usando la variable `$__rate_interval`
+
+[NOTE]
+====
+Disponible en Grafana 7.2 y superior
+====
+
+La variable `$__rate_interval` está destinada a utilizarse en la función de tasa. Se define como max(`$__interval` + _intervalo de raspado_, 4 * _intervalo de raspado_), donde intervalo de raspado es la configuración del paso mínimo (también conocido como intervalo de consulta, una configuración por consulta PromQL), si se establece alguno, _y de lo contrario el intervalo _Scrape_ como se establece la fuente de datos de Prometheus (pero ignorando cualquier ajuste de intervalo mínimo en el panel, porque este último es modificado por el ajuste de resolución).
+
+=== Usar variables en consultas
+
+Hay dos sintaxis:
+
+* `$<varname>` Ejemplo: rate(http_requests_total\{job=~"$job"}[5m])
+
+* `[[varname]]` Ejemplo: rate(http_requests_total\{job=~"[[job]]"}[5m])
+
+¿Por qué de dos formas? La primera sintaxis es más fácil de leer y escribir, pero no le permite usar una variable en medio de una palabra. Cuando las opciones _Multi-valor_ o _Incluir todos los valores_ están habilitadas, Grafana convierte las etiquetas de texto sin formato a una cadena compatible con expresiones regulares. Lo que significa que debe usar `=~` en lugar de `=`.
+
+=== Variable de filtros ad hoc
+
+Prometheus admite el tipo de variable especial de xref:plantillas-y-variables/tipos-de-variables/filtros-ad-hoc.adoc[filtros ad hoc]. Le permite especificar cualquier número de filtros de etiqueta/valor sobre la marcha. Estos filtros se aplican automáticamente a todas sus consultas de Prometheus.
+
+== Anotaciones
+
+Las xref:tableros/anotaciones.adoc[anotaciones] le permiten superponer rica información de eventos en la parte superior de los gráficos. Puede agregar consultas de anotaciones a través del menú Tablero / Vista de anotaciones.
+
+Prometheus admite dos formas de consultar anotaciones.
+
+* Una consulta de métrica regular
+* Una consulta de Prometheus para alertas pendientes y activadas (para obtener más detalles, consulte https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/#inspecting-alerts-during-runtime[Inspección de alertas durante el tiempo de ejecución])
+
+La opción de paso es útil para limitar la cantidad de eventos devueltos por su consulta.
+
+== Obtenga métricas de Grafana en Prometheus
+
+Grafana expone métricas para Prometheus en el punto final `/metrics`. También incluimos un tablero dentro de Grafana para que pueda comenzar a ver sus métricas más rápido. Puede importar el tablero incluido yendo a la página de edición de la fuente de datos y haciendo clic en la pestaña del tablero. Allí puede encontrar un panel para Grafana y uno para Prometheus. ¡Importe y comience a ver todas las métricas!
+
+Para obtener instrucciones detalladas, consulte las xref:administracion/ver-servidor/metricas-internas.adoc[métricas internas de Grafana].
+
+== API de Prometheus
+
+La fuente de datos de Prometheus funciona con otros proyectos que implementan la https://prometheus.io/docs/prometheus/latest/querying/api/[API de consultas de Prometheus], que incluyen:
+
+* https://cortexmetrics.io/docs/[Cortex]
+* https://thanos.io/v0.17/components/query.md/[Thanos]
+
+Para obtener más información sobre cómo consultar otros proyectos compatibles con Prometheus de Grafana, consulte la documentación del proyecto específico.
+
+== Aprovisionar la fuente de datos de Prometheus
+
+Puede configurar fuentes de datos utilizando archivos de configuración con el sistema de aprovisionamiento de Grafana. Lea más sobre cómo funciona y todas las configuraciones que puede establecer para las fuentes de datos en la página de xref:administracion/aprovisionamiento/fuentes-de-datos.adoc[documentos de aprovisionamiento].
+
+A continuación, se muestran algunos ejemplos de aprovisionamiento para esta fuente de datos:
+
+[source,YAML]
+----
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    # Access mode - proxy (server in the UI) or direct (browser in the UI).
+    access: proxy
+    httpMethod: POST
+    url: http://localhost:9090
+    jsonData:
+      exemplarTraceIdDestinations:
+        # Field with internal link pointing to data source in Grafana.
+        # datasourceUid value can be anything, but it should be unique across all defined data source uids.
+        - datasourceUid: my_jaeger_uid
+          name: traceID
+
+        # Field with external link.
+        - name: traceID
+          url: 'http://localhost:3000/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22Jaeger%22,%7B%22query%22:%22$${__value.raw}%22%7D%5D'
+----
+
+== Configurando ejemplares
+
+[NOTE]
+====
+Esta función está disponible en Prometheus 2.26+ y Grafana 7.4+.
+====
+
+Grafana 7.4 y versiones posteriores tienen la capacidad de mostrar datos ejemplares junto con una métrica tanto en Explorar como en Tableros. Los ejemplares son una forma de asociar metadatos de cardinalidad más alta de un evento específico con datos de series temporales tradicionales.
+
+image::image29.png[Screenshot showing the detail window of an Exemplar,width=624,height=285]
+
+Configure ejemplares en la configuración de la fuente de datos agregando enlaces externos o internos.
+
+image::image30.png[Screenshot of the Exemplars configuration,width=624,height=217]

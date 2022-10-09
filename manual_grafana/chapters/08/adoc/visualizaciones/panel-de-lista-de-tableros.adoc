@@ -1,0 +1,32 @@
+= Panel de lista de tableros
+
+El panel de lista de tableros le permite mostrar enlaces dinámicos a otros tableros. La lista se puede configurar para usar tableros marcados con estrellas, tableros visualizados recientemente, una consulta de búsqueda y etiquetas de panel.
+
+image::image68.png[https://grafana.com/static/img/docs/v45/dashboard-list-panels.png,width=624,height=171]
+
+En cada carga del tablero, este panel consulta la lista de tableros, proporcionando siempre los resultados más actualizados.
+
+== Opciones
+
+Utilice estas opciones para refinar su visualización.
+
+=== Opciones
+
+* *Destacados:* muestra los tableros marcados con estrellas en orden alfabético.
+* *Visualizados recientemente:* muestra los tableros visualizados recientemente en orden alfabético.
+* *Búsqueda:* muestra tableros por consulta de búsqueda o etiquetas. Debe ingresar al menos un valor en *Consulta* o *Etiquetas*. Para los campos *Consulta* y *Etiquetas*. Se admite la interpolación de variables, por ejemplo, `$my_var` o `${my_var}`.
+* *Mostrar encabezados:* la selección de la lista elegida (Destacados, Visto recientemente, Buscar) se muestra como un encabezado.
+* *Elementos máximos:* establece el número máximo de elementos a listar por sección. Por ejemplo, si deja esto en el valor predeterminado de 10 y muestra los tableros Destacados y Vistos recientemente, el panel mostrará hasta 20 tableros en total, diez en cada sección.
+
+=== Buscar
+
+Estas opciones solo se aplican si se selecciona la opción *Buscar*.
+
+* *Consulta:* ingrese la consulta por la que desea realizar la búsqueda. Las consultas no distinguen entre mayúsculas y minúsculas y se aceptan valores parciales.
+* *Carpeta:* seleccione las carpetas del tablero que desea mostrar.
+* *Etiquetas:* aquí es donde ingresa las etiquetas por las que desea buscar. Tenga en cuenta que las etiquetas existentes no aparecerán a medida que escribe y _distinguen_ entre mayúsculas y minúsculas.
+
+[NOTE]
+====
+Cuando aparecen varias etiquetas y cadenas, la lista de tableros muestra los que cumplen _todas_ las condiciones.
+====

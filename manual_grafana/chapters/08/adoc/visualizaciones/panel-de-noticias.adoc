@@ -1,0 +1,5 @@
+= Panel de noticias
+
+Este panel muestra una fuente RSS. De forma predeterminada, muestra artículos del blog de Grafana Labs.
+
+Introduzca la URL de un RSS en el campo URL de la sección Visualización. Este tipo de panel no acepta otras consultas.

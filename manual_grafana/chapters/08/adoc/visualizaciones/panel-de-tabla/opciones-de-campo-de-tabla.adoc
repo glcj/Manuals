@@ -1,0 +1,81 @@
+= Opciones de campo de tabla
+
+Esta sección explica todas las opciones de campo de tabla disponibles. Se enumeran en el mismo orden que en Grafana. Las opciones enumeradas en este tema se aplican solo a las visualizaciones del panel de tabla.
+
+La mayoría de las opciones de campo no afectarán la visualización hasta que haga clic fuera del cuadro de opción de campo que está editando o presione Entrar.
+
+Para obtener más información sobre cómo aplicar estas opciones, consulte:
+
+* xref:paneles/opciones-de-campo/configurar-todos-los-campos.adoc[Configurar todos los campos]
+* xref:paneles/opciones-de-campo/configurar-campos-especificos.adoc[Configurar campos específicos]
+
+== Alineación de columnas
+
+Elija cómo Grafana debe alinear el contenido de la celda:
+
+* Auto (predeterminado)
+* Izquierda
+* Centrar
+* Derecha
+
+== Ancho de columna
+
+De forma predeterminada, Grafana calcula automáticamente el ancho de la columna en función del contenido de la celda. En esta opción de campo, puede anular la configuración y definir el ancho de todas las columnas en píxeles.
+
+Por ejemplo, si ingresa `100` en el campo, cuando haga clic fuera del campo, todas las columnas se establecerán en 100 píxeles de ancho.
+
+== Modo de visualización de celda
+
+De forma predeterminada, Grafana elige automáticamente la configuración de pantalla. Puede anular la configuración eligiendo una de las siguientes opciones para cambiar todos los campos.
+
+[NOTE]
+====
+Si los configura en la pestaña Campo, los modos de visualización se aplicarán a todos los campos, incluido el campo de tiempo. Muchas opciones funcionarán mejor si las configura en la pestaña Anular.
+====
+
+=== Texto en color
+
+Si se establecen umbrales, el texto del campo se muestra en el color de umbral apropiado.
+
+image::image82.png[Color text,width=400,height=118]
+
+=== Fondo de color (degradado o sólido)
+
+Si se establecen umbrales, el fondo del campo se muestra en el color de umbral apropiado.
+
+image::image83.png[Color background,width=398,height=107]
+
+=== Medidor de gradiente
+
+Los niveles de umbral definen un gradiente.
+
+image::image84.png[Gradient gauge,width=398,height=133]
+
+=== Indicador LCD
+
+El medidor se divide en pequeñas celdas que están encendidas o apagadas.
+
+image::image85.png[LCD gauge,width=400,height=169]
+
+=== Vista JSON
+
+Muestra el valor formateado como código. Si un valor es un objeto, la vista JSON que permite navegar por el objeto JSON aparecerá al pasar el mouse.
+
+image::image86.png[JSON view,width=398,height=113]
+
+=== Imagen
+
+====
+Solo disponible en Grafana 7.3+
+====
+
+Si tiene un valor de campo que es una URL de imagen o una imagen codificada en base64, puede configurar la tabla para que se muestre como una imagen.
+
+=== Filtro de columna
+
+[NOTE]
+====
+Esta función está disponible en Grafana 7.2+.
+====
+
+Active esta opción para habilitar los filtros de campo de la tabla. Para obtener más información, consulte xref:paneles/visualizaciones/panel-de-tabla/filtrar-columnas-de-la-tabla.adoc[Filtrar columnas de la tabla].

@@ -1,0 +1,379 @@
+= Modelo de datos
+
+En esta sección, se toma un escenario de energía como ejemplo para ilustrar cómo crear un modelo de datos correcto en IoTDB. Para mayor comodidad, se adjunta un archivo de datos de muestra para que practique IoTDB.
+
+Descargue el archivo adjunto: https://github.com/thulab/iotdb/files/4438687/OtherMaterial-Sample.Data.txt[IoTDB-SampleData.txt]
+
+Según las capas de atributos de datos, se expresa como una estructura de jerarquía de atributos basada en la cobertura de atributos y la relación subordinada entre ellos, como se muestra a continuación. La jerarquía de arriba a abajo es: capa de grupo de energía - capa de planta de energía - capa de dispositivo - capa de sensor. ROOT es el nodo raíz y cada nodo de la capa de sensor es un nodo hoja. En el proceso de uso de IoTDB, los atributos en la ruta desde el nodo ROOT se conectan directamente a cada nodo hoja con ".", Formando así el nombre de una serie temporal en IoTDB. Por ejemplo, la ruta más a la izquierda en la Figura 2.1 puede generar una serie temporal llamada `root.ln.wf01.wt01.status`.
+
+.{blank}
+image::imagen-09.jpeg[]
+
+== Estructura de la jerarquía de atributos
+
+Después de obtener el nombre de la serie temporal, debemos configurar el grupo de almacenamiento de acuerdo con el escenario real y la escala de los datos. Debido a que en el escenario de este capítulo, los datos generalmente se obtienen en la unidad de grupos (es decir, los datos pueden estar a través de campos y dispositivos eléctricos), para evitar el cambio frecuente de E/S al escribir datos y cumplir con los requisitos del usuario de aislamiento físico de datos en la unidad de grupos, el grupo de almacenamiento se establece en la capa de grupo.
+
+Estos son los conceptos básicos del modelo involucrado en IoTDB:
+
+=== Dispositivo
+
+Un dispositivo es una instalación equipada con sensores en escenarios reales. En IoTDB, todos los sensores deben tener sus dispositivos correspondientes.
+
+=== Sensor
+
+Un sensor es un equipo de detección en una escena real, que puede detectar la información que se va a medir y puede transformar la información detectada en una señal eléctrica u otra forma deseada de salida de información y enviarla a IoTDB. En IoTDB, todos los datos y rutas almacenados se organizan en unidades de sensores.
+
+=== Grupo de almacenamiento
+
+Los grupos de almacenamiento se utilizan para permitir a los usuarios definir cómo organizar y aislar diferentes datos de series temporales en el disco. Las series de tiempo que pertenecen al mismo grupo de almacenamiento se escriben continuamente en el mismo archivo en la carpeta correspondiente. El archivo puede cerrarse debido a los comandos del usuario o las políticas del sistema y, por lo tanto, los datos que vienen a continuación de estos sensores se almacenarán en un nuevo archivo en la misma carpeta. Las series de tiempo que pertenecen a diferentes grupos de almacenamiento se almacenan en diferentes carpetas.
+
+Los usuarios pueden establecer cualquier ruta de prefijo como grupo de almacenamiento. Siempre que haya cuatro series de tiempo `root.vehicle.d1.s1`, `root.vehicle.d1.s2`, `root.vehicle.d2.s1`, `root.vehicle.d2.s2`, dos dispositivos `d1` y `d2` bajo la ruta `root.vehicle` pueden pertenecer al mismo propietario o al mismo fabricante, por lo que d1 y d2 están estrechamente relacionados. En este punto, la ruta del prefijo root.vehicle se puede designar como un grupo de almacenamiento, lo que permitirá que IoTDB almacene todos los dispositivos en la misma carpeta. Los dispositivos recién agregados en `root.vehicle` también pertenecerán a este grupo de almacenamiento.
+
+[NOTE]
+====
+No se permite establecer una ruta completa (`root.vehicle.d1.s1` como en el ejemplo anterior) como grupo de almacenamiento.
+====
+
+Establecer un número razonable de grupos de almacenamiento puede conducir a mejoras en el rendimiento: no hay una ralentización del sistema debido a la conmutación frecuente de E/S (que también ocupará mucha memoria y dará como resultado la conmutación frecuente de archivos de memoria) causada por demasiados archivos de almacenamiento (o carpetas), ni el bloqueo de comandos de escritura causado por muy pocos archivos de almacenamiento (o carpetas) (lo que reduce la simultaneidad).
+
+Los usuarios deben equilibrar la configuración del grupo de almacenamiento de los archivos de almacenamiento de acuerdo con su propio tamaño de datos y escenarios de uso para lograr un mejor rendimiento del sistema. (Se proporcionarán oficialmente informes de prueba de rendimiento y escala del grupo de almacenamiento en el futuro).
+
+[NOTE]
+====
+El prefijo de una serie temporal debe pertenecer a un grupo de almacenamiento. Antes de crear una serie temporal, el usuario debe establecer a qué grupo de almacenamiento pertenece la serie. Solo las series de tiempo cuyo grupo de almacenamiento está configurado pueden conservarse en el disco.
+====
+
+Una vez que se establece una ruta de prefijo como un grupo de almacenamiento, la configuración del grupo de almacenamiento no se puede cambiar.
+
+Una vez que se establece un grupo de almacenamiento, no se permite volver a configurar todas las capas principales y secundarias de la ruta de prefijo correspondiente (por ejemplo, después de que `root.ln` se establece como grupo de almacenamiento, la capa raíz y `root.ln.wf01` no se permiten establecer como grupos de almacenamiento).
+
+El nombre de capa del grupo de almacenamiento solo puede constar de caracteres, números y guiones bajos, como `root.storagegroup_1`.
+
+=== Ruta
+
+En IoTDB, una ruta es una expresión que cumple con las siguientes restricciones:
+
+[source]
+----
+path: LayerName (DOT LayerName)+
+LayerName: Identifier | STAR
+----
+
+Entre ellos, STAR es "*" y DOT es ".".
+
+Llamamos a la parte media de una ruta entre dos "." como una capa, y por lo tanto `root.A.B.C` es una ruta con cuatro capas.
+
+Vale la pena señalar que en la ruta, root es un carácter reservado, que solo puede aparecer al comienzo de la serie de tiempo que se menciona a continuación. Si root aparece en otras capas, no se puede analizar y se informa de un error.
+
+No se permiten comillas simples en la ruta. Si usted desea utilizar caracteres especiales como "." en LayerName, use comillas dobles. Por ejemplo, `root.sg."d.1"."s.1"`.
+
+Los caracteres admitidos en LayerName sin comillas dobles son los siguientes:
+
+. Caracteres chinos '\u2E80' a '\u9FFF'
+
+. '+', '&', '%', '$', '#', '@', '/', '_', '-', ':'
+
+. 'A' a 'Z', 'a' a 'z', '0' a '9'
+
+. '[', ']' (p. Ej. 's[1', 's[1]', s[ab]')
+
+'-' y ':' no pueden ser el primer carácter. '+' no se puede usar solo.
+
+[NOTE]
+====
+El LayerName del grupo de almacenamiento solo puede ser caracteres, números y guiones bajos.
+
+Además, si se implementa en un sistema Windows, LayerName no distingue entre mayúsculas y minúsculas, lo que significa que no está permitido configurar los grupos de almacenamiento `root.ln` y `root.LN` al mismo tiempo.
+====
+
+=== Ruta de la serie temporal
+
+La ruta de la serie temporal es el concepto central en IoTDB. Se puede pensar en una ruta de serie temporal como la ruta completa de un sensor que produce los datos de la serie temporal. Todas las rutas de la serie temporal en IoTDB deben comenzar con la raíz y terminar con el sensor. Una ruta de serie temporal también se puede llamar ruta completa.
+
+Por ejemplo, si el device1 del tipo de vehículo tiene un sensor llamado sensor1, su ruta de la serie temporal se puede expresar como: `root.vehicle.device1.sensor1`. Las comillas dobles se pueden anidar con caracteres de escape, p. Ej. `root.sg.d1."s.\"t\"1"`.
+
+[NOTE]
+====
+La capa de rutas de series temporales admitidas por el IoTDB actual debe ser mayor o igual a cuatro (se cambiará a dos en el futuro).
+====
+
+=== Ruta de prefijo
+
+La ruta de prefijo se refiere a la ruta donde se encuentra el prefijo de una ruta de serie temporal. Una ruta de prefijo contiene todas las rutas de series temporales prefijadas por la ruta. Por ejemplo, supongamos que tenemos tres sensores: `root.vehicle.device1.sensor1`, `root.vehicle.device1.sensor2`, `root.vehicle.device2.sensor1`, la ruta de prefijo `root.vehicle.device1` contiene dos rutas de la serie temporal `root.vehicle.device1.sensor1` y `root.vehicle.device1.sensor2` mientras que `root.vehicle.device2.sensor1` está excluido.
+
+=== Ruta con estrella
+
+Para que sea más fácil y rápido expresar múltiples rutas de series temporales o rutas de prefijos, IoTDB proporciona a los usuarios la ruta con estrella. `*` puede aparecer en cualquier capa de la ruta. Según la posición donde aparece `*`, la ruta con estrella se puede dividir en dos tipos:
+
+`*` aparece al final la ruta;
+
+`*` aparece en medio la ruta;
+
+Cuando aparece `*` al final de la ruta, representa (`*`)+, que es una o más capas de `*`. Por ejemplo, `root.vehicle.device1.*` Representa todas las rutas con el prefijo `root.vehicle.device1` con capas mayores o iguales a 4, como `root.vehicle.device1.*`, `root.vehicle.device1.*.*`, `root.vehiculo.device1.*.*.*`, etc.
+
+Cuando `*` aparece en el medio de la ruta, se representa `*` a sí mismo, es decir, una capa. Por ejemplo, `root.vehicle.*.sensor1` representa una ruta de 4 capas que tiene el prefijo `root.vehicle` y el sufijo `sensor1`.
+
+[NOTE]
+====
+`*` no se puede colocar al principio de la ruta.
+====
+
+[NOTE]
+====
+Una ruta con `*` al final tiene el mismo significado que una ruta de prefijo, por ejemplo,` root.vehicle.*` Y `root.vehicle` es el mismo.
+====
+
+=== Marca de tiempo
+
+La marca de tiempo es el momento en el que se producen los datos. Incluye marcas de tiempo absolutas y marcas de tiempo relativas
+
+==== Marca de tiempo absoluta
+
+Las marcas de tiempo absolutas en IoTDB se dividen en dos tipos: LONG y DATETIME (incluidas DATETIME-INPUT y DATETIME-DISPLAY). Cuando un usuario ingresa una marca de tiempo, puede usar una marca de tiempo de tipo LONG o una marca de tiempo de tipo DATETIME-INPUT, y los formatos admitidos de la marca de tiempo de tipo DATETIME-INPUT se muestran en la siguiente tabla:
+
+*Formatos admitidos de marca de tiempo del tipo DATETIME-INPUT*
+
+[cols="1"]  
+|=== 
+|*Formato*
+|aaaa-MM-dd HH:mm:ss
+|aaaa/MM/dd HH:mm:ss
+|aaaa.MM.dd HH:mm:ss
+|aaaa-MM-dd'T'HH:mm:ss
+|aaaa/MM/dd'T'HH:mm:ss
+|aaaa.MM.dd'T'HH:mm:ss
+|aaaa-MM-dd HH:mm:ssZZ
+|aaaa/MM/dd HH:mm:ssZZ
+|aaaa.MM.dd HH:mm:ssZZ
+|aaaa-MM-dd'T'HH:mm:ssZZ
+|aaaa/MM/dd'T'HH:mm:ssZZ
+|aaaa.MM.dd'T'HH:mm:ssZZ
+|aaaa/MM/dd HH:mm:ss.SSS
+|aaaa-MM-dd HH:mm:ss.SSS
+|aaaa.MM.dd HH:mm:ss.SSS
+|aaaa/MM/dd'T'HH:mm:ss.SSS
+|aaaa-MM-dd'T'HH:mm:ss.SSS
+|aaaa.MM.dd'T'HH:mm:ss.SSS
+|aaaa-MM-dd HH:mm:ss.SSSZZ
+|aaaa/MM/dd HH:mm:ss.SSSZZ
+|aaaa.MM.dd HH:mm:ss.SSSZZ
+|aaaa-MM-dd'T'HH:mm:ss.SSSZZ
+|aaaa/MM/dd'T'HH:mm:ss.SSSZZ
+|aaaa.MM.dd'T'HH:mm:ss.SSSZZ
+|Formato de hora estándar ISO8601
+|===
+
+IoTDB puede admitir tipos LONG y tipos DATETIME-DISPLAY al mostrar marcas de tiempo. El tipo DATETIME-DISPLAY puede admitir formatos de hora definidos por el usuario. La sintaxis del formato de hora personalizado se muestra en la siguiente tabla:
+
+*La sintaxis del formato de hora personalizado*
+
+[cols="1,1,1,1"]  
+|=== 
+|Símbolo
+|Significado
+|Presentación
+|Ejemplos
+
+|G 
+|era 
+|era 
+|era
+
+|C 
+|siglo de era (>=0) 
+|número 
+|20
+
+|Y 
+|año de era (>=0) 
+|año 
+|1996
+
+|x 
+|semana año
+|año 
+|1996
+
+|w
+|semana de la semana año 
+|número 
+|27
+
+|e
+|día de la semana 
+|número 
+|2
+
+|E
+|día de la semana
+|texto
+|Tuesday; Tue
+
+|y
+|año
+|año 
+|1996
+
+|D 
+|día del año 
+|número 
+|189
+
+|M 
+|mes del año 
+|mes
+|July; Jul; 07
+
+|d 
+|día del mes 
+|número 
+|10
+
+|a 
+|mediodía del día
+|texto
+|PM
+
+|K 
+|hora del mediodía (0 ~ 11) 
+|número 
+|0
+
+|h 
+|hora de reloj del mediodía 
+|(1 ~ 12) 
+|número 
+|12
+
+|H
+|hora del día (0 ~ 23)
+|número 
+|0
+
+|k 
+|hora de reloj del día (1 ~ 24)
+|número
+|24
+
+|m 
+|minuto de la hora 
+|número 
+|30
+
+|s 
+|segundo del minuto 
+|número 
+|55
+
+|S 
+|fracción de segundo 
+|milis 
+|978
+
+||z 
+|zona horaria 
+|texto
+|Pacific Standard Time; PST
+
+|Z 
+|desplazamiento de zona horaria/id
+|zona 
+|-0800; -08:00; America/Los_Angeles
+
+|'
+|escape para texto
+|delimitador
+|
+
+|'' 
+|comillas simples
+|literal
+|'
+|===
+
+==== Marca de tiempo relativa
+
+La hora relativa se refiere a la hora relativa a la hora del servidor `now()` y la hora `DATETIME`.
+
+Sintaxis:
+
+[source]
+----
+ Duration = (Digit+ ('Y'|'MO'|'W'|'D'|'H'|'M'|'S'|'MS'|'US'|'NS'))+
+ RelativeTime = (now() | DATETIME) ((+|-) Duration)+
+       
+
+----
+
+*La sintaxis de la unidad de duración*
+
+[cols="1,1,1,1"]  
+|=== 
+Símbolo 
+Significado 
+Presentacion 
+Ejemplos
+
+y
+año 
+1y=365 days
+1y
+
+mo 
+mes 
+1mo=30 days
+1mo
+
+w
+semana 
+1w=7 days 
+1w
+
+d 
+día 
+1d=1 day
+1d
+
+h 
+hora 
+1h=3600 seconds	
+1h
+
+m 
+minuto
+1m=60 seconds
+1m
+
+s 
+segundo
+1s=1 second	
+1s
+
+ms 
+milisegundo 
+1ms=1000_000 nanoseconds	
+1ms
+
+us 
+microsegundo 
+1us=1000 nanoseconds
+1us
+
+ns 
+nanosegundo 
+1ns=1 nanosecond	
+1ns
+|===
+
+P. ej.:
+
+[source]
+----
+now() - 1d2h //1 day and 2 hours earlier than the current server time
+now() - 1w //1 week earlier than the current server time
+----
+
+[NOTE]
+====
+Debe haber espacios a la izquierda y derecha de '+' y '-'.
+====

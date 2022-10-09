@@ -1,0 +1,53 @@
+= Habilitar diagnósticos
+
+Puede configurar el proceso `grafana-server` para habilitar ciertos diagnósticos cuando se inicia. Esto puede resultar útil a la hora de investigar determinados problemas de rendimiento. _No_ se recomienda tener estos habilitados de forma predeterminada.
+
+== Activar la creación de perfiles
+
+El `grafana-server` se puede iniciar con los argumentos `-profile` para habilitar la creación de perfiles y `-profile-port` para anular el puerto HTTP predeterminado (`6060`) donde los puntos finales de depuración pprof están disponibles, por ejemplo:
+
+[source,Bash]
+----
+./grafana-server -profile -profile-port=8080
+----
+
+Tenga en cuenta que los puntos finales de depuración de `pprof` se sirven en un puerto diferente al del servidor HTTP de Grafana.
+
+Puede configurar o anular la configuración de creación de perfiles mediante variables de entorno:
+
+[source,Bash]
+----
+export GF_DIAGNOSTICS_PROFILING_ENABLED=true
+export GF_DIAGNOSTICS_PROFILING_PORT=8080
+----
+
+Consulte el https://golang.org/cmd/pprof/[comando Go pprof] para obtener más información sobre cómo recopilar y analizar datos de creación de perfiles.
+
+== Usar seguimiento
+
+`grafana-server` se puede iniciar con los argumentos `-tracing` para habilitar el seguimiento y `-tracing-file` para anular el archivo de seguimiento predeterminado (`trace.out`) donde se escribe el resultado del rastreo. Por ejemplo:
+
+[source,Bash]
+----
+./grafana-server -tracing -tracing-file=/tmp/trace.out
+----
+
+Puede configurar o anular la configuración de creación de perfiles mediante variables de entorno:
+
+[source,Bash]
+----
+export GF_DIAGNOSTICS_TRACING_ENABLED=true
+export GF_DIAGNOSTICS_TRACING_FILE=/tmp/trace.out
+----
+
+Ver el seguimiento en un navegador web (Es necesario tener Go instalado):
+
+[source,Bash]
+----
+go tool trace <trace file>
+2019/11/24 22:20:42 Parsing trace...
+2019/11/24 22:20:42 Splitting trace...
+2019/11/24 22:20:42 Opening browser. Trace viewer is listening on http://127.0.0.1:39735
+----
+
+Consulte https://golang.org/cmd/trace/[comando Go de seguimiento] para obtener más información sobre cómo analizar archivos de seguimiento.

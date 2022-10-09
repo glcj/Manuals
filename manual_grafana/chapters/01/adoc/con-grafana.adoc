@@ -1,0 +1,59 @@
+= Comenzando con Grafana
+
+Este tema lo ayuda a comenzar con Grafana y a crear su primer tablero. Para obtener más información sobre Grafana, consulte xref:comenzando/comenzando.adoc[¿Qué es Grafana?].
+
+[NOTE] 
+====
+Grafana también ofrece una https://grafana.com/signup/cloud/connect-account?pg=gsdocs[cuenta gratuita con Grafana Cloud] para ayudarlo a comenzar de manera aún más fácil y rápida. Puede instalar Grafana para autohospedarse u obtener una cuenta gratuita de Grafana Cloud.
+====
+
+== Paso 1: instala Grafana
+
+Grafana se puede instalar en muchos sistemas operativos diferentes. Para obtener una lista de los requisitos mínimos de hardware y software, así como instrucciones sobre cómo instalar Grafana, consulte xref:instalacion/instalacion.adoc[Instalar Grafana].
+
+== Paso 2: iniciar sesión
+
+Para iniciar sesión en Grafana por primera vez:
+
+[arabic]
+. Abra su navegador web y vaya a http://localhost:3000/. El puerto HTTP predeterminado que escucha Grafana es `3000` a menos que haya configurado un puerto diferente.
+. En la página de inicio de sesión, ingrese `admin` como nombre de usuario y contraseña.
+. Haga clic en *Iniciar sesión*. Si el inicio de sesión es exitoso, verá un mensaje para cambiar la contraseña.
+. Haga clic en *Aceptar* en el mensaje, luego cambie su contraseña.
+
+[NOTE] 
+====
+Le recomendamos encarecidamente que siga las mejores prácticas de Grafana y cambie la contraseña de administrador predeterminada. ¡No olvide registrar sus credenciales!
+====
+
+== Paso 3: crear un tablero
+
+Para crear su primer tablero:
+
+[arabic]
+. Haga clic en el icono *+* en el panel izquierdo, seleccione *Crear tablero* y luego haga clic en *Agregar un panel vacío*.
+. En la vista Nuevo tablero / Editar panel, vaya a la pestaña *Consulta*.
+. Configure su xref:paneles/consultas.adoc[consulta] seleccionando `-- Grafana --` en el xref:paneles/consultas.adoc#selector-de-fuente-de-datos[selector de fuente de datos]. Esto genera el tablero de Random Walk.
+. Haga clic en el icono *Guardar* en la esquina superior derecha de su pantalla para guardar el tablero.
+. Agregue un nombre descriptivo y luego haga clic en *Guardar*.
+
+Felicitaciones, ha creado su primer tablero y está mostrando resultados.
+
+== Próximos pasos
+
+Continúe experimentando con lo que ha creado, pruebe el xref:explorar/explorar.adoc[flujo de trabajo de exploración] u otra función de visualización. Consulte xref:fuentes-de-datos/fuentes-de-datos.adoc[Fuentes de datos] para obtener una lista de fuentes de datos compatibles e instrucciones sobre cómo xref:fuentes-de-datos/agregar-una-fuente-de-datos.adoc[agregar una fuente de datos]. Los siguientes temas serán de su interés:
+
+* xref:paneles/paneles.adoc[Paneles]
+* xref:tableros/tableros.adoc[Tableros]
+* xref:tableros/atajos-de-teclado.adoc[Atajos de teclado]
+* xref:complementos/complementos.adoc[Complementos]
+
+=== Administradores
+
+Los siguientes temas son de interés para los usuarios administradores del servidor Grafana:
+
+* xref:administracion/configuracion.adoc[Configuración de Grafana]
+* xref:autenticacion/descripcion-general.adoc[Autenticación]
+* xref:permisos/permisos.adoc[Permisos y roles de usuario]
+* xref:autenticacion/aprovisionamiento.adoc[Aprovisionamiento]
+* xref:autenticacion/cli.adoc[CLI de Grafana]

@@ -1,0 +1,150 @@
+= Notificaciones de alertas
+
+Cuando una alerta cambia de estado, envía notificaciones. Cada regla de alerta puede tener varias notificaciones. Para agregar una notificación a una regla de alerta, primero debe agregar y configurar un canal de `notification` (puede ser correo electrónico, PagerDuty u otra integración).
+
+Esto se hace desde la página de Canales de Notificación.
+
+[NOTE]
+====
+Las alertas solo están disponibles en Grafana v4.0 y superior.
+====
+
+== Agregar un canal de notificación
+
+[arabic]
+. En la barra lateral de Grafana, pase el cursor sobre el icono de *Alerta* (campana) y luego haga clic en *Canales de notificación*.
+. Haz clic en *Agregar canal*.
+. Complete los campos o seleccione las opciones que se describen a continuación.
+
+== Nuevos campos de canal de notificación
+
+=== Predeterminado (enviar en todas las alertas)
+
+* *Nombre:* ingrese un nombre para este canal. Se mostrará cuando los usuarios agreguen notificaciones a las reglas de alerta.
+* *Tipo:* seleccione el tipo de canal. Consulte la <<Lista de notificadores admitidos>> para obtener más detalles.
+* *Predeterminado (enviar en todas las alertas):* cuando se selecciona, esta opción envía una notificación en este canal para todas las reglas de alerta.
+* *Incluir imagen:* consulte <<Habilitar imágenes en notificaciones>> para obtener más detalles.
+* *Desactivar mensaje de resolución:* cuando se selecciona, esta opción desactiva el mensaje de resolución [OK] que se envía cuando el estado de alerta vuelve a ser falso.
+* *Enviar recordatorios:* cuando esta opción está marcada, se enviarán notificaciones adicionales (recordatorios) para las alertas activadas. Puede especificar la frecuencia con la que se deben enviar los recordatorios utilizando el número de segundos (s), minutos (m) u horas (h), por ejemplo, `30s`, `3m`, `5m` o `1h`.
+
+*Importante:* los recordatorios de alerta se envían después de evaluar las reglas. Por lo tanto, nunca se puede enviar un recordatorio con más frecuencia que un intervalo de evaluación de regla de alerta configurado.
+
+Estos ejemplos muestran con qué frecuencia y cuándo se envían recordatorios para una alerta activada.
+
+[cols=",,",options="header",]
+|===
+|Intervalo de evaluación de la regla de alerta |Enviar recordatorios cada |Recordatorio enviado cada (después de la última notificación de alerta)
+|`30s` |`15s` |~30 segundos
+|`1m` |`5m` |~5 minutos
+|`5m` |`15m` |~15 minutos
+|`6m` |`20m` |~24 minutos
+|`1h` |`15m` |~1 hora
+|`1h` |`2h` |~2 horas
+|===
+
+== Lista de notificadores admitidos
+
+[cols=",,,",options="header",]
+|===
+|Name |Type |Supports images |Support alert rule tags
+|<<DingDing>> |`dingding` |si, solo externamente |no
+|Discord |`discord` |si |no
+|<<Correo electróinico>> |`email` |si |no
+|<<Google Hangouts Chat>> |`googlechat` |si, solo externamente |no
+|Hipchat |`hipchat` |si, solo externamente |no
+|<<Kafka>> |`kafka` |si, solo externamente |no
+|Line |`line` |si, solo externamente |no
+|Microsoft Teams |`teams` |si, solo externamente |no
+|<<Opsgenie>> |`opsgenie` |si, solo externamente |si
+|<<Pagerduty>> |pagerduty |si, solo externamente |si
+|Prometheus Alertmanager |`prometheus-alertmanager` |si, solo externamente |si
+|<<Pushover>> |`pushover` |si |no
+|Sensu |sensu |si, solo externamente |no
+|<<Sensu Go>> |`sensugo` |si, solo externamente |no
+|<<Slack>> |`slack` |si |no
+|Telegram |`telegram` |si |no
+|Threema |`threema` |si, solo externamente |no
+|VictorOps |`victorops` |si, solo externamente |si
+|<<Webhook>> |`webhook` |si, solo externamente |si
+|<<Zenduty>> |`webhook` |si, solo externamente |si
+|===
+
+=== Correo electrónico
+
+Para habilitar las notificaciones por correo electrónico, debe configurar la xref:administracion/configuracion.adoc#smtp[configuración de SMTP] en la configuración de Grafana. Las notificaciones por correo electrónico cargarán una imagen del gráfico de alerta en un destino de imagen externo, si está disponible, o un respaldo para adjuntar la imagen al correo electrónico. Tenga en cuenta que si utiliza el almacenamiento de imagen local, es posible que los servidores de correo electrónico y los clientes no puedan acceder a la imagen.
+
+[NOTE]
+====
+Las variables de plantilla no se admiten en las alertas de correo electrónico.
+====
+
+[cols=",",options="header",]
+|===
+|Configuración |Descripción
+|Correo electrónico único |Envíe un correo electrónico único a todos los destinatarios. Desactivado por defecto.
+|Direcciones |Direcciones de correo electrónico de los destinatarios. Puede ingresar varias direcciones de correo electrónico con un ";" separador.
+|===
+
+=== Webhook
+
+La notificación de webhook es una forma sencilla de enviar información sobre un cambio de estado a través de HTTP a un punto final personalizado. Con esta notificación, puede integrar Grafana en un sistema de su elección.
+
+Ejemplo de cuerpo json:
+
+[source,JSON]
+----
+{
+  "dashboardId":1,
+  "evalMatches":[
+    {
+      "value":1,
+      "metric":"Count",
+      "tags":{}
+    }
+  ],
+  "imageUrl":"https://grafana.com/assets/img/blog/mixed_styles.png",
+  "message":"Notification Message",
+  "orgId":1,
+  "panelId":2,
+  "ruleId":1,
+  "ruleName":"Panel Title alert",
+  "ruleUrl":"http://localhost:3000/d/hZ7BuVbWz/test-dashboard?fullscreen\u0026edit\u0026tab=alert\u0026panelId=2\u0026orgId=1",
+  "state":"alerting",
+  "tags":{
+    "tag name":"tag value"
+  },
+  "title":"[Alerting] Panel Title alert"
+}
+----
+
+* *state*: los valores posibles para el estado de alerta son: `ok`, `paused`, `alerting`, `pending`, `no_data`.
+
+=== Prometheus Alertmanager
+
+Alertmanager maneja las alertas enviadas por aplicaciones cliente como el servidor Prometheus o Grafana. Se encarga de deduplicarlos, agruparlos y enrutarlos al receptor correcto. Las notificaciones de Grafana se pueden enviar a Alertmanager a través de un simple webhook entrante. Consulte la https://prometheus.io/docs/alerting/alertmanager[documentación oficial de Prometheus Alertmanager] para obtener información sobre la configuración.
+
+[CAUTION]
+====
+En caso de una configuración de alta disponibilidad, no equilibre la carga del tráfico entre Grafana y Alertmanagers para mantener la coherencia entre todas sus instancias de Alertmanager. En su lugar, apunte a Grafana a una lista de todos los administradores de alertas, enumerando sus URL separadas por comas en la configuración del canal de notificación.
+====
+
+== Habilitar imágenes en notificaciones
+
+Grafana puede representar el panel asociado con la regla de alerta como una imagen PNG e incluirlo en la notificación. Obtenga más información sobre los requisitos y cómo configurar la xref:administracion/renderizacion-de-imagenes.adoc[representación de imágenes].
+
+Debe configurar un proveedor de xref:administracion/configuracion.adoc#_external_image_storage[almacenamiento de imágenes externo] para recibir imágenes en notificaciones de alerta. Si su canal de notificación requiere que la imagen sea de acceso público (por ejemplo, Slack, PagerDuty), configure un proveedor que cargue la imagen en un almacén de imágenes remoto como Amazon S3, Webdav, Google Cloud Storage o Azure Blob Storage. De lo contrario, se puede utilizar el proveedor local para entregar la imagen directamente desde Grafana.
+
+Los servicios de notificación que necesitan acceso a imágenes públicas están marcados como "solo externos".
+
+== Configure el enlace de regreso a Grafana desde notificaciones de alerta
+
+Todas las notificaciones de alerta contienen un enlace a la alerta activada en la instancia de Grafana. Esta URL se basa en la configuración del xref:administracion/configuracion.adoc#_domain[dominio] en Grafana.
+
+== Plantillas de notificaciones
+
+[NOTE]
+====
+La creación de plantillas de notificación de alerta solo está disponible en Grafana v7.4 y versiones posteriores.
+====
+
+La función de plantilla de notificación de alerta le permite tomar el valor de la xref:conceptos-basicos-de-grafana/dimensiones-de-las-series-de-tiempo.adoc#_etiquetas[etiqueta] de una consulta de alerta e xref:alertas/plantillas-de-notificaciones-de-alertas.adoc[inyectarlo en las notificaciones de alerta].

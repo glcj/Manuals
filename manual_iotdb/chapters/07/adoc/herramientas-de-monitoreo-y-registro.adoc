@@ -1,0 +1,308 @@
+= Herramientas de Monitoreo y Registro
+
+== Monitor del Sistema
+
+Actualmente, IoTDB proporciona a los usuarios la herramienta JConsole de Java para monitorear el estado del sistema o usar la API abierta de IoTDB para verificar el estado de los datos.
+
+=== Monitoreo del Estado del Sistema
+
+Después de iniciar la herramienta JConsole y conectarse al servidor IoTDB, se proporciona una visión básica del estado del sistema IoTDB (ocupación de CPU, información en memoria, etc.). Ver [documentación oficial] para obtener más información.
+
+=== Monitoreo de MBean JMX
+
+Al utilizar la herramienta JConsole y conectarse con JMX, se le proporcionan algunas estadísticas y parámetros del sistema.
+
+Esta sección describe cómo usar la pestaña JConsole `Mbean` de JConsole para monitorear algunas configuraciones del sistema de IoTDB, las estadísticas de escritura, etc. Después de conectarse a JMX, puede encontrar el "MBean" de "org.apache.iotdb.service", como se muestra en la imágen siguiente.
+
+image::imagen-15.png[]
+
+Hay varios atributos bajo supervisión, incluido el directorio de archivos de datos, las estadísticas de escritura y los valores de algunos parámetros del sistema. También puede mostrar un gráfico de líneas de la propiedad haciendo doble clic en el valor correspondiente a la propiedad. Para obtener una descripción detallada de los atributos del monitor, consulte las siguientes secciones.
+
+==== Lista de Atributos de MBean Monitor
+
+* SystemDirectory
+
+[cols="1,1"]
+|===
+|Nombre
+|SystemDirectory
+
+|Descripción
+|El directorio absoluto del archivo del sistema de datos.
+
+|Tipo
+|Cadena
+|===
+
+* DataSizeInByte
+
+[cols="1,1"]
+|===
+|Nombre
+|DataSizeInByte
+
+|Descripción
+|El tamaño total del archivo de datos.
+
+|Unidad
+|Byte
+
+|Tipo
+|Largo
+|===
+
+* EnableStatMonitor
+
+[cols="1,1"]
+|===
+|Nombre
+|EnableStatMonitor
+
+|Descripción
+|Si el módulo del monitor está abierto
+
+|Tipo
+|Booleano
+|===
+
+== Monitoreo de Datos
+
+Este módulo es para proporcionar información estadística sobre las operaciones de escritura:
+
+* el tamaño de los datos (en bytes) en IoTDB, el número de puntos de datos en IoTDB;
+    
+*cuántas operaciones se han ejecutado correctamente o no.
+
+=== Activar/Desactivar el Módulo
+
+Los usuarios pueden optar por habilitar o deshabilitar la función de monitoreo de estadísticas de datos (establezca el elemento `enable_stat_monitor` en el archivo de configuración).
+
+=== Almacenamiento de Datos Estadísticos
+
+De forma predeterminada, los datos estadísticos solo se guardan en la memoria y se puede acceder a ellos mediante Jconsole.
+
+Los datos también se pueden escribir como series de tiempo en el disco. Para habilitarlo, configure `enable_monitor_series_write=true` en el archivo de configuración. Si es así, el uso de la declaración `select` en IoTDB-cli puede consultar estas series de tiempo.
+
+[NOTE]
+====
+Si `enable_monitor_series_write=true`, cuando se reinicia IoTDB, los datos estadísticos anteriores se recuperarán en la memoria. si `enable_monitor_series_write=false`, IoTDB olvidará todos los datos estadísticos después de reiniciar la instancia.
+====
+
+=== Monitor de Datos de Escritura
+
+En la actualidad, el sistema de supervisión se puede dividir en dos módulos: estadísticas de escritura global y estadísticas de escritura del grupo de almacenamiento. Las estadísticas globales registran el número total de puntos y solicitudes, y las estadísticas del grupo de almacenamiento cuentan los datos de escritura de cada grupo de almacenamiento.
+
+El sistema establece la granularidad de recopilación del módulo de monitoreo para *actualizar la información estadística una vez que un archivo de datos se descarga en el disco*, por lo que la precisión de los datos puede ser diferente de la situación real. Para obtener información precisa, *Por favor llame al método `flush` antes de consultar*.
+
+Aquí están las estadísticas de escritura de datos (el rango admitido se muestra entre paréntesis):
+
+* TOTAL_POINTS (GLOBAL)
+
+[cols="1,1"]
+|===
+|Nombre
+|TOTAL_POINTS
+
+|Descripción
+|Calcula el número total de puntos de escritura globales.
+
+|Nombre de Serie Temporal
+|root.stats.{"global" |"storageGroupName"}.TOTAL_POINTS
+|===
+
+* TOTAL_REQ_SUCCESS (GLOBAL)
+
+[cols="1,1"]
+|===
+|Nombre
+|TOTAL_REQ_SUCCESS
+
+|Descripción
+|Calcule el número de solicitudes exitosas globales.
+
+|Nombre de Serie Temporal
+|root.stats."global".TOTAL_REQ_SUCCESS
+|===    
+
+* TOTAL_REQ_FAIL (GLOBAL)
+
+[cols="1,1"]
+|===
+|Nombre
+|TOTAL_REQ_FAIL
+
+|Descripción
+|Calcule el número de solicitudes fallidas globales.
+
+|Nombre de Serie Temporal
+|root.stats."global".TOTAL_REQ_FAIL
+|===
+
+Los atributos anteriores también admiten la visualización en JConsole. Para la información estadística de cada grupo de almacenamiento, para evitar la confusión de visualización causada por demasiados grupos de almacenamiento, el usuario puede ingresar el nombre del grupo de almacenamiento en el método de operación bajo el monitor MBean para consultar la información estadística correspondiente.
+
+image::image-16.png[]
+
+=== Ejemplo
+
+Aquí damos algunos ejemplos de cómo escribir estadísticas de datos.
+
+Para conocer el número total de puntos de escritura globales, use la cláusula `select` para consultar su valor. La declaración de consulta es:
+
+[source,SQL]
+----
+select TOTAL_POINTS from root.stats."global"
+----
+
+Para conocer el número total de puntos de escritura globales de root.ln (grupo de almacenamiento), la declaración de consulta es:
+
+[source,SQL]
+----
+select TOTAL_POINTS from root.stats."root.ln"
+----
+
+Para conocer las últimas estadísticas del sistema actual, puede utilizar la última consulta de datos. Aquí está la declaración de consulta:
+
+[source,SQL]
+----
+flush
+select last TOTAL_POINTS from root.stats."global"
+----
+
+== Monitor de Rendimiento
+
+=== Introducción
+
+Para comprender el rendimiento de iotdb, se agrega este módulo para contar el tiempo de consumo de cada operación. Este módulo puede calcular las estadísticas del tiempo promedio de cada operación y la proporción de cada operación cuyo consumo de tiempo cae dentro de un rango de tiempo. La salida está en el archivo log_measure.log. A continuación se muestra un ejemplo de salida.
+
+image::imagen-17.png[]
+
+=== Parámetro de Configuración
+
+ubicación: conf/iotdb-engine.properties
+
+.Parámetro y Descripción
+[cols="1,1,1"]
+|===
+|Parámetro 
+|Valor Predeterminado 
+|Descripción
+
+|enable_performance_stat 
+|false 
+|Es el rendimiento estadístico de la habilitación del submódulo.
+
+|performance_stat_display_interval 
+|60000 
+|El intervalo de visualización del resultado estadístico en ms.
+
+|performance_stat_memory_in_kb 
+|20 
+|La memoria utilizada para performance_stat en kb.
+|===
+
+=== JMX MBean
+
+Conéctese a JConsole con el puerto 31999, y seleccione en la barra de menú `MBean`. Expanda la barra lateral y elija `org.apache.iotdb.db.cost.statistic`. Puede encontrar:
+
+image::imagen-18.png[]
+
+==== Atributo
+
+. `EnableStat` ： Ya sea que las estadísticas estén habilitadas o no, si es cierto, el módulo registra el tiempo que consume cada operación e imprime los resultados; No es editable, pero se puede cambiar con la función siguiente.
+
+. `DisplayIntervalInMs`: el intervalo entre los resultados de impresión. Los cambios no surtirán efecto instantáneamente. Para que los cambios sean efectivos, debe llamar a `startContinuousStatistics()` o `startOneTimeStatistics()`.
+
+. `OperationSwitch` ： Es un mapa para indicar si las estadísticas de un tipo de operación deben ser calculadas, la clave es el nombre de la operación y el valor es verdadero significa que las estadísticas de la operación están habilitadas, de lo contrario deshabilitadas. Este parámetro no se puede cambiar directamente, se cambia mediante la operación '`changeOperationSwitch()`'.
+
+==== Operación
+
+. `startContinuousStatistics`: inicie las estadísticas y la salida en el intervalo de "`DisplayIntervalInMs`".
+
+. `startOneTimeStatistics`： Inicia las estadísticas y la salida con retraso de "`DisplayIntervalInMs`".
+
+. `stopStatistic` ： Detiene las estadísticas.
+
+. `clearStatisticalState()`: borrar el resultado estadístico actual, restablecer el resultado estadístico.
+
+. `changeOperationSwitch(String operationName, Boolean operationState)`: establece si se debe monitorear un tipo de operación. El parámetro '`operationName`' es el nombre de la operación, definido en el atributo `operationSwitch`. El parámetro `operationState` es si habilitar las estadísticas o no. Si el estado se cambia correctamente, la función devolverá verdadero; de lo contrario, devolverá falso.
+
+== Adición de Elementos de Monitoreo Personalizados para Contribuyentes de IOTDB
+
+=== Agregar Operación
+
+Agregue una enumeración en `org.apache.iotdb.db.cost.statistic.Operation`.
+
+=== Agregar Código de Tiempo en el Área de Monitoreo
+
+Agregue el código de tiempo en el área de inicio de monitoreo:
+
+[source]
+----
+long t0 = System. currentTimeMillis();
+----
+
+Agregue el código de tiempo en el área de parada de monitoreo:
+
+[source]
+----
+Measurement.INSTANCE.addOperationLatency(Operation, t0);
+----
+
+== Estadísticas de Proporción de Aciertos de Caché
+
+=== Visión General
+
+Para mejorar el rendimiento de las consultas, IOTDB almacena en caché `ChunkMetaData` y `TsFileMetaData`. Los usuarios pueden ver la tasa de aciertos de caché a través del registro de nivel de depuración y MXBean, y ajustar la memoria ocupada por el caché de acuerdo con la tasa de aciertos de caché y la memoria del sistema. El método de usar MXBean para ver la proporción de aciertos de caché es el siguiente:
+
+. Conéctese a JConsole con el puerto `31999` y seleccione 'MBean' en el elemento de menú de arriba.
+    
+. Expanda la barra lateral y seleccione '`org.apache.iotdb.db.service`'. Obtendrá los resultados que se muestran en la siguiente figura:
+
+image::imagen-19.png[]
+
+== Registro del Sistema
+
+IoTDB permite a los usuarios configurar los registros del sistema de IoTDB (como el nivel de salida del registro) modificando el archivo de configuración del registro. La ubicación predeterminada del archivo de configuración de registro del sistema está en la carpeta `$IOTDB_HOME/conf`.
+
+El archivo de configuración de registro predeterminado se denomina `logback.xml`. El usuario puede modificar la configuración del registro de ejecución del sistema agregando o cambiando los parámetros del nodo del árbol xml. Cabe señalar que la configuración del registro del sistema mediante el archivo de configuración del registro no tiene efecto inmediatamente después de la modificación, sino que tendrá efecto después de reiniciar el sistema. El uso de `logback.xml` es el habitual.
+
+Al mismo tiempo, para facilitar la depuración del sistema por parte de los desarrolladores y DBA, proporcionamos varias interfaces JMX para modificar dinámicamente la configuración del registro y configurar el módulo de registro del sistema en tiempo real sin reiniciar el sistema.
+
+=== Configuración de Registro Dinámico del Sistema
+
+==== Conectar JMX
+
+Aquí usamos JConsole para conectarnos con JMX.
+
+Inicie JConsole, establezca una nueva conexión JMX con el servidor IoTDB (puede seleccionar el proceso local o ingresar la IP y el PUERTO para la conexión remota, el puerto de operación predeterminado del servicio IoTDB JMX es `31999`). La figura 4.1 muestra la GUI de conexión de JConsole.
+
+.Figura 4.1
+image::imagen-20.png[]
+
+Después de conectarse, haga clic en `MBean` y busque `ch.qos.logback.classic.default.ch.qos.logback.classic.jmx.JMXConfigurator` (como se muestra en la figura 4.2).
+
+.Figura 4.2
+image::imagen-21.png[]
+
+En la ventana JMXConfigurator, se proporcionan 6 operaciones, como se muestra en la figura 4.3. Puede utilizar estas interfaces para realizar la operación.
+
+.Figura 4.3
+image::imagen-22.png[]
+
+==== Instrucción de Interfaz
+
+* reloadDefaultConfiguration
+
+Este método consiste en volver a cargar el archivo de configuración de logback predeterminado. El usuario puede modificar primero el archivo de configuración predeterminado y luego llamar a este método para volver a cargar el archivo de configuración modificado en el sistema para que surta efecto.
+
+* reloadByFileName
+
+Este método carga un archivo de configuración de logback con la ruta y el nombre especificados, y luego lo hace efectivo. Este método acepta un parámetro de tipo String llamado p1, que es la ruta al archivo de configuración que debe especificarse para cargar.
+
+* getLoggerEffectiveLevel
+
+Este método es para obtener el nivel de registro actual del registrador especificado. Este método acepta un parámetro de tipo String llamado p1, que es el nombre del registrador especificado. Este método devuelve el nivel de registro actualmente en vigor para el registrador especificado.
+
+* getLoggerLevel
+
+Este método es para obtener el nivel de registro del registrador especificado. Este método acepta un parámetro de tipo String llamado p1, que es el nombre del registrador especificado. Este método devuelve el nivel de registro del registrador especificado. Cabe señalar que la diferencia entre este método y el método `getLoggerEffectiveLevel` es que el método devuelve el nivel de registro que el registrador especificado está configurado en el archivo de configuración. Si el usuario no establece el nivel de registro para el registrador, regrese vacío. Según el mecanismo de herencia de nivel de registro de Logger, el nivel de Logger no se establece explícitamente, heredará la configuración del nivel de registro de su antepasado más cercano. En este punto, llamar al método `getLoggerEffectiveLevel` devolverá el nivel de registro en el que el registrador está en vigor; llamar a `getLoggerLevel` devolverá un valor nulo.

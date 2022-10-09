@@ -1,0 +1,49 @@
+= Descripción general de alertas
+
+Las alertas le permiten identificar problemas en su sistema momentos después de que ocurran. Al identificar rápidamente los cambios no deseados en su sistema, puede minimizar las interrupciones en sus servicios.
+
+Las alertas constan de dos partes:
+
+* Reglas de alerta: cuando se activa la alerta. Las reglas de alerta están definidas por una o más condiciones que Grafana evalúa periódicamente.
+* Canal de notificación: cómo se envía la alerta. Cuando se cumplen las condiciones de una regla de alerta, Grafana notifica a los canales configurados para esa alerta.
+
+Actualmente, solo la visualización del panel de gráficos admite alertas.
+
+== Tareas de alerta
+
+Puede realizar las siguientes tareas para las alertas:
+
+* xref:alertas/notificaciones-de-alertas.adoc[Agregar o editar un canal de notificación de alerta]
+* xref:alertas/crear-alertas.adoc[Crea una regla de alerta]
+* xref:alertas/ver-alertas.adoc[Ver las reglas de alerta existentes y su estado actual]
+* xref:alertas/solucion-de-problemas-de-alertas.adoc[Probar las reglas de alerta y solucionar problemas]
+
+== Agrupación
+
+Actualmente, las alertas admiten una forma limitada de alta disponibilidad. Desde la versión 4.2.0 de Grafana, las notificaciones de alerta se deducen cuando se ejecutan varios servidores. Esto significa que todas las alertas se ejecutan en todos los servidores, pero no se envían notificaciones de alerta duplicadas debido a la lógica de deduplicación. En el futuro se introducirá un equilibrio de carga adecuado de alertas.
+
+== Notificaciones
+
+También puede configurar notificaciones de reglas de alerta junto con un mensaje detallado sobre la regla de alerta. El mensaje puede contener cualquier cosa: información sobre cómo podría resolver el problema, vínculo al runbook, etc.
+
+Las notificaciones reales se configuran y comparten entre múltiples alertas.
+
+== Ejecución de alerta
+
+Las reglas de alerta se evalúan en el backend de Grafana en un programador y un motor de ejecución de consultas que forma parte del núcleo de Grafana. Las reglas de alerta solo pueden consultar fuentes de datos de back-end con las alertas habilitadas. Tales fuentes de datos son:
+
+* integradas o desarrolladas y mantenidas por grafana, como `Graphite`, `Prometheus`, `Loki`, `InfluxDB`, `Elasticsearch`, `Google Cloud Monitoring`, `Cloudwatch`, `Azure Monitor`, `MySQL`, `PostgreSQL`, `MSSQL`, `OpenTSDB`, `Oracle` y `Azure Data Explorer`
+* cualquier fuente de datos de backend de la comunidad con alertas habilitadas (las propiedades de `backend` y de `alerting` se establecen en el xref:desarrolladores/complementos/metadatos.adoc[plugin.json])
+
+== Métricas del motor de alertas
+
+El motor de alertas publica algunas métricas internas sobre sí mismo. Puede leer más sobre cómo Grafana publica métricas internas.
+
+[cols=",,",options="header",]
+|===
+|Descripción |Tipo |Nombre de métrica
+|Número total de alertas |contador |`alerting.active_alerts`
+|Resultado de ejecución de alerta |contador |`alerting.result`
+|Notificaciones de contador enviadas |contador |`alerting.notifications_sent`
+|Temporizador de ejecución de alerta |temporizador |`alerting.execution_time`
+|===

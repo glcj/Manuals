@@ -1,0 +1,593 @@
+= API TsFile
+
+TsFile es un formato de archivo de serie temporal que se utiliza en IoTDB. Esta sesión presenta el uso de este formato de archivo.
+
+== Instalación de la Biblioteca TsFile
+
+Hay dos formas de utilizar TsFile en su propio proyecto.
+
+* Usar como jarras: compila los códigos fuente y compila en jarras
+
+[source]
+----
+git clone https://github.com/apache/iotdb.git
+cd tsfile/
+mvn clean package -Dmaven.test.skip=true
+----
+
+Luego, todos las jarras están en la carpeta llamada `target/`. Importe `target/tsfile-0.12.0-jar-with-dependencies.jar` a su proyecto.
+
+* Úselo como una dependencia de maven:
++
+Compile códigos fuente e impleméntelos en su repositorio local en tres pasos:
+
+** Obtenga los códigos fuente
++
+[source]
+----
+git clone https://github.com/apache/iotdb.git
+----
+
+** Compile los códigos fuente e impleméntelos
++
+[source]
+----
+cd tsfile/
+mvn clean install -Dmaven.test.skip=true
+----
+
+** Agregue dependencias en su proyecto:
++
+[source]
+----
+ <dependency>
+   <groupId>org.apache.iotdb</groupId>
+   <artifactId>tsfile</artifactId>
+   <version>0.10.0</version>
+ </dependency>
+----
++
+O puede descargar las dependencias del repositorio oficial de Maven:
+
+** Primero, busque su maven `settings.xml` en la ruta: `${username}\.m2\settings.xml`, agregue este `<profile> a <profiles>`:
++
+[source]
+----
+  <profile>
+       <id>allow-snapshots</id>
+          <activation><activeByDefault>true</activeByDefault></activation>
+       <repositories>
+         <repository>  
+            <id>apache.snapshots</id>
+            <name>Apache Development Snapshot Repository</name>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+          </repository>
+       </repositories>
+     </profile>
+----
+
+** Luego agregue dependencias a su proyecto:
++
+[source]
+----
+ <dependency>
+   <groupId>org.apache.iotdb</groupId>
+   <artifactId>tsfile</artifactId>
+   <version>0.10.0</version>
+ </dependency>
+----
+
+== Uso de TsFile
+
+Esta sección muestra los usos detallados de TsFile.
+
+*Datos de Series de Tiempo*:Los datos de series de tiempo se consideran una secuencia de cuádruples. Un cuádruple se define como (dispositivo, medida, tiempo, valor).
+
+* *medición*: Una medida física o formal que toman los datos de una serie de tiempo, por ejemplo, la temperatura de una ciudad, el número de ventas de algunos bienes o la velocidad de un tren en diferentes momentos. Como un sensor tradicional (como un termómetro) también toma una sola medición y produce una serie de tiempo, usaremos medición y sensor indistintamente a continuación.
+
+* *dispositivo*: un dispositivo se refiere a una entidad que toma varias medidas (produciendo múltiples series de tiempo), por ejemplo, un tren en marcha monitorea su velocidad, medidor de aceite, millas que ha corrido, cada uno de los pasajeros actuales es transportado a un conjunto de datos de series de tiempo.
+
+*Una Línea de Datos*: en muchas aplicaciones industriales, un dispositivo normalmente contiene más de un sensor y estos sensores pueden tener valores en la misma marca de tiempo, lo que se denomina una línea de datos.
+
+Formalmente, una línea de datos consta de un `device_id`, una marca de tiempo que indica los milisegundos desde el 1 de enero de 1970, 00:00:00, y varios pares de datos compuestos por measurement_id y el `value` correspondiente. Todos los pares de datos de una línea pertenecen a este `device_id` y tienen la misma marca de tiempo. Si una de las `measurements` no tiene un `value` en la marca de tiempo, use un `timestamp` (en realidad, TsFile no almacena valores nulos). Su formato se muestra a continuación:
+
+[source]
+----
+device_id, timestamp, <measurement_id, value>...
+----
+
+A continuación se ilustra un ejemplo. En este ejemplo, el tipo de datos de dos medidas son `INT32`, `FLOAT` respectivamente.
+
+[source]
+----
+device_1, 1490860659000, m1, 10, m2, 12.12
+----
+
+==== Escribir TsFile
+
+Un TsFile se genera mediante los siguientes tres pasos y el código completo se proporciona en la sección "Ejemplo para escribir TsFile".
+
+. Construir una instancia de `TsFileWriter`.
++
+Estos son los constructores disponibles:
++
+* Sin esquema predefinido
++
+[source]
+----
+public TsFileWriter(File file) throws IOException
+----
+
+* Con esquema predefinido
++
+[source]
+----
+public TsFileWriter(File file, Schema schema) throws IOException
+----
++
+Éste es para usar el sistema de archivos HDFS. `TsFileOutput` puede ser una instancia de la clase `HDFSOutput`.
++
+[source]
+----
+public TsFileWriter(TsFileOutput output, Schema schema) throws IOException 
+----
++
+Si desea establecer alguna configuración de TSFile por su cuenta, puede usar param `config`. Por ejemplo:
++
+[source]
+----
+TSFileConfig conf = new TSFileConfig();
+conf.setTSFileStorageFs("HDFS");
+TsFileWriter tsFileWriter = new TsFileWriter(file, schema, conf);
+----
++
+En este ejemplo, los archivos de datos se almacenarán en HDFS, en lugar del sistema de archivos local. Si desea almacenar archivos de datos en el sistema de archivos local, puede usar `conf.setTSFileStorageFs("LOCAL")`, que también es la configuración predeterminada.
++
+También puede configurar el puerto ip y rpc de su HDFS mediante `config.setHdfsIp(...)` y `config.setHdfsPort(...)`. La ip predeterminada es `localhost` y el puerto rpc predeterminado es `9000`.
++
+*Parámetros*:
++
+** file: TsFile para escribir
+
+** schema: Los esquemas de archivo se presentarán en la siguiente parte.
+
+** config: la configuración de TsFile.
+
+. Agregar medidas 
++
+O puede crear una instancia de la clase `Schema` primero y pasarla al constructor de la clase `TsFileWriter`
++
+La clase `Schema` contiene un mapa cuya clave es el nombre de un esquema de medición y el valor es el esquema en sí.
++
+Aquí están las interfaces:
++
+[source]
+----
+// Create an empty Schema or from an existing map
+public Schema()
+public Schema(Map<String, MeasurementSchema> measurements)
+// Use this two interfaces to add measurements
+public void registerMeasurement(MeasurementSchema descriptor)
+public void registerMeasurements(Map<String, MeasurementSchema> measurements)
+// Some useful getter and checker
+public TSDataType getMeasurementDataType(String measurementId)
+public MeasurementSchema getMeasurementSchema(String measurementId)
+public Map<String, MeasurementSchema> getAllMeasurementSchema()
+public boolean hasMeasurement(String measurementId)
+----
++
+Siempre puede usar la siguiente interfaz en la clase `TsFileWriter` para agregar medidas adicionales:
++
+[source]
+----
+public void addMeasurement(MeasurementSchema measurementSchema) throws WriteProcessException
+----
++
+La clase `MeasurementSchema` contiene la información de una medición, hay varios constructores:
++
+[source]
+----
+public MeasurementSchema(String measurementId, TSDataType type, TSEncoding encoding)
+public MeasurementSchema(String measurementId, TSDataType type, TSEncoding encoding, CompressionType compressionType)
+public MeasurementSchema(String measurementId, TSDataType type, TSEncoding encoding, CompressionType compressionType, 
+Map<String, String> props)
+----
++
+*Parámetros*:
+
+** measurementID: el nombre de esta medición, normalmente el nombre del sensor.
+
+** type: el tipo de datos, ahora admite seis tipos: `BOOLEAN`, `INT32`, `INT64`, `FLOAT`, `DOUBLE`, `TEXT`;
+
+** encoding: la codificación de datos.
+
+** compression: La compresión de datos.
+
+** props: Propiedades para tipos de datos especiales, como `max_point_number` para `FLOAT` y `DOUBLE`, `max_string_length` para `TEXT`. Úselos como pares de cadenas en un mapa como ("max_point_number", "3").
++
+[IMPORTANT]
+====   
+Aviso: aunque se puede utilizar un nombre de medición en varios deltaObjects, las propiedades no se pueden cambiar. Es decir. no se permite agregar un nombre de medición varias veces con diferentes tipos o codificaciones. He aquí un mal ejemplo:
+====
++
+[source]
+----
+ // The measurement "sensor_1" is float type
+ addMeasurement(new MeasurementSchema("sensor_1", TSDataType.FLOAT, TSEncoding.RLE));
+ 
+ // This call will throw a WriteProcessException exception
+ addMeasurement(new MeasurementSchema("sensor_1", TSDataType.INT32, TSEncoding.RLE));
+----
+
+. Inserte y escriba datos continuamente.
++
+Utilice esta interfaz para crear un nuevo `TSRecord` (una marca de tiempo y un par de dispositivos).
++
+[source]
+----
+public TSRecord(long timestamp, String deviceId)
+----
++
+A continuación, cree un `DataPoint` (un par de valores y medidas) y utilice el método addTuple para agregar el DataPoint al TsRecord correcto.
++
+Utilice este método para escribir
++
+[source]
+----
+public void write(TSRecord record) throws IOException, WriteProcessException
+----
+
+. Llame `close` para finalizar este proceso de escritura.
+
+[source]
+----
+public void close() throws IOException
+----
+
+También podemos escribir datos en un TsFile cerrado.
+
+. Utilice `ForceAppendTsFileWriter` para abrir un archivo cerrado.
++
+[source]
+----
+public ForceAppendTsFileWriter(File file) throws IOException
+----
+
+. Llamar a `doTruncate`truncar la parte de los metadatos
+
+. Luego use `ForceAppendTsFileWriter` para construir un nuevo `TsFileWriter`
+
+[source]
+----
+public TsFileWriter(TsFileIOWriter fileWriter) throws IOException
+----
+
+Tenga en cuenta que debemos rehacer el paso de agregar medidas antes de escribir nuevos datos en el TsFile.
+
+==== Ejemplo para Escribir un TsFile
+
+Debe instalar TsFile en su repositorio maven local.
+
+[source]
+----
+mvn clean install -pl tsfile -am -DskipTests
+----
+
+Puede escribir un TsFile construyendo TSRecord si tiene datos de series de tiempo *no alineados* (por ejemplo, no todos los sensores contienen valores).
+
+Puede encontrar un ejemplo más completo en `/example/tsfile/src/main/java/org/apache/iotdb/tsfile/TsFileWriteWithTSRecord.java`
+
+Puede escribir un TsFile construyendo *Tablet* si tiene los datos de series de tiempo alineados.
+
+Puede encontrar un ejemplo más completo en `/example/tsfile/src/main/java/org/apache/iotdb/tsfile/TsFileWriteWithTablet.java`
+
+Puede escribir datos en un TsFile cerrado utilizando *ForceAppendTsFileWriter*.
+
+Puede encontrar un ejemplo más completo en `/example/tsfile/src/main/java/org/apache/iotdb/tsfile/TsFileForceAppendWrite.java`
+
+==== Interfaz para Leer TsFile
+
+* Definición de Ruta
+
+Una ruta es una cadena separada por puntos que identifica de forma única una serie de tiempo en TsFile, por ejemplo, "root.area_1.device_1.sensor_1". La última sección "sensor_1" se llama "measurementId" mientras que las partes restantes "root.area_1.device_1" se llaman deviceId. Como se mencionó anteriormente, la misma medición en diferentes dispositivos tiene el mismo tipo de datos y codificación, y los dispositivos también son únicos.
+
+En interfaces de lectura, los `paths` de los parámetros indican las medidas a seleccionar.
+
+La instancia de ruta se puede construir fácilmente a través de la clase `Path`. Por ejemplo:
+
+[source]
+----
+Path p = new Path("device_1.sensor_1");
+----
+
+Pasaremos una ArrayList de rutas para la llamada de consulta final para admitir múltiples rutas.
+
+[source]
+----
+List<Path> paths = new ArrayList<Path>();
+paths.add(new Path("device_1.sensor_1"));
+paths.add(new Path("device_1.sensor_3"));
+----
+
+[IMPORTANT]
+====
+Al construir una Ruta, el formato del parámetro debe ser una cadena separada por puntos, la última parte se reconocerá como measurementId  mientras que las partes restantes se reconocerán como deviceId.
+====
+
+* Definición de Filtro
+
+* El Filtro de Escenario de Uso se utiliza en el proceso de lectura de TsFile para seleccionar datos que satisfacen una o más condiciones determinadas.
+
+* IExpression La `IExpression` es una interfaz de expresión de filtro y se pasará a nuestra última llamada de consulta. Creamos una o más expresiones de filtro y podemos usar operadores de filtro binarios para vincularlos a nuestra expresión final.
+
+* Crear una Expresión de Filtro
++
+Hay dos tipos de filtros.
+
+** TimeFilter: un filtro de `time` en datos de series de tiempo.
++
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter);
+----
++
+Utilice las siguientes relaciones para obtener un objeto `TimeFilter` (value es una variable entera larga).
++
+[cols="1,1"]
+|===
+|Relación
+|Descripción
+
+|TimeFilter.eq(value)
+|Elija el tiempo igual al valor
+
+|TimeFilter.lt(value)
+|Elija el tiempo menor que el valor
+
+|TimeFilter.gt(value)
+|Elija el tiempo mayor que el valor
+
+|TimeFilter.ltEq(value) 
+|Elija el tiempo menor o igual que el valor
+
+|TimeFilter.gtEq(value) 
+|Elija el tiempo mayor o igual que el valor
+
+|TimeFilter.notEq(value) 
+|Elija el tiempo que no sea igual al valor
+
+|TimeFilter.not(TimeFilter)
+|Elija el tiempo que no satisfaga otro TimeFilter
+|===
+
+** ValueFilter: un filtro de valor en datos de series de tiempo.
++
+[source]
+----
+IExpression valueFilterExpr = new SingleSeriesExpression(Path, ValueFilter);
+----
++
+El uso de `ValueFilter` es el mismo que el de `TimeFilter`, solo para asegurarse de que el tipo de valor sea igual al de la medición (definido en la ruta).
+
+* Operadores de Filtros Binarios
+
+Los operadores de filtro binario se pueden utilizar para vincular dos expresiones individuales.
+
+** BinaryExpression.and(Expression, Expression): Elija el valor satisfactorio para ambas expresiones.
+
+** BinaryExpression.or(Expression, Expression): elija el valor satisfactorio para al menos una expresión.
+
+Ejemplos de Expresiones de Filtro
+
+* Ejemplos de TimeFilterExpression
+
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter.eq(15)); // series time = 15
+----
+
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter.ltEq(15)); // series time <= 15
+----
+
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter.lt(15)); // series time < 15
+----
+
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter.gtEq(15)); // series time >= 15
+----
+
+[source]
+----
+IExpression timeFilterExpr = new GlobalTimeExpression(TimeFilter.notEq(15)); // series time != 15
+----
+
+[source]
+----
+IExpression timeFilterExpr = BinaryExpression.and(new GlobalTimeExpression(TimeFilter.gtEq(15L)),
+                                         new GlobalTimeExpression(TimeFilter.lt(25L))); // 15 <= series time < 25
+----
+
+[source]
+----
+IExpression timeFilterExpr = BinaryExpression.or(new GlobalTimeExpression(TimeFilter.gtEq(15L)),
+                                         new GlobalTimeExpression(TimeFilter.lt(25L))); // series time >= 15 or series time < 25
+----
+
+* Leer Interfaz
+
+Primero, abrimos TsFile y obtenemos una instancia de `ReadOnlyTsFile` de una ruta de archivo.
+
+[source]
+----
+TsFileSequenceReader reader = new TsFileSequenceReader(path);
+   
+ReadOnlyTsFile readTsFile = new ReadOnlyTsFile(reader);
+----
+
+A continuación, preparamos la matriz de ruta y la expresión de consulta, luego obtenemos el objeto `QueryExpression` final mediante esta interfaz:
+
+[source]
+----
+QueryExpression queryExpression = QueryExpression.create(paths, statement);
+----
+
+La clase `ReadOnlyTsFile` tiene dos métodos de `query` para realizar una consulta.
+
+* *Método 1*
+
+[source]
+----
+public QueryDataSet query(QueryExpression queryExpression) throws IOException
+----
+
+* *Método 2*
+
+[source]
+----
+public QueryDataSet query(QueryExpression queryExpression, long partitionStartOffset, long partitionEndOffset) throws IOException
+----
++
+Este método está diseñado para aplicaciones avanzadas como TsFile-Spark Connector.
+
+** params: para el método 2, se agregan dos parámetros adicionales para admitir consultas parciales:
+
+*** `particiónStartOffset`: inicio de desplazamiento para un TsFile
+
+*** `particiónEndOffset`: desplazamiento final para un TsFile
++
+====
+¿Qué es Consulta Parcial?
+
+En algunos sistemas de archivos distribuidos (por ejemplo, HDFS), un archivo se divide en varias partes que se denominan "Bloques" y se almacenan en diferentes nodos. La ejecución de una consulta en paralelo en cada uno de los nodos involucrados mejora la eficiencia. Por lo tanto, se necesita una consulta parcial. Paritial Query solo selecciona los resultados almacenados en la parte dividida por `QueryConstant.PARTITION_START_OFFSET` y `QueryConstant.PARTITION_END_OFFSET` para un TsFile.
+====
+
+* Interfaz QueryDataset
+
+La consulta realizada anteriormente devolverá un objeto `QueryDataset`.
+
+Aquí están las interfaces útiles para el usuario.
+
+* `bool hasNext();`
++
+Devuelve true si este conjunto de datos todavía tiene elementos.
+
+* `List<Path> getPaths()`
++
+Obtenga las rutas en este conjunto de datos.
+
+* `List<TSDataType> getDataTypes();`
+
+Obtenga los tipos de datos. La clase TSDataType es una clase de enumeración, el valor será uno de los siguientes:
+
+[source]
+----
+   BOOLEAN,
+   INT32,
+   INT64,
+   FLOAT,
+   DOUBLE,
+   TEXT;
+----
+
+* `RowRecord next() throws IOException;`
++
+Obtiene el siguiente registro.
++
+La clase `RowRecord` consta de una marca de tiempo `long` y una `List<Field>` para datos en diferentes sensores, podemos usar dos métodos getter para obtenerlos.
++
+[source]
+----
+long getTimestamp();
+List<Field> getFields();
+----
++
+Para obtener datos de un campo, utilice estos métodos:
++
+[source]
+----
+TSDataType getDataType();
+Object getObjectValue();
+----
+
+==== Ejemplo para Leer un TsFile Existente
+
+Debe instalar TsFile en su repositorio maven local.
+
+Puede encontrar un ejemplo más completo con la declaración de consulta en `/tsfile/example/src/main/java/org/apache/iotdb/tsfile/TsFileRead.java`
+
+[source, Java]
+----
+package org.apache.iotdb.tsfile;
+import java.io.IOException;
+import java.util.ArrayList;
+import org.apache.iotdb.tsfile.read.ReadOnlyTsFile;
+import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
+import org.apache.iotdb.tsfile.read.common.Path;
+import org.apache.iotdb.tsfile.read.expression.IExpression;
+import org.apache.iotdb.tsfile.read.expression.QueryExpression;
+import org.apache.iotdb.tsfile.read.expression.impl.BinaryExpression;
+import org.apache.iotdb.tsfile.read.expression.impl.GlobalTimeExpression;
+import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
+import org.apache.iotdb.tsfile.read.filter.TimeFilter;
+import org.apache.iotdb.tsfile.read.filter.ValueFilter;
+import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
+/**
+ * The class is to show how to read TsFile file named "test.tsfile".
+ * The TsFile file "test.tsfile" is generated from class TsFileWrite.
+ * Run TsFileWrite to generate the test.tsfile first
+ */
+public class TsFileRead {
+  private static void queryAndPrint(ArrayList<Path> paths, ReadOnlyTsFile readTsFile, IExpression statement)
+          throws IOException {
+    QueryExpression queryExpression = QueryExpression.create(paths, statement);
+    QueryDataSet queryDataSet = readTsFile.query(queryExpression);
+    while (queryDataSet.hasNext()) {
+      System.out.println(queryDataSet.next());
+    }
+    System.out.println("------------");
+  }
+
+  public static void main(String[] args) throws IOException {
+
+    // file path
+    String path = "test.tsfile";
+
+    // create reader and get the readTsFile interface
+    TsFileSequenceReader reader = new TsFileSequenceReader(path);
+    ReadOnlyTsFile readTsFile = new ReadOnlyTsFile(reader);
+    // use these paths(all sensors) for all the queries
+    ArrayList<Path> paths = new ArrayList<>();
+    paths.add(new Path("device_1.sensor_1"));
+    paths.add(new Path("device_1.sensor_2"));
+    paths.add(new Path("device_1.sensor_3"));
+
+    // no query statement
+    queryAndPrint(paths, readTsFile, null);
+
+    //close the reader when you left
+    reader.close();
+  }
+}
+
+
+----
+
+=== Cambiar la Configuración de TsFile
+
+[source]
+----
+TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
+config.setXXX();
+----

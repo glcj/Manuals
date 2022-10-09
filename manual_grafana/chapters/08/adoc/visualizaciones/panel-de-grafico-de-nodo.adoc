@@ -1,0 +1,103 @@
+= Panel de gráfico de nodo
+
+[NOTE]
+====
+Este panel se encuentra actualmente en fase beta. Espere cambios en versiones futuras.
+====
+
+El _Gráfico de nodo_ puede visualizar gráficos o redes dirigidos. Utiliza un diseño de fuerza dirigida para posicionar de manera efectiva los nodos de modo que pueda ayudar a mostrar mapas de infraestructura complejos, jerarquías o diagramas de ejecución.
+
+image::image72.png[Node graph panel,width=624,height=331]
+
+== Requerimientos de datos
+
+El Panel de gráficos de nodos requiere una forma específica de los datos para poder mostrar sus nodos y bordes. Esto significa que no todas las fuentes de datos o consultas se pueden visualizar en este panel. Si desea utilizar esto como desarrollador de fuentes de datos, consulte la sección sobre API de datos.
+
+La visualización del Gráfico de nodos consta de _nodos_ y _bordes_.
+
+* Un _nodo_ se muestra como un círculo. Un nodo puede representar una aplicación, un servicio o cualquier otra cosa que sea relevante desde la perspectiva de una aplicación.
+* Un _borde_ se muestra como una línea que conecta dos nodos. La conexión puede ser una solicitud, una ejecución o alguna otra relación entre los dos nodos.
+
+Tanto los nodos como los bordes pueden tener metadatos o estadísticas asociados. La fuente de datos define qué información y valores se muestran, por lo que diferentes fuentes de datos pueden mostrar diferentes tipos de valores o no mostrar algunos valores.
+
+=== Nodos
+
+[NOTE]
+====
+En este momento, el gráfico de nodos solo puede mostrar 1500 nodos. Si se cruza este límite, aparecerá una advertencia en la esquina superior derecha.
+====
+
+Por lo general, los nodos muestran dos valores estadísticos dentro del nodo y dos identificadores justo debajo del nodo, generalmente el nombre y el tipo. Los nodos también pueden mostrar otro conjunto de valores como un círculo de color alrededor del nodo, con secciones de diferentes colores que representan diferentes valores que deben sumar 1.
+
+Por ejemplo, puede tener el porcentaje de errores representado por la parte roja del círculo. Se pueden mostrar detalles adicionales en un menú contextual cuando se muestra al hacer clic en el nodo. También puede haber enlaces adicionales en el menú contextual que pueden apuntar a otras partes de Grafana o cualquier enlace externo.
+
+image::image73.gif[Node graph navigation,width=624,height=415]
+
+=== Bordes
+
+Los bordes también pueden mostrar estadísticas cuando se desplaza sobre el borde. De manera similar a los nodos, puede abrir un menú contextual con detalles y enlaces adicionales haciendo clic en el borde.
+
+La primera fuente de datos que admite esta visualización es la fuente de datos de Rayos X para su función de Mapa de servicio. Para obtener más información, consulte la https://grafana.com/grafana/plugins/grafana-x-ray-datasource[documentación del complemento de Rayos X].
+
+== Navegando por el gráfico de nodos
+
+Puede desplazarse y acercar o alejar el gráfico de nodos.
+
+=== Desplazar
+
+Puede desplazar la vista haciendo clic fuera de cualquier nodo o borde y arrastrando el mouse.
+
+=== Acercar o alejar
+
+Use los botones en la esquina superior izquierda o use la rueda del mouse, el panel táctil de desplazamiento, junto con la tecla Ctrl o Cmd para acercar o alejar.
+
+== API de datos
+
+Esta visualización necesita una forma específica de los datos que se devolverán desde la fuente de datos para mostrarlos correctamente.
+
+La fuente de datos debe devolver dos marcos de datos, uno para los nodos y otro para los bordes, y también debe establecer `frame.meta.preferredVisualisationType = 'nodeGraph'` en ambos marcos de datos.
+
+=== Parámetros de nodo
+
+Campos requeridos:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|id |cadena |Identificador único del nodo. Se hace referencia a este ID por borde en su campo de origen y destino.
+|===
+
+Campos opcionales:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|title |cadena |Nombre del nodo visible justo debajo del nodo.
+|subTitle |cadena |Adicional, nombre, tipo u otro identificador que se mostrará justo debajo del título.
+|mainStat |cadena/número |Primera estadística que se muestra dentro del propio nodo. Puede ser una cadena, en cuyo caso el valor se mostrará tal cual o puede ser un número, en cuyo caso también se mostrará cualquier unidad asociada con ese campo.
+|secundarioStat |cadena/número |Igual que mainStat pero se muestra justo debajo de él dentro del nodo.
+|arc__* |número |Cualquier campo con el prefijo `arc__` se utilizará para crear el círculo de color alrededor del nodo. Todos los valores en estos campos deben sumar 1. Puede especificar el color usando `config.color.fixedColor`.
+|detail__* |cadena/número |Cualquier campo con el prefijo `detail__` se mostrará en el encabezado del menú contextual cuando se haga clic en el nodo. Utilice `config.displayName` para una etiqueta más legible por humanos.
+|===
+
+=== Parámetros de borde
+
+Campos requeridos:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|Id |cadena |Identificador único del borde.
+|source |cadena |Id del nodo de origen.
+|target |cadena |Id del objetivo.
+|===
+
+Campos opcionales:
+
+[cols=",,",options="header",]
+|===
+|Nombre de campo |Tipo |Descripción
+|mainStat |cadena/número |Primera estadística que se muestra en la superposición al pasar el cursor sobre el borde. Puede ser una cadena, en cuyo caso el valor se mostrará tal cual o puede ser un número, en cuyo caso también se mostrará cualquier unidad asociada con ese campo.
+|secondaryStat |cadena/número |Igual que mainStat pero se muestra justo debajo de él.
+|detail__* |cadena/número |Cualquier campo con el prefijo `detail__` se mostrará en el encabezado del menú contextual cuando se haga clic en el borde. Utilice `config.displayName` para una etiqueta más legible por humanos.
+|===

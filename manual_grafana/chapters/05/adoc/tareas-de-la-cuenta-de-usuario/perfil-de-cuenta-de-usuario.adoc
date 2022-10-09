@@ -1,0 +1,37 @@
+= Perfil de la cuenta de usuario de Grafana
+
+Puede editar y ver información importante sobre su cuenta de usuario de Grafana, incluidas sus organizaciones asignadas, sus sesiones y la información asociada a su cuenta.
+
+== Edite su perfil
+
+Su perfil incluye su nombre, nombre de usuario y dirección de correo electrónico.
+
+* Vaya a la pestaña Preferencias. Pase el cursor sobre el icono de usuario en la esquina inferior izquierda de la pantalla y luego haga clic en *Preferencias*.
+* En la sección Editar perfil, puede editar cualquiera de los siguientes:
+** *Nombre:* edite este campo para cambiar el nombre para mostrar asociado con su perfil.
+** *Correo electrónico:* edite este campo para cambiar la dirección de correo electrónico asociada con su perfil.
+** *Nombre de usuario:* edite este campo para cambiar su nombre de usuario.
+* Clic en *Guardar*.
+
+== Ver sus organizaciones asignadas
+
+Cada usuario es miembro de al menos una organización. Puede tener diferentes roles en cada organización de la que sea miembro.
+
+* Vaya a la pestaña Preferencias. Pase el cursor sobre el icono de usuario en la esquina inferior izquierda de la pantalla y luego haga clic en *Preferencias*.
+* Desplácese hacia abajo hasta la sección Organizaciones.
+** *Nombre:* el nombre de las organizaciones de las que es miembro en esa instancia de Grafana.
+** *Rol:* el rol que se le asigna en la organización. Consulte xref:permisos/roles-de-la-organizacion.adoc[Roles de la organización] sobre los permisos asignados a cada rol.
+** *Actual:* Grafana etiqueta la organización en la que está conectado actualmente como _Actual_. Si forma parte de varias organizaciones, puede hacer clic en *Seleccionar* para cambiar a esa organización.
+
+== Ver sus sesiones de Grafana
+
+Grafana registra sus sesiones en cada instancia de Grafana. Puede revisar esta sección si sospecha que alguien ha hecho un mal uso de sus credenciales de Grafana.
+
+* Vaya a la pestaña Preferencias. Pase el cursor sobre el icono de usuario en la esquina inferior izquierda de la pantalla y luego haga clic en *Preferencias*.
+* Desplácese hacia abajo hasta la sección Sesiones. Grafana muestra lo siguiente:
+[arabic]
+. *Visto por última vez:* cuánto tiempo hace que inició sesión.
+. *Conectado:* la fecha en que inició sesión en la instancia actual de Grafana.
+. *Dirección IP:* la dirección IP desde la que inició sesión.
+. *Navegador y sistema operativo:* el navegador web y el sistema operativo utilizados para iniciar sesión en Grafana.
+Si es un administrador de Grafana para la instancia, puede revocar una sesión haciendo clic en el icono rojo de cierre de sesión en la fila de la sesión.

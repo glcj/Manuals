@@ -1,0 +1,43 @@
+= Anotaciones
+
+image::image147.png[https://grafana.com/static/img/docs/v46/annotations.png,width=624,height=245]
+
+Las anotaciones proporcionan una forma de marcar puntos en el gráfico con eventos enriquecidos. Cuando pasa el cursor sobre una anotación, puede obtener la descripción del evento y las etiquetas del evento. El campo de texto puede incluir enlaces a otros sistemas con más detalle.
+
+== Anotaciones nativas
+
+Grafana viene con un almacén de anotaciones nativo y la capacidad de agregar eventos de anotaciones directamente desde el panel de gráficos o mediante la xref:api-http/anotaciones.adoc[API HTTP].
+
+== Agregar anotaciones
+
+Manteniendo presionado Ctrl/Cmd+Clic. Agregar etiquetas a la anotación hará que se pueda buscar desde otros tableros.
+
+=== Agregar eventos de regiones
+
+También puede mantener presionada la tecla Ctrl/Cmd y seleccionar una región para crear una anotación de región.
+
+=== Consulta incorporada
+
+Después de agregar una anotación, aún estarán visibles. Esto se debe a la consulta de anotaciones incorporada que existe en todos los paneles. Esta consulta de anotación obtendrá todos los eventos de anotación que se originan en el tablero actual y los mostrará en el panel donde se crearon. Esto incluye anotaciones del historial de estado de alerta. Puede evitar que las anotaciones se obtengan y dibujen abriendo la configuración de *Anotaciones* (a través del menú de engranajes del Tablero) y modificando la consulta denominada `Annotations & Alerts (Built-in)`.
+
+Cuando copia un tablero con la función *Guardar como*, obtendrá una nueva identificación de tablero, por lo que las anotaciones creadas en el tablerode origen ya no serán visibles en la copia. Aún puede mostrarlos si agrega una nueva *Consulta de Anotación* y filtra por etiquetas. Pero esto solo funciona si las anotaciones en el tablero de origen tenían etiquetas por las que filtrar.
+
+=== Consulta por etiqueta
+
+Puede crear nuevas consultas de anotaciones que obtengan anotaciones del almacén de anotaciones nativo a través de la fuente de datos ``-- Grafana --`` y estableciendo _Filtrar por_ en `Tags`. Especifique al menos una etiqueta. Por ejemplo, cree una consulta de anotación con el nombre de `outages` y especifique una etiqueta llamada `outage`. Esta consulta mostrará todas las anotaciones que cree (desde cualquier tablero o mediante API) que tengan la etiqueta de `outage`. De forma predeterminada, si agrega varias etiquetas en la consulta de anotaciones, Grafana solo mostrará las anotaciones que tengan todas las etiquetas que proporcionó. Puede invertir el comportamiento habilitando `Match any` cualquiera, lo que significa que Grafana mostrará anotaciones que contengan al menos una de las etiquetas que proporcionó.
+
+En Grafana v5.3 +, es posible utilizar variables de plantilla en la consulta de etiquetas. Entonces, si tiene un tablero que muestra estadísticas para diferentes servicios y una variable de plantilla que dicta qué servicios mostrar, ahora puede usar la misma variable de plantilla en su consulta de anotaciones para mostrar solo anotaciones para esos servicios.
+
+image::image148.png[https://grafana.com/static/img/docs/v53/annotation_tag_filter_variable.png,width=624,height=307]
+
+== Consultar otras fuentes de datos
+
+Los eventos de anotación se obtienen mediante consultas de anotación. Para agregar una nueva consulta de anotación a un tablero, abra el menú de configuración del tablero y luego seleccione `Anotaciones`. Esto abrirá la vista de configuración de anotaciones del tablero. Para crear una nueva consulta de anotación, presione el botón `Nuevo`.
+
+image::image149.png[https://grafana.com/static/img/docs/v50/annotation_new_query.png,width=624,height=234]
+
+Especifique un nombre para la consulta de anotación. Este nombre se le da a la palanca (casilla de verificación) que le permitirá habilitar/deshabilitar la visualización de eventos de anotación de esta consulta. Por ejemplo, puede tener dos consultas de anotación denominadas `Deploys` e `Outages`. La palanca le permitirá decidir qué anotaciones mostrar.
+
+=== Detalles de la consulta de anotación
+
+Las opciones de consulta de anotación son diferentes para cada fuente de datos. Para obtener información sobre las anotaciones en una fuente de datos específica, consulte el tema de la xref:fuentes-de-datos/fuentes-de-datos.adoc[fuente de datos] específica.

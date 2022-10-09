@@ -1,0 +1,236 @@
+= Inicio Rápido
+
+Este breve manual lo guiará a través del proceso básico de uso de IoTDB. Para obtener una guía más completa, visite el xref:/introduccion-a-iotdb/que-es-iotdb.adoc[Manual de Usuario] de nuestro sitio web.
+
+== Prerequisitos
+
+Para usar IoTDB, debe tener:
+
+. Java >= 1.8 (Asegúrese de que se haya establecido la ruta del entorno)
+
+. Establezca el número máximo de archivos abiertos como 65535 para evitar el problema de "demasiados archivos abiertos".
+
+== Instalación
+
+IoTDB le proporciona tres métodos de instalación, puede consultar las siguientes sugerencias, elija una de ellas:
+
+. Instalación desde código fuente. Si necesita modificar el código usted mismo, puede utilizar este método.
+
+. Instalación desde archivos binarios. Descargue los archivos binarios del sitio web oficial. Este es el método recomendado, en el que obtendrá un paquete binario publicado que está listo para usar (Próximamente...)
+
+. Usando Docker: la ruta al dockerfile es https://github.com/apache/iotdb/blob/master/docker/src/main
+
+== Descargar
+
+Puede descargar el archivo binario desde: https://iotdb.apache.org/Download/[Página de Descarga]
+
+== Configuraciones
+
+Los archivos de configuración están en la carpeta "conf"
+
+. módulo de configuración de entorno (`iotdb-env.bat`, `iotdb-env.sh`),
+
+. módulo de configuración del sistema (`iotdb-engine.properties`)
+
+. módulo de configuración de registro (`logback.xml`).
+
+Para obtener más información, consulte https://iotdb.apache.org/UserGuide/V0.12.x/Appendix/Config-Manual.html[Configuración] en detalle.
+
+== Iniciar
+
+Puede seguir el siguiente paso para probar la instalación, si no hay ningún error después de la ejecución, la instalación está completa.
+
+=== Iniciar IoTDB
+
+Los usuarios pueden iniciar IoTDB mediante la  secuencia de comandos de inicio del servidor en la carpeta sbin.
+
+[source]
+----
+# Unix/OS X
+> nohup sbin/start-server.sh >/dev/null 2>&1 &
+or
+> nohup sbin/start-server.sh -c <conf_path> -rpc_port <rpc_port> >/dev/null 2>&1 &
+
+# Windows
+> sbin\start-server.bat -c <conf_path> -rpc_port <rpc_port>
+----
+
+. "-c" y "-rpc_port" son opcionales.
+
+. La opción "-c" especifica el directorio del archivo de configuración del sistema.
+
+. La opción "-rpc_port" especifica el puerto rpc.
+
+. Si se especifican ambas opciones, _rpc_port_ anulará rpc_port en _conf_path_.
+
+Si desea utilizar JMX para conectar IOTDB, es posible que deba agregar
+
+[source]
+----
+-Dcom.sun.management.jmxremote.rmi.port=PORT -Djava.rmi.server.hostname=IP 
+----
+
+a $IOTDB_JMX_OPTS en iotdb-env.sh. o iotdb-env.bat
+
+=== Utilizar Cli
+
+IoTDB ofrece diferentes formas de interactuar con el servidor, aquí presentamos los pasos básicos del uso de la herramienta Cli para insertar y consultar datos.
+
+Después de instalar IoTDB, hay un usuario predeterminado 'root', su contraseña predeterminada también es 'root'. Los usuarios pueden usar este usuario predeterminado para iniciar sesión en Cli para usar IoTDB. La secuencia de comandos de inicio de Cli es la secuencia de comandos start-cli en la carpeta sbin. Al ejecutar la secuencia de comandos, el usuario debe asignar IP, PUERTO, USER_NAME y CONTRASEÑA. Los parámetros predeterminados son "-h 127.0.0.1 -p 6667 -u root -pw -root".
+
+Aquí está el comando para iniciar Cli:
+
+[source]
+----
+# Unix/OS X
+> sbin/start-cli.sh -h 127.0.0.1 -p 6667 -u root -pw root
+
+# Windows
+> sbin\start-cli.bat -h 127.0.0.1 -p 6667 -u root -pw root
+----
+
+El cliente de línea de comandos es interactivo, por lo que si todo está listo, debería ver el logotipo de bienvenida y las declaraciones:
+
+[source]
+----
+ _____       _________  ______   ______
+|_   _|     |  _   _  ||_   _ `.|_   _ \
+  | |   .--.|_/ | | \_|  | | `. \ | |_) |
+  | | / .'`\ \  | |      | |  | | |  __'.
+ _| |_| \__. | _| |_    _| |_.' /_| |__) |
+|_____|'.__.' |_____|  |______.'|_______/  version x.x.x
+
+
+IoTDB> login successfully
+IoTDB>
+----
+
+=== Comandos básicos para IoTDB
+
+Ahora, vamos a presentar la forma de crear series temporales, insertar datos y consultar datos.
+
+Los datos en IoTDB están organizados como series de tiempo, en cada serie de tiempo hay algunos pares de datos y tiempo, y cada serie de tiempo es propiedad de un grupo de almacenamiento. Antes de definir una serie temporal, debemos definir un grupo de almacenamiento usando SET STORAGE GROUP, y aquí hay un ejemplo:
+
+[source]
+----
+IoTDB> SET STORAGE GROUP TO root.ln
+----
+
+También podemos usar SHOW STORAGE GROUP para verificar el grupo de almacenamiento creado:
+
+[source]
+----
+IoTDB> SHOW STORAGE GROUP
++-----------------------------------+
+|                      Storage Group|
++-----------------------------------+
+|                            root.ln|
++-----------------------------------+
+storage group number = 1
+----
+
+Una vez configurado el grupo de almacenamiento, podemos usar CREATE TIMESERIES para crear nuevas series de tiempo. Cuando creamos una serie temporal, debemos definir su tipo de datos y el esquema de codificación. Creamos dos series temporales de la siguiente manera:
+
+[source]
+----
+IoTDB> CREATE TIMESERIES root.ln.wf01.wt01.status WITH DATATYPE=BOOLEAN, ENCODING=PLAIN
+IoTDB> CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE
+----
+
+Para consultar las series temporales específicas, use SHOW TIMESERIES <Path>. <Path> representa la ruta de la serie temporal. Su valor predeterminado es nulo, lo que significa consultar todas las series temporales del sistema (lo mismo que usar "SHOW TIMESERIES root"). Aquí están los ejemplos:
+
+. Consultar todas las series temporales del sistema:
+
+[source]
+----
+IoTDB> SHOW TIMESERIES
++-------------------------------+---------------+--------+--------+
+|                     Timeseries|  Storage Group|DataType|Encoding|
++-------------------------------+---------------+--------+--------+
+|       root.ln.wf01.wt01.status|        root.ln| BOOLEAN|   PLAIN|
+|  root.ln.wf01.wt01.temperature|        root.ln|   FLOAT|     RLE|
++-------------------------------+---------------+--------+--------+
+Total timeseries number = 2
+----
+
+. onsultar una serie temporal específica (root.ln.wf01.wt01.status):
+
+[source]
+----
+IoTDB> SHOW TIMESERIES root.ln.wf01.wt01.status
++------------------------------+--------------+--------+--------+
+|                    Timeseries| Storage Group|DataType|Encoding|
++------------------------------+--------------+--------+--------+
+|      root.ln.wf01.wt01.status|       root.ln| BOOLEAN|   PLAIN|
++------------------------------+--------------+--------+--------+
+Total timeseries number = 1
+----
+
+Insertar datos de series de tiempo es la operación básica de IoTDB, puede usar el comando "INSERT" para finalizar esto. Antes de insertar, debe asignar la marca de tiempo y el nombre de la ruta del sufijo:
+
+[source]
+----
+IoTDB> INSERT INTO root.ln.wf01.wt01(timestamp,status) values(100,true);
+IoTDB> INSERT INTO root.ln.wf01.wt01(timestamp,status,temperature) values(200,false,20.71)
+----
+
+Los datos que acabamos de insertar se muestran así:
+
+[source]
+----
+IoTDB> SELECT status FROM root.ln.wf01.wt01
++-----------------------+------------------------+
+|                   Time|root.ln.wf01.wt01.status|
++-----------------------+------------------------+
+|1970-01-01T08:00:00.100|                    true|
+|1970-01-01T08:00:00.200|                   false|
++-----------------------+------------------------+
+Total line number = 2
+----
+
+También podemos consultar varios datos de series temporales a la vez de esta manera:
+
+[source]
+----
+IoTDB> SELECT * FROM root.ln.wf01.wt01
++-----------------------+--------------------------+-----------------------------+
+|                   Time|  root.ln.wf01.wt01.status|root.ln.wf01.wt01.temperature|
++-----------------------+--------------------------+-----------------------------+
+|1970-01-01T08:00:00.100|                      true|                         null|
+|1970-01-01T08:00:00.200|                     false|                        20.71|
++-----------------------+--------------------------+-----------------------------+
+Total line number = 2
+
+----
+
+Los comandos para salir del Cli son:
+
+[source]
+----
+IoTDB> quit
+or
+IoTDB> exit
+----
+
+Para obtener más información sobre qué comandos son compatibles con IoTDB SQL, consulte https://iotdb.apache.org/UserGuide/V0.12.x/Appendix/SQL-Reference.html[Referencia de SQL].
+
+=== Detener IoTDB
+
+El servidor se puede detener con ctrl+C o la siguiente secuencia de comandos:
+
+[source]
+----
+# Unix/OS X
+> sbin/stop-server.sh
+
+# Windows
+> sbin\stop-server.bat
+----
+
+== Configuración básica
+
+Los archivos de configuración se encuentran en la carpeta `conf`, incluye:
+
+. configuración del entorno (`iotdb-env.bat`, `iotdb-env.sh`),
+. configuración del sistema (`iotdb-engine.properties`)
+. configuración de registro (`logback.xml`).

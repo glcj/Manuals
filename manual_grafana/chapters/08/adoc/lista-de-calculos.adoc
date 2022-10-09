@@ -1,0 +1,26 @@
+= Lista de cálculos
+
+Este tema enumera y define los cálculos utilizados en Grafana.
+
+Entre otros lugares, estos cálculos se utilizan en la pestaña Transformar y en las visualizaciones de indicador de barra, indicador y estadísticas.
+
+[cols=",",options="header",]
+|===
+|Calculo |Descripción
+|Todos los nulos |verdaderos cuando todos los valores son nulos
+|Todos los ceros |verdaderos cuando todos los valores son 0
+|Cuenta de cambios |número de veces que cambia el valor del campo
+|Cuenta |número de valores en un campo
+|Delta |cambio acumulado en el valor
+|Diferencia |diferencia entre el primer y último valor de un campo
+|Diferencia porcentual |porcentaje de cambio entre el primer y el último valor de un campo
+|Cuenta de distintos |número de valores únicos en un campo
+|Primero (no nulo) |primer, valor no-nulo en un campo
+|Max |valor máximo de un campo
+|Medio |valor medio de todos los valores de un campo
+|Min |valor mínimo de un campo
+|Min (por encima de cero) |valor mínimo y positivo de un campo
+|Rango |diferencia entre los valores máximo y mínimo de un campo
+|Paso |intervalo mínimo entre valores de un campo
+|Total |suma de todos los valores en un campo
+|===

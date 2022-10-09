@@ -1,0 +1,1425 @@
+= Configuración
+
+Grafana tiene una serie de opciones de configuración que puede especificar en un archivo de configuración `.ini` o especificar mediante variables de entorno.
+
+[NOTE]
+====
+Debe reiniciar Grafana para que se apliquen los cambios de configuración.
+====
+
+Para ver todas las configuraciones actualmente aplicadas al servidor Grafana, consulte xref:administracion/ver-servidor/ver-configuracion-del-servidor.adoc[Ver configuración del servidor].
+
+== Ubicaciones del archivo de configuración
+
+¡_No_ cambie `defaults.ini`! Los valores predeterminados de Grafana se almacenan en este archivo. Dependiendo de su sistema operativo, realice todos los cambios de configuración en `custom.ini` o `grafana.ini`.
+
+* Configuración predeterminada desde `$WORKING_DIR/conf/defaults.ini`
+* Configuración personalizada desde `$WORKING_DIR/conf/custom.ini`
+* La ruta del archivo de configuración personalizada se puede anular mediante el parámetro `-–config`
+
+=== Windows
+
+`sample.ini` está en el mismo directorio que `defaults.ini` y contiene todas las configuraciones comentadas. Copie sample`.ini` y asígnele el nombre `custom.ini`.
+
+El punto y coma (el símbolo `;`) es la forma estándar de comentar líneas en un archivo `.ini`. Si desea cambiar una configuración, debe eliminar el punto y coma (`;`) delante de la configuración antes de que funcione.
+
+*Ejemplo*
+
+----
+# The HTTP port  to use
+;http_port = 3000
+----
+
+Un problema común es olvidar descomentar una línea en el archivo `custom.ini` (o `grafana.ini`), lo que hace que se ignore la opción de configuración.
+
+== Configurar con variables de entorno
+
+Todas las opciones en el archivo de configuración se pueden anular usando variables de entorno, usando la sintaxis:
+
+[source,Bash]
+----
+GF_<SectionName>_<KeyName>
+----
+
+Donde el nombre de la sección es el texto entre corchetes. Todo debe estar en mayúsculas,`.` y `-` deben reemplazarse por `_`. Por ejemplo, si tiene estas opciones de configuración:
+
+[source,Bash]
+----
+# default section
+instance_name = ${HOSTNAME}
+
+[security]
+admin_user = admin
+
+[auth.google]
+client_secret = 0ldS3cretKey
+
+[plugin.grafana-image-renderer]
+rendering_ignore_https_errors = true
+----
+
+Puede anularlos en máquinas Linux con:
+
+[source,Bash]
+----
+export GF_DEFAULT_INSTANCE_NAME=my-instance
+export GF_SECURITY_ADMIN_USER=owner
+export GF_AUTH_GOOGLE_CLIENT_SECRET=newS3cretKey
+export GF_PLUGIN_GRAFANA_IMAGE_RENDERER_RENDERING_IGNORE_HTTPS_ERRORS=true
+----
+
+== Expansión variable
+
+[NOTE]
+====
+Solo disponible en Grafana 7.1+.
+====
+
+Si alguna de sus opciones contiene la expresión `$__<provider>\{<argument>}` o `$\{<enviroment variable>}`, serán procesadas por el expansor de variables de Grafana. El expansor ejecuta el proveedor con el argumento proporcionado para obtener el valor final de la opción.
+
+Hay tres proveedores: `env`, `file` y `vault`.
+
+=== Proveedor de env
+
+El proveedor `env` se puede utilizar para expandir una variable de entorno. Si establece una opción en `$__env\{PORT}`, la variable de entorno `PORT` se utilizará en su lugar. Para las variables de entorno, también puede utilizar la sintaxis abreviada `$\{PORT}`. El directorio de registro de Grafana se establecería en el directorio `grafana` en el directorio detrás de la variable de entorno `LOGDIR` en el siguiente ejemplo.
+
+[source,Ini]
+----
+[paths]
+logs = $__env{LOGDIR}/grafana
+----
+
+=== Proveedor de archivos
+
+`file` lee un archivo del sistema de archivos. Recorta los espacios en blanco desde el principio y el final de los archivos. La contraseña de la base de datos en el siguiente ejemplo sería reemplazada por el contenido del archivo `/etc/secrets/gf_sql_password`:
+
+[source,Ini]
+----
+[database]
+password = $__file{/etc/secrets/gf_sql_password}
+----
+
+=== Proveedor de bóveda
+
+El proveedor `vault` le permite administrar sus secretos con https://www.hashicorp.com/products/vault[Hashicorp Vault].
+
+====
+El proveedor Vault solo está disponible en Grafana Enterprise v7.1 +. Para obtener más información, consulte xref:grafana-enterprise/boveda.adoc[Integración de Vault] en xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].
+====
+
+== app_mode
+
+Las opciones son `production` y `development`. El valor predeterminado es `production`. _No_ cambie esta opción a menos que esté trabajando en el desarrollo de Grafana.
+
+== instance_name
+
+Establezca el nombre de la instancia de grafana-server. Se utiliza en registros, métricas internas e información de agrupación. El valor predeterminado es: `${HOSTNAME}`, que se reemplazará con la variable de entorno `HOSTNAME`, si está vacía o no existe, Grafana intentará usar llamadas al sistema para obtener el nombre de la máquina.
+
+== [paths]
+
+=== data
+
+Ruta de acceso a donde Grafana almacena la base de datos sqlite3 (si se usa), sesiones basadas en archivos (si se usan) y otros datos. Esta ruta generalmente se especifica a través de la línea de comando en el script init.d o en el archivo de servicio systemd.
+
+=== temp_data_lifetime
+
+Cuánto tiempo se deben conservar las imágenes temporales en el directorio `data`. Predeterminado a: `24h`. Modificadores admitidos: `h` (horas),`m` (minutos), por ejemplo: `168h`, `30m`, `10h30m`.
+
+Utilice `0` para no limpiar nunca archivos temporales.
+
+=== logs
+
+Ruta al lugar donde Grafana almacena los registros. Esta ruta generalmente se especifica a través de la línea de comando en el script init.d o en el archivo de servicio systemd. Puede anularlo en el archivo de configuración o en el archivo de variable de entorno predeterminado. Sin embargo, tenga en cuenta que al anular esto, la ruta de registro predeterminada se utilizará temporalmente hasta que Grafana se haya iniciado por completo.
+
+Anule la ruta del registro utilizando el argumento de línea de comando `cfg:default.paths.logs`:
+
+[source,Bash]
+----
+./grafana-server --config /custom/config.ini --homepath /custom/homepath cfg:default.paths.logs=/custom/path
+----
+
+=== plugins
+
+Directorio donde Grafana escanea y busca complementos automáticamente. Para obtener información sobre la instalación manual o automática de complementos, consulte xref:complementos/instalacion.adoc[Instalar complementos de Grafana].
+
+=== provisioning
+
+Carpeta que contiene archivos de configuración de xref:administracion/aprovisionamiento.adoc[aprovisionamiento] que Grafana aplicará al inicio. Los tableros se volverán a cargar cuando cambien los archivos json.
+
+== [server]
+
+=== protocol
+
+`http`, `https`, `h2` o `socket`
+
+=== http_addr
+
+La dirección IP a la que enlazar. Si está vacío, se vinculará a todas las interfaces
+
+=== http_port
+
+El puerto al que se va a enlazar, por defecto es `3000`. Para usar el puerto 80, debe otorgar el permiso binario de Grafana, por ejemplo:
+
+[source,Bash]
+----
+$ sudo setcap 'cap_net_bind_service=+ep' /usr/sbin/grafana-server
+----
+
+O redirigir el puerto 80 al puerto de Grafana usando:
+
+[source,Bash]
+----
+$ sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000
+----
+
+Otra forma es poner un servidor web como Nginx o Apache frente a Grafana y hacer que hagan de proxy a las solicitudes hacia Grafana.
+
+=== domain
+
+Esta configuración solo se usa como parte de la configuración `root_url` (ver más abajo). Importante si usa GitHub o Google OAuth.
+
+=== enforce_domain
+
+Redirije al dominio correcto si el encabezado del host no coincide con el dominio. Evita los ataques de revinculación de DNS. El valor predeterminado es `false`.
+
+=== root_url
+
+Esta es la URL completa que se utiliza para acceder a Grafana desde un navegador web. Esto es importante si usa la autenticación de Google o GitHub OAuth (para que la URL de devolución de llamada sea correcta).
+
+[NOTE]
+====
+Esta configuración también es importante si tiene un proxy inverso frente a Grafana que lo expone a través de una subruta. En ese caso, agregue la subruta al final de esta configuración de URL.
+====
+
+=== serve_from_sub_path
+
+Sirve Grafana desde la subruta especificada en la configuración `root_url`. De forma predeterminada, se establece en `false` por razones de compatibilidad.
+
+Habilitando esta configuración y usando una subruta en `root_url` arriba, por Ej., `root_url = http://localhost:3000/grafana`, se puede acceder a Grafana en `http://localhost:3000/grafana`.
+
+=== router_logging
+
+Establézcalo en `true` para que Grafana registre todas las solicitudes HTTP (no solo los errores). Estos se registran como eventos de nivel de información en el registro de Grafana.
+
+=== static_root_path
+
+La ruta al directorio donde se encuentran los archivos de la interfaz (archivos HTML, JS y CSS). El valor predeterminado es `public`, por lo que el binario de Grafana debe ejecutarse con el directorio de trabajo configurado en la ruta de instalación.
+
+=== enable_gzip
+
+Establezca esta opción en `true` para habilitar la compresión HTTP, esto puede mejorar la velocidad de transferencia y la utilización del ancho de banda. Se recomienda que la mayoría de los usuarios lo establezcan como `true`. De forma predeterminada, se establece en `false` por razones de compatibilidad.
+
+=== cert_file
+
+Ruta al archivo de certificado (si `protocol` está configurado en `https` o `h2`).
+
+=== cert_key
+
+Ruta al archivo de la clave del certificado (si `protocol` está configurado en `https` o `h2`).
+
+=== socket
+
+Ruta donde se debe crear el socket cuando `protocol=socket`. Asegúrese de que Grafana tenga los permisos adecuados antes de cambiar esta configuración.
+
+=== cdn_url
+
+[NOTE]
+====
+Disponible en Grafana v7.4 y versiones posteriores.
+====
+
+Especifique una dirección URL HTTP completa a la raíz de sus activos de Grafana CDN. Grafana agregará rutas de edición y versión.
+
+Por ejemplo, dada una URL cdn como `https://cdn.myserver.com`, grafana intentará cargar un archivo javascript desde `http://cdn.myserver.com/grafana-oss/7.4.0/public/build/app.%3chash%3e.js[http://cdn.myserver.com/grafana-oss/7.4.0/public/build/app.<hash>.js]`.
+
+=== read_timeout
+
+Establece el tiempo máximo usando un formato de duración (5s/5m/5ms) antes de que se agote el tiempo de lectura de una solicitud entrante y se cierren las conexiones inactivas. `0` significa que no hay tiempo de espera para leer la solicitud.
+
+== [database]
+
+Grafana necesita una base de datos para almacenar usuarios y paneles (y otras cosas). De forma predeterminada, está configurado para usar `sqlite3`, que es una base de datos incrustada (incluida en el binario principal de Grafana).
+
+=== type
+
+Ya sea `mysql`, `postgres` o `sqlite3`, es su elección.
+
+=== host
+
+Solo aplicable a MySQL o Postgres. Incluye IP o nombre de host y puerto o, en caso de sockets Unix, la ruta hacia él. Por ejemplo, para MySQL ejecutándose en el mismo host que Grafana: `host = 127.0.0.1:3306` o con sockets Unix: `host = /var/run/mysqld/mysqld.sock`
+
+=== name
+
+El nombre de la base de datos de Grafana. Déjelo configurado en `grafana` o algún otro nombre.
+
+=== user
+
+El usuario de la base de datos (no aplicable para `sqlite3`).
+
+=== Password
+
+La contraseña del usuario de la base de datos (no aplicable para `sqlite3`). Si la contraseña contiene `#` o `;` tiene que envolverlo con comillas triples. Por ejemplo, `"""#password;"""`
+
+=== url
+
+Use la URL o los otros campos a continuación para configurar la base de datos Ejemplo: `mysql://user:secret@host:port/database`
+
+=== max_idle_conn
+
+El número máximo de conexiones en el grupo de conexiones inactivas.
+
+=== max_open_conn
+
+El número máximo de conexiones abiertas a la base de datos.
+
+=== conn_max_lifetime
+
+Establece la cantidad máxima de tiempo que se puede reutilizar una conexión. El valor predeterminado es 14400 (lo que significa 14400 segundos o 4 horas). Para MySQL, esta configuración debería ser más corta que la variable `wait_timeout`.
+
+=== log_queries
+
+Establézcalo en `true` para registrar las llamadas SQL y los tiempos de ejecución.
+
+=== ssl_mode
+
+Para Postgres, use `disable`, `require` o `verify-full`. Para MySQL, use `true`, `false` o `skip-verify`.
+
+=== isolation_level
+
+Solo el controlador MySQL admite niveles de aislamiento en Grafana. En caso de que el valor esté vacío, se aplica el nivel de aislamiento predeterminado del controlador. Las opciones disponibles son “READ-UNCOMMITED”, “READ-COMMITTED”, “REPEATABLE-READ” o “SERIALIZABLE”.
+
+=== ca_cert_path
+
+La ruta al certificado de CA que se utilizará. En muchos sistemas Linux, los certificados se pueden encontrar en `/etc/ssl/certs`.
+
+=== client_key_path
+
+La ruta a la clave del cliente. Solo si el servidor requiere autenticación de cliente.
+
+=== client_cert_path
+
+La ruta al certificado de cliente. Solo si el servidor requiere autenticación de cliente.
+
+=== server_cert_name
+
+El campo de nombre común del certificado utilizado por el servidor `mysql` o `postgres`. No es necesario si `ssl_mode` está configurado para `skip-verify`.
+
+=== path
+
+Solo aplicable para la base de datos `sqlite3`. La ruta del archivo donde se almacenará la base de datos.
+
+=== cache_mode
+
+Solo para "sqlite3". Configuración de https://www.sqlite.org/sharedcache.html[caché compartida] utilizada para conectarse a la base de datos. (privado, compartido) Por defecto es `private`.
+
+== [remote_cache]
+
+=== type
+
+`redis`, `memcached` o `database`. Predeterminado `database`
+
+=== connstr
+
+La cadena de conexión de la caché remota. El formato depende del `type` de caché remota. Las opciones son `database`, `redis` y `memcache`.
+
+=== database
+
+Déjelo vacío cuando use `database`, ya que usará la base de datos primaria.
+
+=== redis
+
+Ejemplo connstr: `addr=127.0.0.1:6379,pool_size=100,db=0,ssl=false`
+
+* `addr` es el host `:` puerto del servidor redis.
+* `pool_size` (opcional) es el número de conexiones subyacentes que se pueden realizar a redis.
+* `db` (opcional) es el identificador de número de la base de datos redis que desea utilizar.
+* `ssl` (opcional) es si se debe usar SSL para conectarse al servidor redis. El valor puede ser `true`, `false` o `insecure`. Establecer el valor en `insecure` omite la verificación de la cadena de certificados y el nombre de host al realizar la conexión.
+
+=== memcache
+
+Ejemplo connstr: `127.0.0.1:11211`
+
+== [dataproxy]
+
+=== logging
+
+Esto habilita el registro del proxy de datos, el valor predeterminado es `false`.
+
+=== timeout
+
+Cuánto tiempo debe esperar el proxy de datos antes de que se agote el tiempo de espera. El valor predeterminado es 30 segundos.
+
+Esta configuración también se aplica a las fuentes de datos HTTP de backend centrales donde las solicitudes de consulta usan un cliente HTTP con un tiempo de espera establecido.
+
+=== keep_alive_seconds
+
+Intervalo entre sondas de mantener vivo. El valor predeterminado es `30` segundos. Para obtener más detalles, consulte la documentación de https://golang.org/pkg/net/#Dialer.KeepAlive[Dialer.KeepAlive].
+
+=== tls_handshake_timeout_seconds
+
+El período de tiempo que Grafana esperará para un protocolo de enlace TLS exitoso con la fuente de datos. El valor predeterminado es `10` segundos. Para obtener más detalles, consulte la documentación de https://golang.org/pkg/net/http/#Transport.TLSHandshakeTimeout[Transport.TLSHandshakeTimeout].
+
+=== expect_continue_timeout_seconds
+
+El tiempo que Grafana esperará los encabezados de la primera respuesta de una fuente de datos después de escribir los encabezados de la solicitud, si la solicitud tiene un encabezado "Expect: 100-continue". Un valor de `0` dará como resultado que el cuerpo se envíe inmediatamente. El valor predeterminado es `1` segundo. Para obtener más detalles, consulte la documentación de https://golang.org/pkg/net/http/#Transport.ExpectContinueTimeout[Transport.ExpectContinueTimeout].
+
+=== max_idle_connections
+
+El número máximo de conexiones inactivas que mantendrá Grafana. El valor predeterminado es `100`. Para obtener más detalles, consulte la documentación de https://golang.org/pkg/net/http/#Transport.MaxIdleConns[Transport.MaxIdleConns].
+
+=== idle_conn_timeout_seconds
+
+El tiempo que Grafana mantiene las conexiones inactivas antes de cerrarlas. El valor predeterminado es `90` segundos. Para obtener más detalles, consulte la documentación de https://golang.org/pkg/net/http/#Transport.IdleConnTimeout[Transport.IdleConnTimeout].
+
+=== send_user_header
+
+Si está habilitado y el usuario no es anónimo, el proxy de datos agregará el encabezado X-Grafana-User con el nombre de usuario en la solicitud. El valor predeterminado es `false`.
+
+== [analytics]
+
+=== reporting_enabled
+
+Cuando está habilitado, Grafana enviará estadísticas de uso anónimas a `stats.grafana.org`. No se rastrea ninguna dirección IP, solo contadores simples para rastrear instancias en ejecución, versiones, tablero y recuentos de errores. Es muy útil para nosotros, así que déjelo habilitado. Los contadores se envían cada 24 horas. El valor predeterminado es `true`.
+
+=== check_for_updates
+
+Configure en false para deshabilitar todas las comprobaciones en https://grafana.com para las nuevas versiones de los complementos instalados y en el repositorio de Grafana GitHub para buscar una versión más reciente de Grafana. La información de la versión se utiliza en algunas vistas de la interfaz de usuario para notificar que existe una nueva actualización de Grafana o una actualización de complemento. Esta opción no genera actualizaciones automáticas ni envía información confidencial. La verificación se realiza cada 10 minutos.
+
+=== google_analytics_ua_id
+
+Si desea realizar un seguimiento del uso de Grafana a través de Google Analytics, especifique _su_ ID de Universal Analytics aquí. De forma predeterminada, esta función está desactivada.
+
+=== google_tag_manager_id
+
+ID de Google Tag Manager, solo habilitado si ingresa un ID aquí.
+
+== [security]
+
+=== disable_initial_admin_creation
+
+[NOTE]
+====
+Solo disponible en Grafana v6.5 +.
+====
+
+Desactive la creación de un usuario administrador en el primer inicio de Grafana. El valor predeterminado es `false`.
+
+=== admin_user
+
+El nombre del usuario administrador de Grafana predeterminado, que tiene todos los permisos. El valor predeterminado es `admin`.
+
+=== admin_password
+
+La contraseña del administrador de Grafana predeterminado. Establecer una vez en la primera ejecución. El valor predeterminado es `admin`.
+
+=== secret_key
+
+Usado para firmar algunas configuraciones de fuentes de datos como secretos y contraseñas, el formato de encriptación usado es AES-256 en modo CFB. No se puede cambiar sin necesidad de actualizar la configuración de la fuente de datos para volver a codificarlos.
+
+=== disable_gravatar
+
+Establézcalo en `true` para deshabilitar el uso de Gravatar para las imágenes de perfil de usuario. El valor predeterminado es `false`.
+
+=== data_source_proxy_whitelist
+
+Defina una lista blanca de direcciones IP o dominios permitidos, con puertos, que se utilizarán en las URL de origen de datos con el proxy de origen de datos de Grafana. Formato: `ip_or_domain:port` separado por espacios. Las fuentes de datos PostgreSQL, MySQL y MSSQL no utilizan el proxy y, por lo tanto, no se ven afectadas por esta configuración.
+
+=== disable_brute_force_login_protection
+
+Configúrelo en `true` para deshabilitar la https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#account-lockout[protección de inicio de sesión por fuerza bruta]. El valor predeterminado es `false`.
+
+=== cookie_secure
+
+Establézcalo en `true` si aloja Grafana detrás de HTTPS. El valor predeterminado es `false`.
+
+=== cookie_samesite
+
+Establece el atributo de cookie `SameSite` y evita que el navegador envíe esta cookie junto con solicitudes entre sitios. El objetivo principal es mitigar el riesgo de fuga de información de origen cruzado. Esta configuración también proporciona cierta protección contra ataques de falsificación de solicitudes entre sitios (CSRF). [Lea más sobre SameSite aquí]. Los valores válidos son `lax`, `strict`, `none` y `disabled`. El valor predeterminado es `lax`. El uso de valor `disabled` no agrega ningún atributo de `SameSite` a las cookies.
+
+=== allow_embedding
+
+Cuando es `false`, el encabezado HTTP `X-Frame-Options: deny` se establecerá en las respuestas HTTP de Grafana, lo que indicará a los navegadores que no permitan renderizar Grafana en un `<frame>`, `<iframe>`, `<embed>` u `<object>`. El objetivo principal es mitigar el riesgo de https://www.owasp.org/index.php/Clickjacking[Clickjacking]. El valor predeterminado es `false`.
+
+=== strict_transport_security
+
+Establézcalo en `true` si desea habilitar el encabezado de respuesta HTTP `Strict-Transport-Security` (HSTS). Esto solo se envía cuando HTTPS está habilitado en esta configuración. HSTS les dice a los navegadores que solo se debe acceder al sitio mediante HTTPS.
+
+=== stric_transport_security_max_age_seconds
+
+Establece cuánto tiempo un navegador debe almacenar en caché HSTS en segundos. Solo se aplica si strict_transport_security está habilitada. El valor predeterminado es `86400`.
+
+=== strict_transport_security_preload
+
+Establézcalo en `true` para habilitar la opción `preloading` de HSTS. Solo se aplica si strict_transport_security está habilitada. El valor predeterminado es `false`.
+
+=== strict_transport_security_subdomains
+
+Establézcalo en `true` si desea habilitar la opción HSTS includeSubDomains. Solo se aplica si strict_transport_security está habilitada. El valor predeterminado es `false`.
+
+=== x_content_type_options
+
+Establézcalo en `true` para habilitar el encabezado de respuesta X-Content-Type-Options. El encabezado HTTP de respuesta X-Content-Type-Options es un marcador utilizado por el servidor para indicar que los tipos MIME anunciados en los encabezados Content-Type no deben cambiarse y seguirse. El valor predeterminado es `false`.
+
+=== x_xss_protection
+
+Configúrelo en `false` para deshabilitar el encabezado X-XSS-Protection, que le dice a los navegadores que dejen de cargar las páginas cuando detectan ataques de scripts entre sitios (XSS) reflejados. El valor predeterminado es `false` hasta la próxima versión secundaria, `6.3`.
+
+=== content_security_policy
+
+Establézcalo en `true` para agregar el encabezado Content-Security-Policy a sus solicitudes. CSP permite controlar los recursos que el agente de usuario puede cargar y ayuda a prevenir ataques XSS.
+
+=== content_security_policy_template
+
+Establezca la plantilla de Política de seguridad de contenido utilizada al agregar el encabezado Content-Security-Policy a sus solicitudes. `$NONCE` en la plantilla incluye un nonce aleatorio.
+
+== [snapshots]
+
+=== external_enabled
+
+Establézcalo en `false` para deshabilitar el punto final de publicación de instantáneas externas (el valor predeterminado es `true`).
+
+=== external_snapshot_url
+
+Establezca la raiz URL en una instancia de Grafana donde desee publicar instantáneas externas (el valor predeterminado es https://snapshots-origin.raintank.io).
+
+=== external_snapshot_name
+
+Establecer nombre para el botón de instantánea externa. El valor predeterminado es `Publish to snapshot.raintank.io`.
+
+=== public_mode
+
+Establézcalo en `true` para permitir que esta instancia de Grafana actúe como un servidor de instantáneas externo y permita solicitudes no autenticadas para crear y eliminar instantáneas. El valor predeterminado es `false`.
+
+=== snapshot_remove_expired
+
+Habilite esta opción para eliminar automáticamente las instantáneas caducadas. El valor predeterminado es `true`.
+
+== [dashboards]
+
+=== versions_to_keep
+
+Número de versiones del tablero para conservar (por tablero). Predeterminado: `20`, Mínimo: `1`.
+
+=== min_refresh_interval
+
+[NOTE]
+====
+Solo disponible en Grafana v6.7 +.
+====
+
+Esta función evita que los usuarios establezcan el intervalo de actualización del tablero en un valor menor que un valor de intervalo dado. El valor de intervalo predeterminado es de 5 segundos. La cadena de intervalo es una secuencia posiblemente firmada de números decimales, seguida de un sufijo de unidad (ms, s, m, h, d), p. Ej. `30s` o `1m`.
+
+A partir de Grafana v7.3, esto también limita las opciones de intervalo de actualización en Explorar.
+
+=== default_home_dashboard_path
+
+Ruta al tablero de inicio predeterminado. Si este valor está vacío, entonces Grafana usa StaticRootPath + “dashboards/home.json”
+
+== [users]
+
+=== allow_sign_up
+
+Configúrelo en `false` para prohibir que los usuarios puedan registrarse/crear cuentas de usuario. El valor predeterminado es `false`. El usuario administrador aún puede crear usuarios desde las https://grafana.com/reference/admin[Páginas de Administrador de Grafana].
+
+=== allow_org_create
+
+Configúrelo en `false` para prohibir a los usuarios crear nuevas organizaciones. El valor predeterminado es `false`.
+
+=== auto_assign_org
+
+Configúrelo en `true` para agregar automáticamente nuevos usuarios a la organización principal (id 1). Cuando se establece en `false`, los nuevos usuarios automáticamente hacen que se cree una nueva organización para ese nuevo usuario. El valor predeterminado es `true`.
+
+=== auto_assign_org_id
+
+Establezca este valor para agregar automáticamente nuevos usuarios a la organización proporcionada. Esto requiere que `auto_assign_org` se establezca en `true`. Asegúrese de que esta organización ya exista. El valor predeterminado es `1`.
+
+=== auto_assign_org_role
+
+El rol que se asignará a los nuevos usuarios en la organización principal (si la configuración anterior se establece en `true`). El valor predeterminado es `Viewer`, otras opciones válidas son `Admin` y `Editor`p. Ej.:
+
+`auto_assign_org_role = Viewer`
+
+=== verify_email_enabled
+
+Requiere validación por correo electrónico antes de que se complete el registro. El valor predeterminado es `false`.
+
+=== login_hint
+
+Texto utilizado como texto de marcador de posición en la página de inicio de sesión para la entrada de inicio de sesión/nombre de usuario.
+
+=== password_hint
+
+Texto utilizado como texto de marcador de posición en la página de inicio de sesión para ingresar la contraseña.
+
+=== default_theme
+
+Establezca el tema de la interfaz de usuario predeterminado: `dark` o `light`. El valor predeterminado es `dark`.
+
+=== home_page
+
+Ruta a una página de inicio personalizada. Los usuarios solo son redirigidos a esto si se usa el tablero de inicio predeterminado. Debe coincidir con una ruta de interfaz y contener una barra al principio.
+
+=== Gestión de usuarios externos
+
+Si administra usuarios de forma externa, puede reemplazar el botón de invitación de usuario para organizaciones con un enlace a un sitio externo junto con una descripción.
+
+=== viewers_can_edit
+
+Los espectadores pueden acceder y utilizar xref:explorar/explorar.adoc[Explorar] y realizar ediciones temporales en los paneles de los tableros a los que tienen acceso. No pueden guardar sus cambios. El valor predeterminado es `false`.
+
+=== editors_can_admin
+
+Los editores pueden administrar tableros, carpetas y equipos que creen. El valor predeterminado es `false`.
+
+=== user_invite_max_lifetime_duration
+
+El tiempo que dura una invitación de usuario válida antes de caducar. Esta configuración debe expresarse como una duración. Ejemplos: 6h (horas), 2d (días), 1w (semana). El valor predeterminado es `24h` (24 horas). La duración mínima admitida es de `15m` (15 minutos).
+
+=== hidden_users
+
+Esta es una lista de nombres de usuario separados por comas. Los usuarios especificados aquí están ocultos en la interfaz de usuario de Grafana. Todavía son visibles para los administradores de Grafana y para ellos mismos.
+
+== [auth]
+
+Grafana ofrece muchas formas de autenticar a los usuarios. Consulte la xref:autenticacion/autenticacion.adoc[Descripción general de la autenticación de Grafana] y otra documentación de autenticación para obtener instrucciones detalladas sobre cómo configurar la autenticación.
+
+=== login_cookie_name
+
+El nombre de la cookie para almacenar el token de autenticación. El valor predeterminado es `grafana_session`.
+
+=== login_maximum_inactive_lifetime_duration
+
+La vida máxima (duración) que un usuario autenticado puede estar inactivo antes de que se le solicite que inicie sesión en la próxima visita. El valor predeterminado es 7 días (7d). Esta configuración debe expresarse como una duración, p. Ej. 5m (minutos), 6h (horas), 10d (días), 2w (semanas), 1M (mes). La vida útil se restablece en cada rotación de token exitosa (token_rotation_interval_minutes).
+
+=== login_maximum_lifetime_duration
+
+La vida máxima (duración) que un usuario autenticado puede estar dentro desde el tiempo de inicio de sesión antes de que se le solicite iniciar sesión. El valor predeterminado es 30 días (30d). Esta configuración debe expresarse como una duración, por ejemplo: 5m (minutos), 6h (horas), 10d (días), 2w (semanas), 1M (mes).
+
+=== token_rotation_interval_minutes
+
+Con qué frecuencia se rotan los tokens de autenticación para usuarios autenticados cuando el usuario está activo. El valor predeterminado es cada 10 minutos.
+
+=== disable_login_form
+
+Establézcalo en `true` para deshabilitar (ocultar) el formulario de inicio de sesión, útil si usa OAuth. El valor predeterminado es `false`.
+
+=== disable_signout_menu
+
+Configúrelo en `true` para deshabilitar el enlace de cierre de sesión en el menú lateral. Esto es útil si usa auth.proxy. El valor predeterminado es `false`.
+
+=== signout_redirect_url
+
+URL a la que redirigir al usuario después de cerrar la sesión.
+
+=== oauth_auto_login
+
+Configure en `true` para intentar iniciar sesión con OAuth automáticamente, omitiendo la pantalla de inicio de sesión. Esta configuración se ignora si se configuran varios proveedores de OAuth. El valor predeterminado es `false`.
+
+=== oauth_state_cookie_max_age
+
+Cuántos segundos vive la cookie de estado de OAuth antes de ser eliminada. El valor predeterminado es `600` (segundos). Los administradores pueden aumentar este valor si experimentan errores de discrepancia en el estado de inicio de sesión de OAuth.
+
+=== api_key_max_seconds_to_live
+
+Límite de segundos de vida de la clave API antes de su vencimiento. El valor predeterminado es `-1` (ilimitado).
+
+=== sigv4_auth_enabled
+
+[NOTE]
+====
+Solo disponible en Grafana 7.3+.
+====
+
+Establézcalo en `true` para habilitar la opción de autenticación AWS Signature Version 4 para fuentes de datos basadas en HTTP. El valor predeterminado es `false`.
+
+== [auth.anonymous]
+
+Consulte xref:autenticacion/autenticacion-de-grafana.adoc#_autenticacion-anonima[Autenticación Anónima] para obtener instrucciones detalladas.
+
+== [auth.github]
+
+Consulte la xref:autenticacion/autenticacion-de-github-oauth2.adoc[Autenticación de GitHub OAuth2] para obtener instrucciones detalladas.
+
+== [auth.gitlab]
+
+Consulte la xref:autenticacion/autenticacion-de-gitlab-oauth2.adoc[Autenticación de Gitlab OAuth2] para obtener instrucciones detalladas.
+
+== [auth.google]
+
+Consulte la xref:autenticacion/autenticacion-de-google-oauth2.adoc[Autenticación de Google OAuth2] para obtener instrucciones detalladas.
+
+== [auth.grafananet]
+
+Nombres de claves heredados, todavía en el archivo de configuración para que funcionen en variables env.
+
+== [auth.grafana_com]
+
+Nombres de claves heredados, todavía en el archivo de configuración para que funcionen en variables env.
+
+== [auth.azuread]
+
+Consulte la xref:autenticacion/autenticacion-de-azure-ad-oauth2.adoc[Autenticación de Azure AD OAuth2] para obtener instrucciones detalladas.
+
+== [auth.okta]
+
+Consulte la xref:autenticacion/autenticacion-okta-oauth2.adoc[Autenticación Okta OAuth2] para obtener instrucciones detalladas.
+
+== [auth.generic_oauth]
+
+Consulte la xref:autenticacion/autenticacion-generica.adoc[Autenticación genética de OAuth] para obtener instrucciones detalladas.
+
+== [auth.basic]
+
+Consulte xref:autenticacion/descripcion-general.adoc#_autenticacion_basica[Autenticación Básica] para obtener instrucciones detalladas.
+
+== [auth.proxy]
+
+Consulte xref:autenticacion/proxy-de-autenticacion.adoc[Autenticación de Proxy] de Autenticación para obtener instrucciones detalladas.
+
+== [auth.ldap]
+
+Consulte la xref:autenticacion/autenticacion-ldap.adoc[Autenticación LDAP] para obtener instrucciones detalladas.
+
+== [aws]
+
+Puede configurar complementos de AWS principales y externos.
+
+=== allowed_auth_providers
+
+Especifique qué proveedores de autenticación permiten los complementos de AWS. Para obtener una lista de proveedores permitidos, consulte la página de configuración de la fuente de datos para un complemento determinado. Si configura un complemento mediante el aprovisionamiento, solo se permiten los proveedores que se especifican en `allowed_auth_providers`.
+
+Opciones: `default` (AWS SDK predeterminado), `keys` (acceso y clave secreta), `credentials` (archivo de credenciales), `ec2_iam_role` (rol EC2 IAM)
+
+=== assume_role_enabled
+
+Establézcalo en `false` para deshabilitar la autenticación de AWS para que no use un rol asumido con credenciales de seguridad temporales. Para obtener detalles sobre asumir roles, consulte la documentación de referencia de la API de AWS sobre la operación https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html[AssumeRole].
+
+Si esta opción está deshabilitada, los campos *Assume Role* y *External Id* se eliminan de la página de configuración de la fuente de datos de AWS. Si el complemento se configura mediante el aprovisionamiento, es posible utilizar un rol asumido siempre que `assume_role_enabled` esté establecido en `true`.
+
+=== list_metrics_page_limit
+
+Utilice la opción de https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_ListMetrics.html[Lista de Métricas API] para cargar métricas para espacios de nombres personalizados en la fuente de datos de CloudWatch. De forma predeterminada, el límite de páginas es `500`.
+
+== [auth.jwt]
+
+Consulte la xref:autenticacion/autenticacion-jwt.adoc[Autenticación JWT] para obtener más información.
+
+== [smtp]
+
+Configuración del servidor de correo electrónico.
+
+=== enabled
+
+Habilite esto para permitir que Grafana envíe correo electrónico. El valor predeterminado es `false`.
+
+Si la contraseña contiene `#` o `;`, entonces debe envolverla con comillas triples. Ejemplo: `“""#password;”""`
+
+=== host
+
+El valor predeterminado es `localhost:25`.
+
+=== user
+
+En caso de autenticación SMTP, el valor predeterminado es `empty`.
+
+=== password
+
+En caso de autenticación SMTP, el valor predeterminado es `empty`.
+
+=== cert_file
+
+Ruta de archivo a un archivo de certificado, el valor predeterminado es `empty`.
+
+=== key_file
+
+Ruta de archivo a un archivo de clave, el valor predeterminado es `empty`.
+
+=== skip_verify
+
+Verifique SSL para el servidor SMTP, el valor predeterminado es `false`.
+
+=== from_address
+
+Dirección utilizada al enviar correos electrónicos, la predeterminada es `admin@grafana.localhost`.
+
+=== from_name
+
+Nombre que se utilizará al enviar correos electrónicos, el predeterminado es `Grafana`.
+
+=== ehlo_identity
+
+Nombre que se utilizará como identidad de cliente para EHLO en el cuadro de diálogo SMTP, el valor predeterminado es `<instance_name>`.
+
+=== startTLS_policy
+
+Ya sea "OpportunisticStartTLS", "MandatoryStartTLS", "NoStartTLS". El valor predeterminado es `empty`.
+
+== [emails]
+
+=== welcome_email_on_sign_up
+
+El valor predeterminado es `false`.
+
+=== templates_pattern
+
+El valor predeterminado es `emails/*.html`.
+
+== [log]
+
+Opciones de registro de Grafana.
+
+=== mode
+
+Las opciones son `console`, `file` y `syslog`. El valor predeterminado es `console` y `file`. Utilice espacios para separar varios modos, p. Ej. `console file`.
+
+=== level
+
+Las opciones son `debug`, `info`, `warn`, `error` y `critical`. El valor predeterminado es `info`.
+
+=== filters
+
+Configuraciones opcionales para establecer diferentes niveles para registradores específicos. Por ejemplo: `filters = sqlstore:debug`
+
+== [log.console]
+
+Solo es aplicable cuando se utiliza `console` en modo `[log]`.
+
+=== level
+
+Las opciones son `debug`, `info`, `warn`, `error` y `critical`. El valor predeterminado se hereda del nivel `[log]`.
+
+=== format
+
+Formato de línea de registro, las opciones válidas son text, console y json. El valor predeterminado es la `console`.
+
+== [log.file]
+
+Solo se aplica cuando se utiliza file en el modo `[log]`.
+
+=== level
+
+Las opciones son `debug`, `info`, `warn`, `error` y `critical`. El valor predeterminado se hereda del nivel `[log]`.
+
+=== format
+
+Formato de línea de registro, las opciones válidas son text, console y json. El valor predeterminado es `text`.
+
+=== log_rotate
+
+Habilite la rotación automática de registros, las opciones válidas son `false` o `true`. El valor predeterminado es `true`. Cuando está habilitado use `max_lines`, `max_size_shift`, `daily_rotate` y `max_days` para configurar el comportamiento de la rotación del registro.
+
+=== max_lines
+
+Máximo de líneas por archivo antes de rotarlo. El valor predeterminado es `1000000`.
+
+=== max_size_shift
+
+Tamaño máximo del archivo antes de rotarlo. El valor predeterminado es `28`, lo que significa `1 << 28`, `256MB`.
+
+=== daily_rotate
+
+Habilite la rotación diaria de archivos, las opciones válidas son `false` o `true`. El valor predeterminado es `true`.
+
+=== max­_days
+
+Número máximo de días para mantener los archivos de registro. El valor predeterminado es `7`.
+
+== [log.syslog]
+
+Solo se aplica cuando se utiliza `syslog` en el modo `[log]`.
+
+=== level
+
+Las opciones son `debug`, `info`, `warn`, `error` y `critical`. El valor predeterminado se hereda del nivel `[log]`.
+
+=== format
+
+Formato de línea de registro, las opciones válidas son `text`, `console` y `json`. El valor predeterminado es `text`.
+
+=== network and address
+
+Tipo y dirección de red de Syslog. Puede ser UDP, TCP o UNIX. Si se deja en blanco, se utilizan los puntos finales de UNIX predeterminados.
+
+=== facility
+
+Instalación de Syslog. Las opciones válidas son `user`, `daemon` o `local0` hasta `local7`. El valor predeterminado es `empty`.
+
+=== tag
+
+Etiqueta de Syslog. De forma predeterminada, se utiliza el `argv[0]` del proceso.
+
+== [log.frontend]
+
+[NOTE]
+====
+Esta función está disponible en Grafana 7.4+.
+====
+=== enabled
+
+Se inicializa el agente javascript de Sentry. El valor predeterminado es `false`.
+
+=== sentry_dsn
+
+Sentry DSN si desea enviar eventos a Sentry
+
+=== custom_endpoint
+
+Punto final HTTP personalizado al que enviar eventos capturados por el agente Sentry. Por defecto, `/log`, registrará los eventos en stdout.
+
+=== sample_rate
+
+Tasa de eventos que se informarán entre `0` (ninguno) y `1` (todos, predeterminado), flotante.
+
+=== log_endpoint_requests_per_second_limit
+
+Límite de solicitudes por segundo aplicado por un período prolongado, para el punto de conexión de ingestión de registros de backend de Grafana, `/log`. El valor predeterminado es `3`.
+
+=== log_endpoint_burst_limit
+
+Número máximo de solicitudes aceptadas por intervalo corto de tiempo para el punto de conexión de ingestión de registros de backend de Grafana, `/log`. El valor predeterminado es `15`.
+
+== [quota]
+
+Establezca cuotas en `-1` para hacer ilimitadas.
+
+=== enabled
+
+Habilite las cuotas de uso. El valor predeterminado es `false`.
+
+=== org_user
+
+Limite la cantidad de usuarios permitidos por organización. El valor predeterminado es `10`.
+
+=== org_dashboard
+
+Limite la cantidad de tableros permitidos por organización. El valor predeterminado es `100`.
+
+=== org_data_source
+
+Limite la cantidad de fuentes de datos permitidas por organización. El valor predeterminado es `10`.
+
+=== org_api_key
+
+Limite la cantidad de claves de API que se pueden ingresar por organización. El valor predeterminado es `10`.
+
+=== user_org
+
+Limite el número de organizaciones que puede crear un usuario. El valor predeterminado es `10`.
+
+=== global_user
+
+Establece un límite global de usuarios. El valor predeterminado es `-1` (ilimitado).
+
+=== global_org
+
+Establece un límite global en el número de organizaciones que se pueden crear. El valor predeterminado es `-1` (ilimitado).
+
+=== global_dashboard
+
+Establece un límite global en la cantidad de tableros que se pueden crear. El valor predeterminado es `-1` (ilimitado).
+
+=== global_api_key
+
+Establece el límite global de claves API que se pueden ingresar. El valor predeterminado es `-1` (ilimitado).
+
+=== global_session
+
+Establece un límite global en el número de usuarios que pueden iniciar sesión a la vez. El valor predeterminado es `-1` (ilimitado).
+
+== [alerting]
+
+Para obtener más información sobre la función de Alertas en Grafana, consulte xref:alertas/alertas.adoc[Descripción general de las alertas].
+
+=== enabled
+
+Configúrelo en `false` para deshabilitar el motor de alertas y ocultar las alertas en la interfaz de usuario de Grafana. El valor predeterminado es `true`.
+
+=== execute_alerts
+
+Desactiva la ejecución de reglas de alerta, pero las alertas siguen estando visibles en la interfaz de usuario de Grafana.
+
+=== error_or_timeout
+
+Configuración predeterminada para nuevas reglas de alerta. De forma predeterminada, los errores y los tiempos de espera se clasifican como alertas. (alerting, keep_state)
+
+=== nodata_or_nullvalues
+
+Define cómo Grafana maneja nodata o valores nulos en las alertas. Las opciones son `alerting`, `no_data`, `keep_state` y `ok`. El valor predeterminado es `no_data`.
+
+=== concurrent_render_limit
+
+Las notificaciones de alerta pueden incluir imágenes, pero la representación de muchas imágenes al mismo tiempo puede sobrecargar el servidor. Este límite protege al servidor de la sobrecarga de procesamiento y garantiza que las notificaciones se envíen rápidamente. El valor predeterminado es `5`.
+
+=== evaluation_timeout_seconds
+
+Establece el tiempo de espera del cálculo de la alerta. El valor predeterminado es `30`.
+
+=== notification_timeout_seconds
+
+Establece el tiempo de espera de la notificación de alerta. El valor predeterminado es `30`.
+
+=== max_attempts
+
+Establece un límite máximo de intentos de enviar notificaciones de alerta. El valor predeterminado es `3`.
+
+=== min_interval_seconds
+
+Establece el intervalo mínimo entre evaluaciones de reglas. El valor predeterminado es `1`.
+
+[NOTE]
+====
+Esta configuración tiene prioridad sobre la frecuencia de cada regla individual. Si la frecuencia de una regla es menor que este valor, este valor se aplica.
+====
+
+=== max_annotation_age =
+
+Configura durante cuánto tiempo se almacenan las anotaciones de alerta. El valor predeterminado es 0, que los mantiene para siempre. Esta configuración debe expresarse como una duración. Ejemplos: 6h (horas), 10d (días), 2w (semanas), 1M (mes).
+
+=== max_annotations_to_keep =
+
+Configura el número máximo de anotaciones de alerta que almacena Grafana. El valor predeterminado es `0`, que conserva todas las anotaciones de alerta.
+
+== [annotations]
+
+=== cleanupjob_batchsize
+
+Configura el tamaño del lote para el trabajo de limpieza de anotaciones. Esta configuración se utiliza para anotaciones de alertas, API y tableros.
+
+== [annotations.dashboard]
+
+Las anotaciones del tablero significan que las anotaciones están asociadas con el tablero en el que se crean.
+
+=== max_age
+
+Configura cuánto tiempo se almacenan las anotaciones del tablero. El valor predeterminado es `0`, que los mantiene para siempre. Esta configuración debe expresarse como una duración. Ejemplos: 6h (horas), 10d (días), 2w (semanas), 1M (mes).
+
+=== max_annotations_to_keep
+
+Configura el número máximo de anotaciones del tablero que almacena Grafana. El valor predeterminado es `0`, que conserva todas las anotaciones del tablero.
+
+== [annotations.api]
+
+Las anotaciones de API significan que las anotaciones se han creado utilizando la API sin ninguna asociación con un tablero.
+
+=== max_age
+
+Configura cuánto tiempo Grafana almacena las anotaciones de la API. El valor predeterminado es `0`, que los mantiene para siempre. Esta configuración debe expresarse como una duración. Ejemplos: 6h (horas), 10d (días), 2w (semanas), 1M (mes).
+
+=== max_annotations_to_keep
+
+Configura el número máximo de anotaciones de API que guarda Grafana. El valor predeterminado es `0`, que conserva todas las anotaciones de la API.
+
+== [explore]
+
+Para obtener más información sobre esta función, consulte xref:explorar/explorar.adoc[Explorar].
+
+=== enabled
+
+Habilite o deshabilite la sección Explorar. El valor predeterminado es `enabled`.
+
+== [metrics]
+
+Para obtener instrucciones detalladas, consulte las xref:administracion/ver-servidor/metricas-internas-de-grafana.adoc[Métricas Internas de Grafana].
+
+=== enabled
+
+Habilite los informes de métricas. El valor predeterminado es true. Disponible a través de HTTP API `<URL>/metrics`.
+
+=== interval_seconds
+
+Intervalo de descarga/escritura al enviar métricas a la TSDB externa. El valor predeterminado es `10`.
+
+=== disable_total_stats
+
+Si se establece en `true`, la generación de estadísticas totales (`stat_totals_*` metrics) está deshabilitada. El valor predeterminado es `false`.
+
+=== basic_auth_username y basic_auth_password
+
+Si ambos están configurados, entonces se requiere autenticación básica para acceder al punto final de métricas.
+
+== [metrics.environment_info]
+
+Agrega dimensiones a la métrica `grafana_environment_info`, que puede mostrar más información sobre la instancia de Grafana.
+
+----
+; exampleLabel1 = exampleValue1
+; exampleLabel2 = exampleValue2
+----
+
+== [metrics.graphite]
+
+Utilice estas opciones si desea enviar métricas internas de Grafana a Graphite.
+
+=== address
+
+Habilitar configurando la dirección. El formato es `<Hostname or ip>`:port.
+
+=== prefix
+
+Prefijo métrico de Graphite. El valor predeterminado es `prod.grafana.%(instance_name)s`.
+
+== [grafana_net]
+
+=== url
+
+El valor predeterminado es https://grafana.com.
+
+== [grafana_com]
+
+=== url
+
+El valor predeterminado es https://grafana.com.
+
+== [tracing.jaeger]
+
+Configure el cliente Jaeger de Grafana para el seguimiento distribuido.
+
+También puede utilizar las variables de entorno `JAEGER_*` estándar para configurar Jaeger. Consulte la tabla al final de https://www.jaegertracing.io/docs/1.16/client-features/ para ver la lista completa. Las variables de entorno anularán cualquier configuración proporcionada aquí.
+
+=== address
+
+El host:port de destino para informes de intervalos. (ej: `localhost:6831`)
+
+Se puede configurar con las variables de entorno `JAEGER_AGENT_HOST` y `JAEGER_AGENT_PORT`.
+
+=== always_included_tag
+
+Lista de etiquetas separadas por comas para incluir en todos los tramos nuevos, como `tag1:value1,tag2:value2`.
+
+Se puede configurar con la variable de entorno `JAEGER_TAGS` (use `=` en lugar de `:` con la variable de entorno).
+
+=== sampler_type
+
+El valor predeterminado es `const`.
+
+Especifica el tipo de muestreador: `const`, `probabilistic`, `ratelimiting` o `remote`.
+
+Consulte https://www.jaegertracing.io/docs/1.16/sampling/#client-sampling-configuration para obtener detalles sobre los diferentes tipos de rastreo.
+
+Se puede configurar con la variable de entorno `JAEGER_SAMPLER_TYPE`.
+
+=== sampler_param
+
+El valor predeterminado es `1`.
+
+Este es el parámetro de configuración del muestreador. Dependiendo del valor de `sampler_type`, puede ser `0`, `1` o un valor decimal intermedio.
+
+* Para muestreador `const`, `0` o `1` para siempre `false`/`true` respectivamente
+* Para el muestreador probabilistic, una probabilidad entre `0` y `1.0`
+* Para el muestreador `rateLimiting`, el número de intervalos por segundo
+* Para el muestreador `remote`, param es el mismo que para el `probabilistic` e indica la frecuencia de muestreo inicial antes de que se reciba la real de la nave nodriza.
+
+Puede establecerse con la variable de entorno `JAEGER_SAMPLER_PARAM`.
+
+=== sampling_server_url
+
+sampling_server_url es la URL de un administrador de muestreo que proporciona una estrategia de muestreo.
+
+=== zipkin_propagation
+
+El valor predeterminado es `false`.
+
+Controla si se utiliza o no el formato de propagación de intervalo de Zipkin (con encabezados HTTP `x-b3-`). De forma predeterminada, se utiliza el formato de Jaeger.
+
+Se puede configurar con la variable de entorno y el valor `JAEGER_PROPAGATION=b3`.
+
+=== disable_shared_zipkin_spans
+
+El valor predeterminado es `false`.
+
+Si se establece en `true`, se desactivan los intervalos de RPC compartidos. Dejar esto disponible es la configuración más común cuando se usa Zipkin en cualquier otro lugar de su infraestructura.
+
+== [external_image_storage]
+
+Estas opciones controlan cómo se deben hacer públicas las imágenes para que puedan compartirse en servicios como Slack o mensajes de correo electrónico.
+
+=== provider
+
+Las opciones son s3, webdav, gcs, azure_blob, local). Si se deja vacío, Grafana ignora la acción de carga.
+
+== [external_image_storage.s3]
+
+=== endpoint
+
+URL de punto final opcional (nombre de host o URI completo) para anular el punto final S3 generado por defecto. Si desea mantener el valor predeterminado, déjelo vacío. Aún debe proporcionar un valor de `region` si especifica un punto final.
+
+=== path_style_access
+
+Establezca esto en true para forzar el direccionamiento de estilo de ruta en las solicitudes de S3, es decir, `http://s3.amazonaws.com/BUCKET/KEY`, en lugar del predeterminado, que es el direccionamiento de depósito alojado virtual cuando sea posible (`http://BUCKET.s3.amazonaws.com/KEY`).
+
+[NOTE]
+====
+Esta opción es específica del servicio Amazon S3.
+====
+
+=== bucket_url
+
+(Para compatibilidad con versiones anteriores, solo funciona cuando no hay ningún depósito o región configurados) URL del depósito para S3. La región de AWS se puede especificar dentro de la URL o su valor predeterminado es "us-east-1", p. Ej.
+
+* http://grafana.s3.amazonaws.com/
+* https://grafana.s3-ap-southeast-2.amazonaws.com/
+
+=== bucket
+
+Nombre del segmento para S3. p.ej. grafana.snapshot.
+
+=== region
+
+Nombre de la región para S3. p.ej. "Us-east-1", "cn-north-1", etc.
+
+=== path
+
+Ruta adicional opcional dentro del depósito, útil para aplicar políticas de vencimiento.
+
+=== access_key
+
+Clave de acceso, p. Ej. AAAAAAAAAAAAAAAAAAAA.
+
+La clave de acceso requiere permisos para el depósito S3 para las acciones "s3: PutObject" y "s3: PutObjectAcl".
+
+=== secret_key
+
+Clave secreta, p. Ej. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.
+
+== [external_image_storage.webdav]
+
+=== url
+
+URL donde Grafana envía la solicitud PUT con imágenes.
+
+=== username
+
+Nombre de usuario de autenticación básico.
+
+=== password
+
+Contraseña de autenticación básica.
+
+=== public_url
+
+URL opcional para enviar a los usuarios en notificaciones. Si la cadena contiene la secuencia $\{file}, se reemplaza con el nombre del archivo cargado. De lo contrario, el nombre del archivo se agrega a la parte de la ruta de la URL, sin modificar ninguna cadena de consulta.
+
+== [external_image_storage.gcs]
+
+=== key_file
+
+Ruta opcional al archivo de claves JSON asociado con una cuenta de servicio de Google para autenticar y autorizar. Si no se proporciona ningún valor, intente utilizar las https://cloud.google.com/docs/authentication/production#finding_credentials_automatically[credenciales predeterminadas de la aplicación]. Las claves de la cuenta de servicio se pueden crear y descargar desde https://console.developers.google.com/permissions/serviceaccounts.
+
+La Cuenta de Servicio debe tener el rol de "Escritor de Objetos de Almacenamiento". El modelo de control de acceso del depósito debe ser "Establecer permisos a nivel de objeto y de cubo". Grafana mismo hará que las imágenes sean legibles para el público cuando las URL firmadas no estén habilitadas.
+
+=== bucket
+
+Nombre del cubo en Google Cloud Storage.
+
+=== path
+
+Ruta adicional opcional dentro del cubo.
+
+=== enable_signed_urls
+
+Si se establece en true, Grafana crea una https://cloud.google.com/storage/docs/access-control/signed-urls[URL firmada] para la imagen cargada en Google Cloud Storage.
+
+=== signed_url_expiration
+
+Establece la caducidad de la URL firmada, cuyo valor predeterminado es de siete días.
+
+== [external_image_storage.azure_blob]
+
+=== account_name
+
+Nombre de la cuenta de almacenamiento.
+
+=== account_key
+
+Clave de cuenta de almacenamiento
+
+=== container_name
+
+Nombre del contenedor donde almacenar imágenes "Blob" con nombres aleatorios. Es necesario crear el contenedor de blobs de antemano. Solo se admiten contenedores públicos.
+
+== [external_image_storage.local]
+
+Esta opción no requiere ninguna configuración.
+
+== [rendering]
+
+Opciones para configurar un servicio de representación de imágenes HTTP remoto, ej: utilizando https://github.com/grafana/grafana-image-renderer.
+
+=== server_url
+
+URL a un servicio de representación de imágenes HTTP remoto, ej: http://localhost:8081/render, permitirá a Grafana representar paneles y tableros en imágenes PNG mediante solicitudes HTTP a un servicio externo.
+
+=== callback_url
+
+Si el servicio de renderizador de imágenes HTTP remoto se ejecuta en un servidor diferente al servidor de Grafana, es posible que deba configurarlo en una URL donde se pueda acceder a Grafana, ej: http://grafana.domain/.
+
+=== concurrent_render_request_limit
+
+El límite de solicitud de procesamiento simultáneo afecta cuando se usa el punto final HTTP /render. La representación de muchas imágenes al mismo tiempo puede sobrecargar el servidor, contra lo que esta configuración puede ayudar a proteger al permitir solo una cierta cantidad de solicitudes simultáneas. El valor predeterminado es `30`.
+
+== [panels]
+
+=== enable_alpha
+
+Establézcalo en `true` si desea probar paneles alfa que aún no están listos para uso general. El valor predeterminado es `false`.
+
+=== disable_sanitize_html
+
+Si se establece en `true`, Grafana permitirá etiquetas de script en paneles de texto. No recomendado ya que habilita vulnerabilidades XSS. El valor predeterminado es `false`. Esta configuración se introdujo en Grafana v6.0.
+
+== [plugins]
+
+=== enable_alpha
+
+Establézcalo en `true` si desea probar los complementos alfa que aún no están listos para el uso general. El valor predeterminado es `false`.
+
+=== allow_loading_unsigned_plugins
+
+Ingrese una lista separada por comas de identificadores de complementos para identificar los complementos que pueden cargarse incluso si carecen de una firma válida.
+
+=== marketplace_url
+
+url personalizado para instalar/aprender más para complementos empresariales. El valor predeterminado es https://grafana.com/grafana/plugins/.
+
+== [plugin.grafana-image-renderer]
+
+Para obtener más información, consulte xref:administracion/renderización-de-imagenes[Renderización de imágenes].
+
+=== rendering_timezone
+
+Indique a la instancia del navegador sin cabeza que use una zona horaria predeterminada cuando no la proporcione Grafana, por ejemplo: al renderizar la imagen del panel de alerta. Consulte https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt[ICUs metaZones.txt] para obtener una lista de los ID de zona horaria admitidos. Recurre a la variable de entorno TZ si no se establece.
+
+=== rendering_language
+
+Indique a la instancia del navegador sin cabeza que utilice un idioma predeterminado cuando no lo proporcione Grafana, p. Ej. al renderizar la imagen del panel de alerta. Consulte el encabezado HTTP Accept-Language para comprender cómo formatear este valor, ej: ‘fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5’.
+
+=== rendering_viewport_device_scale_factor
+
+Indique a la instancia del navegador sin cabeza que utilice un factor de escala de dispositivo predeterminado cuando no lo proporcione Grafana, p. Ej. al renderizar la imagen del panel de alerta. El valor predeterminado es `1`. El uso de un valor más alto producirá imágenes más detalladas (DPI más alto), pero requiere más espacio en disco para almacenar una imagen.
+
+=== rendering_ignore_https_errors
+
+Indique a la instancia del navegador sin cabeza si debe ignorar los errores HTTPS durante la navegación. Los errores HTTPS predeterminados no se ignoran. Debido al riesgo de seguridad, no recomendamos que ignore los errores HTTPS.
+
+=== rendering_verbose_logging
+
+Indique a la instancia del navegador sin cabeza si debe capturar y registrar información detallada al renderizar una imagen. El valor predeterminado es `false` y solo capturará y registrará mensajes de error.
+
+Cuando está habilitado, los mensajes de depuración también se capturan y registran.
+
+Para que la información detallada se incluya en el registro del servidor Grafana, debe ajustar el nivel del registro de renderizado para depurar, configurar [log].filter = rendering:debug.
+
+=== rendering_dumpio
+
+Indique a la instancia del navegador sin cabeza si debe generar sus mensajes de error y depuración en el proceso en ejecución del servicio de representación remota. El valor predeterminado es `false`.
+
+Puede ser útil establecer esto en `true` al solucionar problemas.
+
+=== rendering_args
+
+Argumentos adicionales para pasar a la instancia del navegador sin cabeza. El valor predeterminado es `–no-sandbox`. La lista de indicadores de Chromium se puede encontrar en https://peter.sh/experiments/chromium-command-line-switches/. Separe varios argumentos con comas.
+
+=== rendering_chrome_bin
+
+Puede configurar el complemento para usar un binario de navegador diferente en lugar de la versión preempaquetada de Chromium.
+
+Tenga en cuenta que esto _no_ es recomendable. Puede encontrar problemas si la versión instalada de Chrome/Chromium no es compatible con el complemento.
+
+=== rendering_mode
+
+Indique cómo se crean las instancias de navegador sin cabeza. El valor predeterminado es `default` y creará una nueva instancia de navegador en cada solicitud.
+
+El modo `clustered` se asegurará de que solo un máximo de navegadores/páginas de incógnito puedan ejecutarse al mismo tiempo.
+
+El modo `reusable` tendrá una instancia de navegador y creará una nueva página de incógnito en cada solicitud.
+
+=== rendering_clustering_mode
+
+Cuando rendering_mode = clustered, puede indicar cuántos navegadores o páginas de incógnito se pueden ejecutar al mismo tiempo. Por defecto es `browser` y se agrupará utilizando instancias de navegador.
+
+El modo `context` se agrupará utilizando páginas de incógnito.
+
+=== rendering_clustering_max_concurrency
+
+Cuando rendering_mode = clustered, puede definir el número máximo de instancias del navegador/páginas de incógnito que se pueden ejecutar al mismo tiempo.
+
+=== rendering_viewport_max_width
+
+Limite el ancho máximo de la ventana gráfica que se puede solicitar.
+
+=== rendering_viewport_max_height
+
+Limite la altura máxima de la ventana gráfica que se puede solicitar.
+
+=== rendering_viewport_max_device_scale_factor
+
+Limite el factor de escala máximo del dispositivo de ventana gráfica que se puede solicitar.
+
+=== grpc_host
+
+Cambie el host de escucha del servidor gRPC. El host predeterminado es `127.0.0.1`.
+
+=== grpc_port
+
+Cambie el puerto de escucha del servidor gRPC. El puerto predeterminado es `0` y asignará automáticamente un puerto que no esté en uso.
+
+== [enterprise]
+
+Para obtener más información sobre Grafana Enterprise, consulte xref:grafana-enterprise/grafana-enterprise.adoc[Grafana Enterprise].
+
+== [feature_toggles]
+
+=== enable
+
+Claves de funciones alfa para habilitar, separadas por espacio. Las características alfa disponibles son: `ngalert`
+
+== [date_formats]
+
+listening port
+
+[NOTE]
+====
+Las siguientes opciones de formato de fecha solo están disponibles en Grafana v7.2+.
+====
+
+Esta sección controla los valores predeterminados de todo el sistema para los formatos de fecha utilizados en rangos de tiempo, gráficos y cuadros de entrada de fecha.
+
+Los patrones de formato utilizan tokens de formato https://momentjs.com/docs/#/displaying/[Moment.js].
+
+=== full_date
+
+Formato de fecha completa utilizado por el selector de rango de tiempo y en otros lugares donde se representa una fecha completa.
+
+=== intervals
+
+Estos formatos de intervalos se utilizan en el gráfico para mostrar solo una fecha u hora parcial. Por ejemplo, si solo hay minutos entre las etiquetas de marca del eje Y, se utiliza el formato `interval_minute`.
+
+Predeterminados
+
+----
+interval_second = HH:mm:ss
+interval_minute = HH:mm
+interval_hour = MM/DD HH:mm
+interval_day = MM/DD
+interval_month = YYYY-MM
+interval_year = YYYY
+----
+
+=== use_browser_locale
+
+Establezca esto en `true` para que los formatos de fecha se deriven automáticamente de la ubicación de su navegador. El valor predeterminado es `false`. Esta es una característica experimental.
+
+=== default_timezone
+
+Se utiliza como zona horaria predeterminada para las preferencias del usuario. Puede ser `browser` para la zona horaria local del navegador o un nombre de zona horaria de la base de datos de la zona horaria de IANA, como `UTC` o `Europa/Amsterdam`.
+
+== [expressions]
+
+[NOTE]
+====
+Esta función está disponible en Grafana v7.4 y versiones posteriores.
+====
+
+=== enabled
+
+Establezca esto en `false` para deshabilitar expresiones y ocultarlas en la interfaz de usuario de Grafana. El valor predeterminado es `true`.

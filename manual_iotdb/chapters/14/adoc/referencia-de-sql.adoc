@@ -1,0 +1,1209 @@
+= Apéndice 2: Referencia de SQL
+
+En esta parte, le presentaremos el lenguaje de consulta de IoTDB. IoTDB le ofrece un lenguaje de consulta similar a SQL para interactuar con IoTDB, el lenguaje de consulta se puede dividir en 4 partes principales:
+
+* Declaración de Esquema: todas las declaraciones sobre la gestión de esquemas se enumeran en esta sección.
+
+* Declaración de Gestión de Datos: las declaraciones sobre la gestión de datos (como: inserción de datos, consulta de datos, etc.) se enumeran en esta sección.
+
+* Declaración de Administración de la Base de Datos: las declaraciones sobre la administración y autenticación de la base de datos se enumeran en esta sección.
+
+* Funciones: las funciones que ofrece IoTDB se enumeran todas en esta sección.
+
+Todas estas declaraciones están escritas en la propia sintaxis de IoTDB, para obtener detalles sobre la composición de la sintaxis, consulte la sección de [Referencia].
+
+== Mostrar Versión
+
+[source,SQL]
+----
+show version
+----
+
+[source,SQL]
+----
++---------------+
+|        version|
++---------------+
+|0.12.0-SNAPSHOT|
++---------------+
+Total line number = 1
+It costs 0.417s
+----
+
+== Declaración de Esquema
+
+* Establecer Grupo de Almacenamiento
+
+[source,SQL]
+----
+SET STORAGE GROUP TO <FullPath>
+Eg: IoTDB > SET STORAGE GROUP TO root.ln.wf01.wt01
+Note: FullPath can not include `*`
+----
+
+* Eliminar Grupo de Almacenamiento
+
+[source,SQL]
+----
+DELETE STORAGE GROUP <FullPath> [COMMA <FullPath>]*
+Eg: IoTDB > DELETE STORAGE GROUP root.ln.wf01.wt01
+Eg: IoTDB > DELETE STORAGE GROUP root.ln.wf01.wt01, root.ln.wf01.wt02
+Eg: IoTDB > DELETE STORAGE GROUP root.ln.wf01.*
+Eg: IoTDB > DELETE STORAGE GROUP root.*
+----
+
+* Declaración de Crear Serie Temporal
+
+[source,SQL]
+----
+CREATE TIMESERIES <FullPath> WITH <AttributeClauses>
+alias
+    : LR_BRACKET ID RR_BRACKET
+    ;
+attributeClauses
+    : DATATYPE OPERATOR_EQ dataType COMMA ENCODING OPERATOR_EQ encoding
+    (COMMA (COMPRESSOR | COMPRESSION) OPERATOR_EQ compressor=propertyValue)?
+    (COMMA property)*
+    tagClause
+    attributeClause
+    ;
+attributeClause
+    : (ATTRIBUTES LR_BRACKET property (COMMA property)* RR_BRACKET)?
+    ;
+tagClause
+    : (TAGS LR_BRACKET property (COMMA property)* RR_BRACKET)?
+    ;
+DataTypeValue: BOOLEAN | DOUBLE | FLOAT | INT32 | INT64 | TEXT
+EncodingValue: GORILLA | PLAIN | RLE | TS_2DIFF | REGULAR
+CompressorValue: UNCOMPRESSED | SNAPPY
+propertyValue: SDT | COMPDEV | COMPMINTIME | COMPMAXTIME
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.status WITH DATATYPE=BOOLEAN, ENCODING=PLAIN
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE, COMPRESSOR=SNAPPY, MAX_POINT_NUMBER=3
+Eg: create timeseries root.turbine.d0.s0(temperature) with datatype=FLOAT, encoding=RLE, compression=SNAPPY tags(unit=f, description='turbine this is a test1') attributes(H_Alarm=100, M_Alarm=50)
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE, LOSS=SDT, COMPDEV=0.01
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE, LOSS=SDT, COMPDEV=0.01, COMPMINTIME=3
+Eg: CREATE TIMESERIES root.ln.wf01.wt01.temperature WITH DATATYPE=FLOAT, ENCODING=RLE, LOSS=SDT, COMPDEV=0.01, COMPMINTIME=2, COMPMAXTIME=15
+Note: Datatype and encoding type must be corresponding. Please check Chapter 3 Encoding Section for details.
+Note: When propertyValue is SDT, it is required to set compression deviation COMPDEV, which is the maximum absolute difference between values.
+Note: For SDT, values withtin COMPDEV will be discarded.
+Note: For SDT, it is optional to set compression minimum COMPMINTIME, which is the minimum time difference between stored values for purpose of noise reduction.
+Note: For SDT, it is optional to set compression maximum COMPMAXTIME, which is the maximum time difference between stored values regardless of COMPDEV.
+----
+
+* Declaración de Eliminar Serie Temporal
+
+[source,SQL]
+----
+DELETE TIMESERIES <PrefixPath> [COMMA <PrefixPath>]*
+Eg: IoTDB > DELETE TIMESERIES root.ln.wf01.wt01.status
+Eg: IoTDB > DELETE TIMESERIES root.ln.wf01.wt01.status, root.ln.wf01.wt01.temperature
+Eg: IoTDB > DELETE TIMESERIES root.ln.wf01.wt01.*
+----
+
+* Declaración de Modificar Serie Temporal
+
+[source,SQL]
+----
+ALTER TIMESERIES fullPath alterClause
+alterClause
+    : RENAME beforeName=ID TO currentName=ID
+    | SET property (COMMA property)*
+    | DROP ID (COMMA ID)*
+    | ADD TAGS property (COMMA property)*
+    | ADD ATTRIBUTES property (COMMA property)*
+    | UPSERT tagClause attributeClause
+    ;
+attributeClause
+    : (ATTRIBUTES LR_BRACKET property (COMMA property)* RR_BRACKET)?
+    ;
+tagClause
+    : (TAGS LR_BRACKET property (COMMA property)* RR_BRACKET)?
+    ;
+Eg: ALTER timeseries root.turbine.d1.s1 RENAME tag1 TO newTag1
+Eg: ALTER timeseries root.turbine.d1.s1 SET tag1=newV1, attr1=newV1
+Eg: ALTER timeseries root.turbine.d1.s1 DROP tag1, tag2
+Eg: ALTER timeseries root.turbine.d1.s1 ADD TAGS tag3=v3, tag4=v4
+Eg: ALTER timeseries root.turbine.d1.s1 ADD ATTRIBUTES attr3=v3, attr4=v4
+EG: ALTER timeseries root.turbine.d1.s1 UPSERT TAGS(tag2=newV2, tag3=v3) ATTRIBUTES(attr3=v3, attr4=v4)
+----
+
+* Declaración de Mostrar Todas las Series Temporales
+
+[source,SQL]
+----
+SHOW TIMESERIES
+Eg: IoTDB > SHOW TIMESERIES
+Note: This statement can only be used in IoTDB Client. If you need to show all timeseries in JDBC, please use `DataBaseMetadata` interface.
+----
+
+* Declaración de Mostrar Series Temporales Específicas
+
+[source,SQL]
+----
+SHOW TIMESERIES <Path>
+Eg: IoTDB > SHOW TIMESERIES root
+Eg: IoTDB > SHOW TIMESERIES root.ln
+Eg: IoTDB > SHOW TIMESERIES root.ln.*.*.status
+Eg: IoTDB > SHOW TIMESERIES root.ln.wf01.wt01.status
+Note: The path can be prefix path, star path or timeseries path
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Serie Temporal Específica con la cláusula `where`
+
+[source,SQL]
+----
+SHOW TIMESERIES prefixPath? showWhereClause?
+showWhereClause
+    : WHERE (property | containsExpression)
+    ;
+containsExpression
+    : name=ID OPERATOR_CONTAINS value=propertyValue
+    ;
+
+Eg: show timeseries root.ln where unit='c'
+Eg: show timeseries root.ln where description contains 'test1'
+----
+
+* Declaración de Mostrar Serie Temporal Específica con la cláusula `where` comenzando desde el desplazamiento y limitando el número total de resultados
+
+[source,SQL]
+----
+SHOW TIMESERIES prefixPath? showWhereClause? limitClause?
+
+showWhereClause
+    : WHERE (property | containsExpression)
+    ;
+containsExpression
+    : name=ID OPERATOR_CONTAINS value=propertyValue
+    ;
+limitClause
+    : LIMIT INT offsetClause?
+    | offsetClause? LIMIT INT
+    ;
+    
+Eg: show timeseries root.ln where unit='c'
+Eg: show timeseries root.ln where description contains 'test1'
+Eg: show timeseries root.ln where unit='c' limit 10 offset 10
+----
+
+* Declaración de Mostrar Grupo de Almacenamiento
+
+[source,SQL]
+----
+SHOW STORAGE GROUP
+Eg: IoTDB > SHOW STORAGE GROUP
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Grupo de Almacenamiento Específico
+
+[source,SQL]
+----
+SHOW STORAGE GROUP <PrefixPath>
+Eg: IoTDB > SHOW STORAGE GROUP root.*
+Eg: IoTDB > SHOW STORAGE GROUP root.ln
+Note: The path can be prefix path or star path.
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Estado de Fusión
+
+[source,SQL]
+----
+SHOW MERGE
+Eg: IoTDB > SHOW MERGE
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Contar Series Temporales
+
+[source,SQL]
+----
+COUNT TIMESERIES <Path>
+Eg: IoTDB > COUNT TIMESERIES root
+Eg: IoTDB > COUNT TIMESERIES root.ln
+Eg: IoTDB > COUNT TIMESERIES root.ln.*.*.status
+Eg: IoTDB > COUNT TIMESERIES root.ln.wf01.wt01.status
+Note: The path can be prefix path, star path or timeseries path.
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+[source,SQL]
+----
+COUNT TIMESERIES <Path> GROUP BY LEVEL=<INTEGER>
+Eg: IoTDB > COUNT TIMESERIES root GROUP BY LEVEL=1
+Eg: IoTDB > COUNT TIMESERIES root.ln GROUP BY LEVEL=2
+Eg: IoTDB > COUNT TIMESERIES root.ln.wf01 GROUP BY LEVEL=3
+Note: The path can be prefix path or timeseries path.
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Contar Nodos
+
+[source,SQL]
+----
+COUNT NODES <Path> LEVEL=<INTEGER>
+Eg: IoTDB > COUNT NODES root LEVEL=2
+Eg: IoTDB > COUNT NODES root.ln LEVEL=2
+Eg: IoTDB > COUNT NODES root.ln.* LEVEL=3
+Eg: IoTDB > COUNT NODES root.ln.wf01 LEVEL=3
+Note: The path can be prefix path or timeseries path.
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Todos los Dispositivos
+
+[source,SQL]
+----
+SHOW DEVICES (WITH STORAGE GROUP)? limitClause? 
+Eg: IoTDB > SHOW DEVICES
+Eg: IoTDB > SHOW DEVICES WITH STORAGE GROUP
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Dispositivos Específicos
+
+[source,SQL]
+----
+SHOW DEVICES <PrefixPath> (WITH STORAGE GROUP)? limitClause?
+Eg: IoTDB > SHOW DEVICES root
+Eg: IoTDB > SHOW DEVICES root.ln
+Eg: IoTDB > SHOW DEVICES root.*.wf01
+Eg: IoTDB > SHOW DEVICES root.ln WITH STORAGE GROUP
+Eg: IoTDB > SHOW DEVICES root.*.wf01 WITH STORAGE GROUP
+Note: The path can be prefix path or star path.
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar las Rutas Secundarias de la Raíz
+
+[source,SQL]
+----
+SHOW CHILD PATHS
+Eg: IoTDB > SHOW CHILD PATHS
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Declaración de Mostrar Rutas Secundarias
+
+[source,SQL]
+----
+SHOW CHILD PATHS <Path>
+Eg: IoTDB > SHOW CHILD PATHS root
+Eg: IoTDB > SHOW CHILD PATHS root.ln
+Eg: IoTDB > SHOW CHILD PATHS root.*.wf01
+Eg: IoTDB > SHOW CHILD PATHS root.ln.wf*
+Note: The path can be prefix path or star path, the nodes can be in a "prefix + star" format. 
+Note: This statement can be used in IoTDB Client and JDBC.
+----
+
+* Crear Instantánea para el Esquema
+
+[source,SQL]
+----
+CREATE SNAPSHOT FOR SCHEMA
+----
+
+== Declaración de Gestión de Datos
+
+* Declaración de Insertar Registro
+
+[source,SQL]
+----
+INSERT INTO <PrefixPath> LPAREN TIMESTAMP COMMA <Sensor> [COMMA <Sensor>]* RPAREN VALUES LPAREN <TimeValue>, <PointValue> [COMMA <PointValue>]* RPAREN
+Sensor : Identifier
+Eg: IoTDB > INSERT INTO root.ln.wf01.wt01(timestamp,status) values(1509465600000,true)
+Eg: IoTDB > INSERT INTO root.ln.wf01.wt01(timestamp,status) VALUES(NOW(), false)
+Eg: IoTDB > INSERT INTO root.ln.wf01.wt01(timestamp,temperature) VALUES(2017-11-01T00:17:00.000+08:00,24.22028)
+Eg: IoTDB > INSERT INTO root.ln.wf01.wt01(timestamp, status, temperature) VALUES (1509466680000, false, 20.060787);
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+Note: The order of Sensor and PointValue need one-to-one correspondence
+----
+
+* Declaración de Eliminar Registro
+
+[source,SQL]
+----
+DELETE FROM <PrefixPath> [COMMA <PrefixPath>]* [WHERE <WhereClause>]?
+WhereClause : <Condition> [(AND) <Condition>]*
+Condition  : <TimeExpr> [(AND) <TimeExpr>]*
+TimeExpr : TIME PrecedenceEqualOperator (<TimeValue> | <RelativeTime>)
+Eg: DELETE FROM root.ln.wf01.wt01.temperature WHERE time > 2016-01-05T00:15:00+08:00 and time < 2017-11-1T00:05:00+08:00
+Eg: DELETE FROM root.ln.wf01.wt01.status, root.ln.wf01.wt01.temperature WHERE time < NOW()
+Eg: DELETE FROM root.ln.wf01.wt01.* WHERE time >= 1509466140000
+----
+
+* Declaración de Seleccionar Registro
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> [WHERE <WhereClause>]?
+SelectClause : <SelectPath> (COMMA <SelectPath>)*
+SelectPath : <FUNCTION> LPAREN <Path> RPAREN | <Path>
+FUNCTION : ‘COUNT’ , ‘MIN_TIME’, ‘MAX_TIME’, ‘MIN_VALUE’, ‘MAX_VALUE’
+FromClause : <PrefixPath> (COMMA <PrefixPath>)?
+WhereClause : <Condition> [(AND | OR) <Condition>]*
+Condition  : <Expression> [(AND | OR) <Expression>]*
+Expression : [NOT | !]? <TimeExpr> | [NOT | !]? <SensorExpr>
+TimeExpr : TIME PrecedenceEqualOperator (<TimeValue> | <RelativeTime>)
+RelativeTimeDurationUnit = Integer ('Y'|'MO'|'W'|'D'|'H'|'M'|'S'|'MS'|'US'|'NS')
+RelativeTime : (now() | <TimeValue>) [(+|-) RelativeTimeDurationUnit]+
+SensorExpr : (<Timeseries> | <Path>) PrecedenceEqualOperator <PointValue>
+Eg: IoTDB > SELECT status, temperature FROM root.ln.wf01.wt01 WHERE temperature < 24 and time > 2017-11-1 0:13:00
+Eg. IoTDB > SELECT * FROM root
+Eg. IoTDB > SELECT * FROM root where time > now() - 5m
+Eg. IoTDB > SELECT * FROM root.ln.*.wf*
+Eg. IoTDB > SELECT COUNT(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 25
+Eg. IoTDB > SELECT MIN_TIME(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 25
+Eg. IoTDB > SELECT MAX_TIME(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature > 24
+Eg. IoTDB > SELECT MIN_VALUE(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature > 23
+Eg. IoTDB > SELECT MAX_VALUE(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 25
+Eg. IoTDB > SELECT COUNT(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 25 GROUP BY LEVEL=1
+Note: the statement needs to satisfy this constraint: <Path>(SelectClause) + <PrefixPath>(FromClause) = <Timeseries>
+Note: If the <SensorExpr>(WhereClause) is started with <Path> and not with ROOT, the statement needs to satisfy this constraint: <PrefixPath>(FromClause) + <Path>(SensorExpr) = <Timeseries>
+Note: In Version 0.7.0, if <WhereClause> includes `OR`, time filter can not be used.
+Note: There must be a space on both sides of the plus and minus operator appearing in the time expression 
+----
+
+* Declaración de Agrupar Por
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> WHERE  <WhereClause> GROUPBY <GroupByTimeClause>
+SelectClause : <Function> [COMMA < Function >]*
+Function : <AggregationFunction> LPAREN <Path> RPAREN
+FromClause : <PrefixPath>
+WhereClause : <Condition> [(AND | OR) <Condition>]*
+Condition  : <Expression> [(AND | OR) <Expression>]*
+Expression : [NOT | !]? <TimeExpr> | [NOT | !]? <SensorExpr>
+TimeExpr : TIME PrecedenceEqualOperator (<TimeValue> |<RelativeTime>)
+RelativeTimeDurationUnit = Integer ('Y'|'MO'|'W'|'D'|'H'|'M'|'S''MS'|'US'|'NS')
+RelativeTime : (now() | <TimeValue>) [(+|-)RelativeTimeDurationUnit]+
+SensorExpr : (<Timeseries> | <Path>) PrecedenceEqualOperator<PointValue>
+GroupByTimeClause : LPAREN <TimeInterval> COMMA <TimeUnit> (COMMA<TimeUnit>)? RPAREN
+TimeInterval: LSBRACKET <TimeValue> COMMA <TimeValue> RRBRACKET |LRBRACKET <TimeValue> COMMA <TimeValue> RSBRACKET
+TimeUnit : Integer <DurationUnit>
+DurationUnit : "ms" | "s" | "m" | "h" | "d" | "w" | "mo"
+Eg: SELECT COUNT(status), COUNT(temperature) FROM root.ln.wf01.wt01where temperature < 24 GROUP BY([1509465720000, 1509466380000), 5m)
+Eg: SELECT COUNT(status), COUNT(temperature) FROM root.ln.wf01.wt01where temperature < 24 GROUP BY((1509465720000, 1509466380000], 5m)
+Eg. SELECT COUNT (status), MAX_VALUE(temperature) FROM root.ln.wf01wt01 WHERE time < 1509466500000 GROUP BY([1509465720000,1509466380000), 5m, 10m)
+Eg. SELECT MIN_TIME(status), MIN_VALUE(temperature) FROM root.lnwf01.wt01 WHERE temperature < 25 GROUP BY ([1509466140000,1509466380000), 3m, 5ms)
+Eg. SELECT MIN_TIME(status), MIN_VALUE(temperature) FROM root.lnwf01.wt01 WHERE temperature < 25 GROUP BY ((1509466140000,1509466380000], 3m, 5ms)
+Eg. SELECT MIN_TIME(status), MIN_VALUE(temperature) FROM root.lnwf01.wt01 WHERE temperature < 25 GROUP BY ((1509466140000,1509466380000], 1mo)
+Eg. SELECT MIN_TIME(status), MIN_VALUE(temperature) FROM root.lnwf01.wt01 WHERE temperature < 25 GROUP BY ((1509466140000,1509466380000], 1mo, 1mo)
+Eg. SELECT MIN_TIME(status), MIN_VALUE(temperature) FROM root.lnwf01.wt01 WHERE temperature < 25 GROUP BY ((1509466140000,1509466380000], 1mo, 2mo)
+Note: the statement needs to satisfy this constraint: <Path(SelectClause) + <PrefixPath>(FromClause) = <Timeseries>
+Note: If the <SensorExpr>(WhereClause) is started with <Path> andnot with ROOT, the statement needs to satisfy this constraint:<PrefixPath>(FromClause) + <Path>(SensorExpr) = <Timeseries>
+Note: <TimeValue>(TimeInterval) needs to be greater than 0
+Note: First <TimeValue>(TimeInterval) in needs to be smaller thansecond <TimeValue>(TimeInterval)
+Note: <TimeUnit> needs to be greater than 0
+Note: Third <TimeUnit> if set shouldn't be smaller than second<TimeUnit>
+Note: If the second <DurationUnit> is "mo", the third<DurationUnit> need to be in month
+Note: If the third <DurationUnit> is "mo", the second<DurationUnit> can be in any unit
+----
+
+* Declaración Rellenar
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> WHERE <WhereClause> FILL <FillClause>
+SelectClause : <Path> [COMMA <Path>]*
+FromClause : < PrefixPath > [COMMA < PrefixPath >]*
+WhereClause : <WhereExpression>
+WhereExpression : TIME EQUAL <TimeValue>
+FillClause : LPAREN <TypeClause> [COMMA <TypeClause>]* RPAREN
+TypeClause : <Int32Clause> | <Int64Clause> | <FloatClause> | <DoubleClause> | <BoolClause> | <TextClause>
+Int32Clause: INT32 LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+Int64Clause: INT64 LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+FloatClause: FLOAT LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+DoubleClause: DOUBLE LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+BoolClause: BOOLEAN LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+TextClause: TEXT LBRACKET (<LinearClause> | <PreviousClause>)  RBRACKET
+PreviousClause : PREVIOUS [COMMA <ValidPreviousTime>]?
+LinearClause : LINEAR [COMMA <ValidPreviousTime> COMMA <ValidBehindTime>]?
+ValidPreviousTime, ValidBehindTime: <TimeUnit>
+TimeUnit : Integer <DurationUnit>
+DurationUnit : "ms" | "s" | "m" | "h" | "d" | "w"
+Eg: SELECT temperature FROM root.ln.wf01.wt01 WHERE time = 2017-11-01T16:37:50.000 FILL(float[previous, 1m])
+Eg: SELECT temperature,status FROM root.ln.wf01.wt01 WHERE time = 2017-11-01T16:37:50.000 FILL (float[linear, 1m, 1m], boolean[previous, 1m])
+Eg: SELECT temperature,status,hardware FROM root.ln.wf01.wt01 WHERE time = 2017-11-01T16:37:50.000 FILL (float[linear, 1m, 1m], boolean[previous, 1m], text[previous])
+Eg: SELECT temperature,status,hardware FROM root.ln.wf01.wt01 WHERE time = 2017-11-01T16:37:50.000 FILL (float[linear], boolean[previous, 1m], text[previous])
+Note: the statement needs to satisfy this constraint: <PrefixPath>(FromClause) + <Path>(SelectClause) = <Timeseries>
+Note: Integer in <TimeUnit> needs to be greater than 0
+----
+
+* Declaración de Agrupar Por Relleno
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> WHERE  <WhereClause> GROUP BY <GroupByClause> (FILL <GROUPBYFillClause>)?
+GroupByClause : LPAREN <TimeInterval> COMMA <TimeUnit> RPAREN
+GROUPBYFillClause : LPAREN <TypeClause> RPAREN
+TypeClause : <AllClause> | <Int32Clause> | <Int64Clause> | <FloatClause> | <DoubleClause> | <BoolClause> | <TextClause> 
+AllClause: ALL LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+Int32Clause: INT32 LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+Int64Clause: INT64 LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+FloatClause: FLOAT LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+DoubleClause: DOUBLE LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+BoolClause: BOOLEAN LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+TextClause: TEXT LBRACKET (<PreviousUntilLastClause> | <PreviousClause>)  RBRACKET
+PreviousClause : PREVIOUS
+PreviousUntilLastClause : PREVIOUSUNTILLAST
+Eg: SELECT last_value(temperature) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (float[PREVIOUS])
+Eg: SELECT last_value(temperature) FROM root.ln.wf01.wt01 GROUP BY((15, 100], 5m) FILL (float[PREVIOUS])
+Eg: SELECT last_value(power) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (int32[PREVIOUSUNTILLAST])
+Eg: SELECT last_value(power) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (int32[PREVIOUSUNTILLAST, 5m])
+Eg: SELECT last_value(temperature), last_value(power) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (ALL[PREVIOUS])
+Eg: SELECT last_value(temperature), last_value(power) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (ALL[PREVIOUS, 5m])
+Note: In group by fill, sliding step is not supported in group by clause
+Note: Now, only last_value aggregation function is supported in group by fill.
+Note: Linear fill is not supported in group by fill.
+----
+
+* Declaración de Ordenar por Tiempo
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> WHERE  <WhereClause> GROUP BY <GroupByClause> (FILL <GROUPBYFillClause>)? orderByTimeClause?
+orderByTimeClause: order by time (asc | desc)?
+
+Eg: SELECT last_value(temperature) FROM root.ln.wf01.wt01 GROUP BY([20, 100), 5m) FILL (float[PREVIOUS]) order by time desc
+Eg: SELECT * from root order by time desc
+Eg: SELECT * from root order by time desc align by device 
+Eg: SELECT * from root order by time desc disable align
+Eg: SELECT last * from root order by time desc
+----
+
+* Declaración de Limitar
+
+[source,SQL]
+----
+SELECT <SelectClause> FROM <FromClause> [WHERE <WhereClause>] [<LIMITClause>] [<SLIMITClause>]
+SelectClause : [<Path> | Function]+
+Function : <AggregationFunction> LPAREN <Path> RPAREN
+FromClause : <Path>
+WhereClause : <Condition> [(AND | OR) <Condition>]*
+Condition : <Expression> [(AND | OR) <Expression>]*
+Expression: [NOT|!]?<TimeExpr> | [NOT|!]?<SensorExpr>
+TimeExpr : TIME PrecedenceEqualOperator (<TimeValue> | <RelativeTime>)
+RelativeTimeDurationUnit = Integer ('Y'|'MO'|'W'|'D'|'H'|'M'|'S'|'MS'|'US'|'NS')
+RelativeTime : (now() | <TimeValue>) [(+|-) RelativeTimeDurationUnit]+
+SensorExpr : (<Timeseries>|<Path>) PrecedenceEqualOperator <PointValue>
+LIMITClause : LIMIT <N> [OFFSETClause]?
+N : Integer
+OFFSETClause : OFFSET <OFFSETValue>
+OFFSETValue : Integer
+SLIMITClause : SLIMIT <SN> [SOFFSETClause]?
+SN : Integer
+SOFFSETClause : SOFFSET <SOFFSETValue>
+SOFFSETValue : Integer
+Eg: IoTDB > SELECT status, temperature FROM root.ln.wf01.wt01 WHERE temperature < 24 and time > 2017-11-1 0:13:00 LIMIT 3 OFFSET 2
+Eg. IoTDB > SELECT COUNT (status), MAX_VALUE(temperature) FROM root.ln.wf01.wt01 WHERE time < 1509466500000 GROUP BY([1509465720000, 1509466380000], 5m) LIMIT 3
+Note: N, OFFSETValue, SN and SOFFSETValue must be greater than 0.
+Note: The order of <LIMITClause> and <SLIMITClause> does not affect the grammatical correctness.
+Note: <FillClause> can not use <LIMITClause> but not <SLIMITClause>.
+----
+
+* Declaración de Alinear por Dispositivo
+
+[source,SQL]
+----
+AlignbyDeviceClause : ALIGN BY DEVICE
+
+Rules:  
+1. Both uppercase and lowercase are ok.  
+Correct example: select * from root.sg1 align by device  
+Correct example: select * from root.sg1 ALIGN BY DEVICE  
+
+2. AlignbyDeviceClause can only be used at the end of a query statement.  
+Correct example: select * from root.sg1 where time > 10 align by device  
+Wrong example: select * from root.sg1 align by device where time > 10  
+
+3. The paths of the SELECT clause can only be single level. In other words, the paths of the SELECT clause can only be measurements or STAR, without DOT.
+Correct example: select s0,s1 from root.sg1.* align by device  
+Correct example: select s0,s1 from root.sg1.d0, root.sg1.d1 align by device  
+Correct example: select * from root.sg1.* align by device  
+Correct example: select * from root align by device  
+Correct example: select s0,s1,* from root.*.* align by device  
+Wrong example: select d0.s1, d0.s2, d1.s0 from root.sg1 align by device  
+Wrong example: select *.s0, *.s1 from root.* align by device  
+Wrong example: select *.*.* from root align by device
+
+4. The data types of the same measurement column should be the same across devices. 
+Note that when it comes to aggregated paths, the data type of the measurement column will reflect 
+the aggregation function rather than the original timeseries.
+
+Correct example: select s0 from root.sg1.d0,root.sg1.d1 align by device   
+root.sg1.d0.s0 and root.sg1.d1.s0 are both INT32.  
+
+Correct example: select count(s0) from root.sg1.d0,root.sg1.d1 align by device   
+count(root.sg1.d0.s0) and count(root.sg1.d1.s0) are both INT64.  
+
+Wrong example: select s0 from root.sg1.d0, root.sg2.d3 align by device  
+root.sg1.d0.s0 is INT32 while root.sg2.d3.s0 is FLOAT. 
+
+5. The display principle of the result table is that all the columns (no matther whther a column has has existing data) will be shown, with nonexistent cells being null. Besides, the select clause support const column (e.g., 'a', '123' etc..).  
+For example, "select s0,s1,s2,'abc',s1,s2 from root.sg.d0, root.sg.d1, root.sg.d2 align by device". Suppose that the actual existing timeseries are as follows:  
+- root.sg.d0.s0
+- root.sg.d0.s1
+- root.sg.d1.s0
+
+Then you could expect a table like:  
+
+| Time | Device   | s0 | s1 |  s2  | 'abc' | s1 |  s2  |
+| ---  | ---      | ---| ---| null | 'abc' | ---| null |
+|  1   |root.sg.d0| 20 | 2.5| null | 'abc' | 2.5| null |
+|  2   |root.sg.d0| 23 | 3.1| null | 'abc' | 3.1| null |
+| ...  | ...      | ...| ...| null | 'abc' | ...| null |
+|  1   |root.sg.d1| 12 |null| null | 'abc' |null| null |
+|  2   |root.sg.d1| 19 |null| null | 'abc' |null| null |
+| ...  | ...      | ...| ...| null | 'abc' | ...| null |
+
+Note that the cells of measurement 's0' and device 'root.sg.d1' are all null.    
+
+6. The duplicated devices in the prefix paths are neglected.  
+For example, "select s0,s1 from root.sg.d0,root.sg.d0,root.sg.d1 align by device" is equal to "select s0,s1 from root.sg.d0,root.sg.d1 align by device".  
+For example. "select s0,s1 from root.sg.*,root.sg.d0 align by device" is equal to "select s0,s1 from root.sg.* align by device".  
+
+7. The duplicated measurements in the suffix paths are not neglected.  
+For example, "select s0,s0,s1 from root.sg.* align by device" is not equal to "select s0,s1 from root.sg.* align by device".
+
+8. Both time predicates and value predicates are allowed in Where Clause. The paths of the value predicates can be the leaf node or full path started with ROOT. And wildcard is not allowed here. For example:
+- select * from root.sg.* where time = 1 align by device
+- select * from root.sg.* where s0 < 100 align by device
+- select * from root.sg.* where time < 20 AND s0 > 50 align by device
+- select * from root.sg.d0 where root.sg.d0.s0 = 15 align by device
+
+9. More correct examples:
+   - select * from root.vehicle align by device
+   - select s0,s0,s1 from root.vehicle.* align by device
+   - select s0,s1 from root.vehicle.* limit 10 offset 1 align by device
+   - select * from root.vehicle slimit 10 soffset 2 align by device
+   - select * from root.vehicle where time > 10 align by device
+   - select * from root.vehicle.* where time < 10 AND s0 > 25 align by device
+   - select * from root.vehicle where root.vehicle.d0.s0>0 align by device
+   - select count(*) from root.vehicle align by device
+   - select sum(*) from root.vehicle GROUP BY (20ms,0,[2,50]) align by device
+   - select * from root.vehicle where time = 3 Fill(int32[previous, 5ms]) align by device
+----
+
+* Declaración de Desactivar Alineación
+
+[source,SQL]
+----
+Disable Align Clause: DISABLE ALIGN
+
+Rules:  
+1. Both uppercase and lowercase are ok.  
+Correct example: select * from root.sg1 disable align  
+Correct example: select * from root.sg1 DISABLE ALIGN  
+
+2. Disable Align Clause can only be used at the end of a query statement.  
+Correct example: select * from root.sg1 where time > 10 disable align 
+Wrong example: select * from root.sg1 disable align where time > 10 
+
+3. Disable Align Clause cannot be used with Aggregation, Fill Statements, Group By or Group By Device Statements, but can with Limit Statements.
+Correct example: select * from root.sg1 limit 3 offset 2 disable align
+Correct example: select * from root.sg1 slimit 3 soffset 2 disable align
+Wrong example: select count(s0),count(s1) from root.sg1.d1 disable align
+Wrong example: select * from root.vehicle where root.vehicle.d0.s0>0 disable align
+Wrong example: select * from root.vehicle align by device disable align
+
+4. The display principle of the result table is that only when the column (or row) has existing data will the column (or row) be shown, with nonexistent cells being empty.
+
+You could expect a table like:
+| Time | root.sg.d0.s1 | Time | root.sg.d0.s2 | Time | root.sg.d1.s1 |
+| ---  | ---           | ---  | ---           | ---  | ---           |
+|  1   | 100           | 20   | 300           | 400  | 600           |
+|  2   | 300           | 40   | 800           | 700  | 900           |
+|  4   | 500           |      |               | 800  | 1000          |
+|      |               |      |               | 900  | 8000          |
+
+5. More correct examples: 
+   - select * from root.vehicle disable align
+   - select s0,s0,s1 from root.vehicle.* disable align
+   - select s0,s1 from root.vehicle.* limit 10 offset 1 disable align
+   - select * from root.vehicle slimit 10 soffset 2 disable align
+   - select * from root.vehicle where time > 10 disable align
+
+----
+
+* Declaración de Seleccionar Último Registro
+
+La función LAST devuelve el último par de valor de tiempo de la serie de tiempo dada. Actualmente, los filtros no son compatibles con consultas LAST.
+
+[source,SQL]
+----
+SELECT LAST <SelectClause> FROM <FromClause>
+Select Clause : <Path> [COMMA <Path>]*
+FromClause : < PrefixPath > [COMMA < PrefixPath >]*
+WhereClause : <TimeExpr> [(AND | OR) <TimeExpr>]*
+TimeExpr : TIME PrecedenceEqualOperator (<TimeValue> | <RelativeTime>)
+
+Eg. SELECT LAST s1 FROM root.sg.d1
+Eg. SELECT LAST s1, s2 FROM root.sg.d1
+Eg. SELECT LAST s1 FROM root.sg.d1, root.sg.d2
+Eg. SELECT LAST s1 FROM root.sg.d1 where time > 100
+Eg. SELECT LAST s1, s2 FROM root.sg.d1 where time >= 500
+
+Rules:
+1. the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+
+2. SELECT LAST only supports time filter that contains '>' or '>=' currently.
+
+3. The result set of last query will always be displayed in a fixed three column table format.
+For example, "select last s1, s2 from root.sg.d1, root.sg.d2", the query result would be:
+
+| Time | Path         | Value |
+| ---  | ------------ | ----- |
+|  5   | root.sg.d1.s1| 100   |
+|  2   | root.sg.d1.s2| 400   |
+|  4   | root.sg.d2.s1| 250   |
+|  9   | root.sg.d2.s2| 600   |
+
+4. It is not supported to use "diable align" in LAST query. 
+
+----
+
+* Declaración "Cómo"
+
+La declaración "Cómo" asigna un alias a la consulta de series de tiempo en la declaración SELECT
+
+[source,SQL]
+----
+You can use as statement in all queries, but some rules are restricted about wildcard.
+
+1. Raw data query
+select s1 as speed, s2 as temperature from root.sg.d1
+
+The result set will be like：
+| Time | speed | temperature |
+|  ... |  ...  |     ....    |
+
+2. Aggregation query
+select count(s1) as s1_num, max_value(s2) as s2_max from root.sg.d1
+
+3. Down-frequence query
+select count(s1) as s1_num from root.sg.d1 group by ([100,500), 80ms)
+
+4. Align by device query
+select s1 as speed, s2 as temperature from root.sg.d1 align by device
+
+select count(s1) as s1_num, count(s2), count(s3) as s3_num from root.sg.d2 align by device
+
+5. Last Record query
+select last s1 as speed, s2 from root.sg.d1
+
+Rules：
+1. In addition to Align by device query，each AS statement has to corresponding to one time series exactly.
+
+E.g. select s1 as temperature from root.sg.*
+
+At this time if `root.sg.*` includes more than one device，then an exception will be thrown。
+
+2. In align by device query，the prefix path that each AS statement corresponding to can includes multiple device, but the suffix path can only be single sensor.
+
+E.g. select s1 as temperature from root.sg.*
+
+In this situation, it will be show correctly even if multiple devices are selected.
+
+E.g. select * as temperature from root.sg.d1
+
+In this situation, it will throws an exception if * corresponds to multiple sensors.
+
+----
+
+== Declaración de Gestión de la Base de Datos
+
+* Crear Usuario
+
+[source,SQL]
+----
+CREATE USER <userName> <password>;  
+userName:=identifier  
+password:=string
+Eg: IoTDB > CREATE USER thulab 'pwd';
+----
+
+* Borrar Usuario
+
+[source,SQL]
+----
+DROP USER <userName>;  
+userName:=identifier
+Eg: IoTDB > DROP USER xiaoming;
+----
+
+* Crear Rol
+
+[source,SQL]
+----
+CREATE ROLE <roleName>;  
+roleName:=identifie
+Eg: IoTDB > CREATE ROLE admin;
+----
+
+* Eliminar Rol
+
+[source,SQL]
+----
+DROP ROLE <roleName>;  
+roleName:=identifier
+Eg: IoTDB > DROP ROLE admin;
+----
+
+* Otorgar Privilegios de Usuario
+
+[source,SQL]
+----
+GRANT USER <userName> PRIVILEGES <privileges> ON <nodeName>;  
+userName:=identifier  
+nodeName:=identifier (DOT identifier)*  
+privileges:= string (COMMA string)*
+Eg: IoTDB > GRANT USER tempuser PRIVILEGES 'DELETE_TIMESERIES' on root.ln;
+
+----
+
+* Otorgar Privilegios de Rol
+
+[source,SQL]
+----
+GRANT ROLE <roleName> PRIVILEGES <privileges> ON <nodeName>;  
+privileges:= string (COMMA string)*  
+roleName:=identifier  
+nodeName:=identifier (DOT identifier)*
+Eg: IoTDB > GRANT ROLE temprole PRIVILEGES 'DELETE_TIMESERIES' ON root.ln;
+----
+
+* Otorgar Rol de Usuario
+
+[source,SQL]
+----
+GRANT <roleName> TO <userName>;  
+roleName:=identifier  
+userName:=identifier
+Eg: IoTDB > GRANT temprole TO tempuser;
+----
+
+* Revocar Privilegios de Usuario
+
+[source,SQL]
+----
+REVOKE USER <userName> PRIVILEGES <privileges> ON <nodeName>;   
+privileges:= string (COMMA string)*  
+userName:=identifier  
+nodeName:=identifier (DOT identifier)*
+Eg: IoTDB > REVOKE USER tempuser PRIVILEGES 'DELETE_TIMESERIES' on root.ln;
+----
+
+* Revocar Privilegios de Rol
+
+[source,SQL]
+----
+REVOKE ROLE <roleName> PRIVILEGES <privileges> ON <nodeName>;  
+privileges:= string (COMMA string)*  
+roleName:= identifier  
+nodeName:=identifier (DOT identifier)*
+Eg: IoTDB > REVOKE ROLE temprole PRIVILEGES 'DELETE_TIMESERIES' ON root.ln;
+----
+
+* Revocar Rol de Usuario
+
+[source,SQL]
+----
+REVOKE <roleName> FROM <userName>;
+roleName:=identifier
+userName:=identifier
+Eg: IoTDB > REVOKE temprole FROM tempuser;
+----
+
+* Listar Usuarios
+
+[source,SQL]
+----
+LIST USER
+Eg: IoTDB > LIST USER
+----
+
+* Listar Roles
+
+[source,SQL]
+----
+LIST ROLE
+Eg: IoTDB > LIST ROLE
+----
+
+* Listar Privilegios
+
+[source,SQL]
+----
+LIST PRIVILEGES USER  <username> ON <path>;    
+username:=identifier    
+path=‘root’ (DOT identifier)*
+Eg: IoTDB > LIST PRIVILEGES USER sgcc_wirte_user ON root.sgcc;
+----
+
+* Listar Privilegios de Roles (En una Ruta Específica)
+
+[source,SQL]
+----
+LIST PRIVILEGES ROLE <roleName> ON <path>;    
+roleName:=identifier  
+path=‘root’ (DOT identifier)*
+Eg: IoTDB > LIST PRIVILEGES ROLE wirte_role ON root.sgcc;
+----
+
+* Listar Privilegios de Usuarios
+
+[source,SQL]
+----
+LIST USER PRIVILEGES <username> ;   
+username:=identifier  
+Eg: IoTDB > LIST USER PRIVILEGES tempuser;
+----
+
+* Listar Privilegios de Roles
+
+[source,SQL]
+----
+LIST ROLE PRIVILEGES <roleName>
+roleName:=identifier
+Eg: IoTDB > LIST ROLE PRIVILEGES actor;
+----
+
+* Listar Roles de Usuarios
+
+[source,SQL]
+----
+LIST ALL ROLE OF USER <username> ;  
+username:=identifier
+Eg: IoTDB > LIST ALL ROLE OF USER tempuser;
+----
+
+* Listar Usuarios de Rol
+
+[source,SQL]
+----
+LIST ALL USER OF ROLE <roleName>;
+roleName:=identifier
+Eg: IoTDB > LIST ALL USER OF ROLE roleuser;
+----
+
+* Modificar Contraseña
+
+[source,SQL]
+----
+ALTER USER <username> SET PASSWORD <password>;
+roleName:=identifier
+password:=identifier
+Eg: IoTDB > ALTER USER tempuser SET PASSWORD 'newpwd';
+
+----
+
+== Funciones
+
+* COUNT
+
+La función COUNT devuelve el número de valores de series de tiempo (uno o más) valores no nulos seleccionados por la declaración SELECT. El resultado es un entero de 64 bits con signo. Si no hay filas coincidentes, COUNT() devuelve 0.
+
+[source,SQL]
+----
+SELECT COUNT(Path) (COMMA COUNT(Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT COUNT(status), COUNT(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* FIRST_VALUE
+
+La función FIRST_VALUE devuelve el primer valor en puntos de la serie temporal elegida (una o más).
+
+[source,SQL]
+----
+SELECT FIRST_VALUE (Path) (COMMA FIRST_VALUE (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT FIRST_VALUE (status), FIRST_VALUE (temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* LAST_VALUE
+
+La función LAST_VALUE devuelve el último valor en puntos de la serie temporal elegida (una o más).
+
+    [source,SQL]
+    ----
+    SELECT LAST_VALUE (Path) (COMMA LAST_VALUE (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+    Eg. SELECT LAST_VALUE (status), LAST_VALUE (temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+    Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+    ---- 
+
+* MAX_TIME
+
+La función MAX_TIME devuelve la marca de tiempo máxima de la serie temporal elegida (una o más). El resultado es un entero de 64 bits con signo, mayor que 0.
+
+[source,SQL]
+----
+SELECT MAX_TIME (Path) (COMMA MAX_TIME (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT MAX_TIME(status), MAX_TIME(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* MAX_VALUE
+
+La función MAX_VALUE devuelve el valor máximo (ordenado lexicográficamente) de la serie temporal elegida (una o más).
+
+[source,SQL]
+----
+SELECT MAX_VALUE (Path) (COMMA MAX_VALUE (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT MAX_VALUE(status), MAX_VALUE(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* AVG
+
+La función AVG devuelve el valor medio aritmético de la serie temporal elegida durante un período de tiempo específico. Las series temporales deben ser `int32`, `int64`, `float`, `double type` y los otros tipos no deben calcularse. El resultado es un número de tipo `double`.
+
+[source,SQL]
+----
+SELECT AVG (Path) (COMMA AVG (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT AVG (temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* MIN_TIME
+
+La función MIN_TIME devuelve la marca de tiempo mínima de la serie temporal elegida (una o más). El resultado es un entero de 64 bits con signo, mayor que 0.
+
+[source,SQL]
+----
+SELECT MIN_TIME (Path) (COMMA MIN_TIME (Path))*FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT MIN_TIME(status), MIN_TIME(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* MIN_VALUE
+
+La función MIN_VALUE devuelve el valor mínimo (ordenado lexicográficamente) de la serie temporal elegida (una o más).
+
+[source,SQL]
+----
+SELECT MIN_VALUE (Path) (COMMA MIN_VALUE (Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT MIN_VALUE(status),MIN_VALUE(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+* NOW
+
+La función NOW devuelve la marca de tiempo actual. Esta función se puede utilizar en la declaración de operación de datos para representar el tiempo. El resultado es un entero de 64 bits con signo, mayor que 0.
+
+[source,SQL]
+----
+NOW()
+Eg. INSERT INTO root.ln.wf01.wt01(timestamp,status) VALUES(NOW(), false)
+Eg. DELETE FROM root.ln.wf01.wt01.status, root.ln.wf01.wt01.temperature WHERE time < NOW()
+Eg. SELECT * FROM root WHERE time < NOW()
+Eg. SELECT COUNT(temperature) FROM root.ln.wf01.wt01 WHERE time < NOW()
+----
+
+* SUM
+
+La función SUM devuelve la suma de las series temporales elegidas (una o más) durante un período de tiempo específico. Las series temporales deben ser int32, int64, float, double type y los otros tipos no deben calcularse. El resultado es un número de tipo doble.
+
+[source,SQL]
+----
+SELECT SUM(Path) (COMMA SUM(Path))* FROM <FromClause> [WHERE <WhereClause>]?
+Eg. SELECT SUM(temperature) FROM root.ln.wf01.wt01 WHERE root.ln.wf01.wt01.temperature < 24
+Note: the statement needs to satisfy this constraint: <PrefixPath> + <Path> = <Timeseries>
+----
+
+== TTL
+
+IoTDB admite la configuración TTL de nivel de almacenamiento, lo que significa que puede eliminar datos antiguos de forma automática y periódica. El beneficio de usar TTL es que, con suerte, puede controlar el uso total del espacio en disco y evitar que la máquina se quede sin discos. Además, el rendimiento de la consulta puede disminuir a medida que aumenta el número total de archivos y el uso de memoria también aumenta a medida que hay más archivos. La eliminación oportuna de estos archivos ayuda a mantener un alto nivel de rendimiento de consultas y reduce el uso de memoria. Las operaciones TTL en IoTDB están respaldadas por las siguientes tres declaraciones:
+
+* Establecer TTL
+
+[source,SQL]
+----
+SET TTL TO StorageGroupName TTLTime
+Eg. SET TTL TO root.group1 3600000
+This example means that for data in root.group1, only that of the latest 1 hour will remain, the
+older one is removed or made invisible. 
+Note: TTLTime should be millisecond timestamp. When TTL is set, insertions that fall
+out of TTL will be rejected.
+----
+
+* Quitar TTL
+
+[source,SQL]
+----
+UNSET TTL TO StorageGroupName
+Eg. UNSET TTL TO root.group1
+This example means that data of all time will be accepted in this group. 
+----
+
+* Mostrar TTL
+
+[source,SQL]
+----
+SHOW ALL TTL
+SHOW TTL ON StorageGroupNames
+Eg.1 SHOW ALL TTL
+This example will show TTLs of all storage groups.
+Eg.2 SHOW TTL ON root.group1,root.group2,root.group3
+This example will show TTLs of the specified 3 groups.
+Notice: storage groups without TTL will show a "null"
+----
+
+Aviso: cuando configura TTL en algunos grupos de almacenamiento, los datos fuera del TTL se volverán invisibles de inmediato, pero debido a que los archivos de datos pueden contener datos tanto obsoletos como vivos o los archivos de datos pueden estar siendo utilizados por consultas, la eliminación física de datos está obsoleto. Si aumenta o desarma TTL justo después de configurarlo previamente, es posible que se vuelvan a ver algunos datos previamente invisibles, pero el que se eliminó físicamente se perderá para siempre. En otras palabras, a diferencia de la declaración de eliminación, la atomicidad de la eliminación de datos no está garantizada por cuestiones de eficiencia. Por lo tanto, le recomendamos que no cambie el TTL una vez que esté configurado o al menos no lo restablezca con frecuencia, a menos que esté decidido a sufrir la imprevisibilidad.
+
+* Eliminar Partición (Experimental)
+
+[source,SQL]
+----
+DELETE PARTITION StorageGroupName INT(COMMA INT)*
+Eg DELETE PARTITION root.sg1 0,1,2
+This example will delete the first 3 time partitions of storage group root.sg1.
+----
+
+El ID de partición se puede encontrar en carpetas de datos o se puede convertir usando `timestamp / partitionInterval`.
+
+
+== Seguimiento de Rendimiento
+
+IoTDB admite el seguimiento de la ejecución de declaraciones de consulta mediante el uso de declaraciones `TRACING`. El número de archivos tsfile y fragmentos a los que accede la consulta, etc. se genera a través del archivo de registro. La ubicación de salida predeterminada está en `./data/tracing`. La función de seguimiento del rendimiento está desactivada de forma predeterminada. Los usuarios pueden usar el comando `TRACING ON/OFF` para activar/desactivar esta función.
+
+[source,SQL]
+----
+TRACING ON    // Open performance tracing
+TRACING OFF   // Close performance tracing
+----
+
+== Matar Consulta
+
+* Mostrar la Lista de Consultas en Curso
+
+[source,SQL]
+----
+SHOW QUERY PROCESSLIST
+----
+
+* Matar Consulta
+
+[source,SQL]
+----
+KILL QUERY INT?
+E.g. KILL QUERY
+E.g. KILL QUERY 2
+----
+
+== Identificadores
+
+[source,SQL]
+----
+QUOTE := '\'';
+DOT := '.';
+COLON : ':' ;
+COMMA := ',' ;
+SEMICOLON := ';' ;
+LPAREN := '(' ;
+RPAREN := ')' ;
+LBRACKET := '[';
+RBRACKET := ']';
+EQUAL := '=' | '==';
+NOTEQUAL := '<>' | '!=';
+LESSTHANOREQUALTO := '<=';
+LESSTHAN := '<';
+GREATERTHANOREQUALTO :'>=';
+GREATERTHAN := '>';
+DIVIDE := '/';
+PLUS := '+';
+MINUS := '-';
+STAR := '*';
+Letter := 'a'..'z' | 'A''Z';
+HexDigit := 'a'..'f' 'A'..'F';
+Digit := '0'..'9';
+Boolean := TRUE | FALSE 0 | 1 (case insensitive)
+----
+
+[source,SQL]
+----
+StringLiteral := ( '\'' ( ~('\'') )* '\'' | '\"' ( ~('\"') )* '\"');
+eg. 'abc'
+eg. 'abc'
+----
+
+[source,SQL]
+----
+Integer := ('-' | '+')? Digit+;
+eg. 123
+eg. -222
+----
+
+[source,SQL]
+----
+Float := ('-' | '+')? Digit+ DOT Digit+ (('e' | 'E') ('-' | '+')? Digit+)?;
+eg. 3.1415
+eg. 1.2E10
+eg. -1.33
+----
+
+[source,SQL]
+----
+Identifier := (Letter | '_') (Letter | Digit | '_' | MINUS)*;
+eg. a123
+eg. _abc123
+----
+
+== Literales
+
+[source,SQL]
+----
+PointValue : Integer | Float | StringLiteral | Boolean
+----
+
+[source,SQL]
+----
+TimeValue : Integer | DateTime | ISO8601 | NOW()
+Note: Integer means timestamp type.
+
+DateTime : 
+eg. 2016-11-16T16:22:33+08:00
+eg. 2016-11-16 16:22:33+08:00
+eg. 2016-11-16T16:22:33.000+08:00
+eg. 2016-11-16 16:22:33.000+08:00
+Note: DateTime Type can support several types, see Chapter 3 Datetime section for details.
+----
+
+[source,SQL]
+----
+PrecedenceEqualOperator : EQUAL | NOTEQUAL | LESSTHANOREQUALTO | LESSTHAN | GREATERTHANOREQUALTO | GREATERTHAN
+----
+
+[source,SQL]
+----
+Timeseries : ROOT [DOT <LayerName>]* DOT <SensorName>
+LayerName : Identifier
+SensorName : Identifier
+eg. root.ln.wf01.wt01.status
+eg. root.sgcc.wf03.wt01.temperature
+Note: Timeseries must be start with `root`(case insensitive) and end with sensor name.
+----
+
+[source,SQL]
+----
+PrefixPath : ROOT (DOT <LayerName>)*
+LayerName : Identifier | STAR
+eg. root.sgcc
+eg. root.*
+----
+
+[source,SQL]
+----
+Path: (ROOT | <LayerName>) (DOT <LayerName>)* 
+LayerName: Identifier | STAR
+eg. root.ln.wf01.wt01.status
+eg. root.*.wf01.wt01.status
+eg. root.ln.wf01.wt01.*
+eg. *.wt01.*
+eg. *
+----

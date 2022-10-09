@@ -1,0 +1,7 @@
+= Visualizaciones
+
+Grafana ofrece una variedad de visualizaciones para adaptarse a diferentes casos de uso. Esta sección de la documentación enumera las diferentes visualizaciones disponibles en Grafana y sus configuraciones de visualización únicas.
+
+Las opciones predeterminadas y sus opciones de visualización únicas se describen en las páginas de esta sección.
+
+Puede agregar más tipos de paneles con xref:complementos/complementos.adoc[complementos].
